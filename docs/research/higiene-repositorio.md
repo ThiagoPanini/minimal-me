@@ -5,8 +5,8 @@ Pesquisa do ticket [#7](https://github.com/ThiagoPanini/minimal-me/issues/7) (pa
 ## Retomada
 
 - **Estado**: em andamento. Seis repositórios e o repo meta cobertos; tabela preenchida.
-- **Coberto**: overpower, life-under-control, ethitorial, travelmanager, tfbox, panlabs-docs, `panlabs-tech/.github` (contexto), GitHub Projects, rulesets, segurança, hooks locais.
-- **Pendente**: (1) confirmar via API a árvore `.github/` e a raiz do `main` remoto de `tfbox` e `panlabs-docs`, cujos clones locais estão atrás do remoto; (2) confirmar quais check-runs o `main` do tfbox publica de fato; (3) seção "Lacunas" com a documentação oficial do GitHub (CODEOWNERS, arquivos de saúde comunitária e defaults de org, SECURITY/CONTRIBUTING, merge queue, rulesets de org/tag/workflows obrigatórios, Projects, code scanning, labels padrão de org).
+- **Coberto**: overpower, life-under-control, ethitorial, travelmanager, tfbox (pelo `main` remoto), panlabs-docs, `panlabs-tech/.github` (contexto), GitHub Projects, rulesets, segurança, hooks locais.
+- **Pendente**: seção "Lacunas" com a documentação oficial do GitHub (CODEOWNERS, arquivos de saúde comunitária e defaults de org, SECURITY/CONTRIBUTING, merge queue, rulesets de org/tag/workflows obrigatórios, Projects, code scanning, labels padrão de org). Clones defasados de tfbox e panlabs-docs já conferidos contra o remoto.
 - **Onde continuar**: preencher a seção "Lacunas" no fim; depois comentar e fechar a issue #7.
 
 ## Clones locais usados
@@ -17,9 +17,9 @@ Pesquisa do ticket [#7](https://github.com/ThiagoPanini/minimal-me/issues/7) (pa
 | `panlabs-tech/life-under-control` | `/home/paninit/workspaces/panlabs-tech/life-under-control` | igual (`8a18846`, 2026-07-28) |
 | `panlabs-tech/ethitorial` | `/home/paninit/workspaces/panlabs-tech/ethitorial` | igual (`3a97571`, 2026-07-28) |
 | `panlabs-tech/travelmanager` | `/home/paninit/workspaces/panlabs-tech/travelmanager` | igual (`e337ce0`, 2026-07-28) |
-| `panlabs-tech/tfbox` | `/home/paninit/workspaces/panlabs-tech/tfbox` (checkout em `feature/repo-improvement`) | local `0ffff2f` atrás do remoto `7486a50` (2026-07-28); fatos lidos de `origin/main` local e conferidos via API |
-| `ThiagoPanini/panlabs-docs` | `/home/paninit/workspaces/panlabs-docs` | local `fe22e5f` atrás do remoto `1c3c7f2` (2026-09-08); idem |
-| `panlabs-tech/.github` (repo meta, contexto) | `/home/paninit/workspaces/panlabs-tech/.github` | local `f178395` atrás do remoto `7bb5cb2` (2026-11-02); lista de workflows conferida via API |
+| `panlabs-tech/tfbox` | `/home/paninit/workspaces/panlabs-tech/tfbox` (checkout em `feature/repo-improvement`) | local `0ffff2f` **atrás** do remoto `7486a50` (2026-07-28, PR #97); `.github/`, raiz e `docs/agents/` lidos do remoto via API |
+| `ThiagoPanini/panlabs-docs` | `/home/paninit/workspaces/panlabs-docs` | local `fe22e5f` atrás do remoto `1c3c7f2` (2026-09-08); `ci.yml` e `deploy.yml` remotos **idênticos** aos locais (`diff`); raiz remota sem hooks, igual à local |
+| `panlabs-tech/.github` (repo meta, contexto) | `/home/paninit/workspaces/panlabs-tech/.github` | local `f178395` atrás do remoto `7bb5cb2` (2026-11-02); `config/ruleset.json`, `config/org.json`, `.github/dependabot.yml`, `ANATOMY.md` e `.github/workflows/README.md` remotos **idênticos** aos locais (`diff`); lista de workflows conferida via API |
 
 Comparação: `gh api repos/<r>/commits/main --jq .sha` contra `git -C <clone> rev-parse origin/main`. Nenhum `git fetch` foi executado nos clones.
 
@@ -29,9 +29,10 @@ Comparação: `gh api repos/<r>/commits/main --jq .sha` contra `git -C <clone> r
 |---|---|---|---|---|---|---|
 | Templates de issue (`.github/ISSUE_TEMPLATE/`) | não | não | 1 form (`task.yml`) | não | 5 forms + `config.yml` + `README.md` | não |
 | Template de PR (`.github/pull_request_template.md`) | não | sim | sim | sim | sim | não |
-| Workflows de CI (`.github/workflows/`) | 3 próprios: `ci.yml`, `tag.yml`, `release.yml` | 2: `pr-checks.yml` (caller parcial), `deploy.yml` | 2: `pr-checks.yml` (caller), `deploy.yml` | 2: `pr-checks.yml` (caller), `deploy.yml` | 5 próprios: `feature.yml`, `pr-gate.yml`, `deploy.yml`, 2 `reusable-*.yml` locais | 2: `ci.yml`, `deploy.yml` |
-| Referencia a CI compartilhada `panlabs-tech/.github@v1.0.0` | não | parcial (`security.yml`, `open-pr.yml`; pernas Python/Node locais) | sim (4 workflows) | sim (4 workflows) | não | não |
-| Actions pinadas por SHA (com comentário de versão) | sim, todas | só em `pr-checks.yml`; `deploy.yml` usa tags `@v4`/`@v5` | idem (`deploy.yml` com `@v6`/`@v7`) | idem (`deploy.yml` com `@v4`/`@v6`) | não (tags `@v4`, `@v5`, `@v6`, `@v9`) | não (tags `@v3`, `@v4`, `@v5`) |
+| Workflows de CI (`.github/workflows/`) | 3 próprios: `ci.yml`, `tag.yml`, `release.yml` | 2: `pr-checks.yml` (caller parcial), `deploy.yml` | 2: `pr-checks.yml` (caller), `deploy.yml` | 2: `pr-checks.yml` (caller), `deploy.yml` | 5: `pr-checks.yml` (caller parcial), `pr-gate.yml`, `deploy.yml`, 2 `reusable-*.yml` locais | 2: `ci.yml`, `deploy.yml` |
+| Referencia a CI compartilhada `panlabs-tech/.github@v1.0.0` | não | parcial (`security.yml`, `open-pr.yml`; pernas Python/Node locais) | sim (4 workflows) | sim (4 workflows) | parcial (`security.yml`, `open-pr.yml`; pernas Terraform/Node locais) | não |
+| Publica os checks de nome fixo `checks` + `security` | não (`gate`, `release-ready`) | sim | sim | sim | sim | não (`gate`) |
+| Actions pinadas por SHA (com comentário de versão) | sim, todas | só em `pr-checks.yml`; `deploy.yml` usa tags `@v4`/`@v5` | idem (`deploy.yml` com `@v6`/`@v7`) | idem (`deploy.yml` com `@v4`/`@v6`) | não (`pr-gate.yml`/`deploy.yml` com `@v2`, `@v4`, `@v5`, `@v6`; os reusable são locais) | não (tags `@v3`, `@v4`, `@v5`) |
 | Dependabot version updates (`.github/dependabot.yml`) | não | não | não | não | sim (github-actions, npm `/scripts`, npm `/web`) | não |
 | Dependabot security updates (configuração do repo) | desligado | ligado (pausado) | ligado (pausado) | ligado (pausado) | ligado (pausado) | desligado |
 | Dependabot alerts (`vulnerability-alerts`) | ligado | ligado | ligado | ligado | ligado | ligado |
@@ -48,12 +49,13 @@ Comparação: `gh api repos/<r>/commits/main --jq .sha` contra `git -C <clone> r
 | Proteção de branch clássica | nenhuma | nenhuma | nenhuma | nenhuma | nenhuma | nenhuma |
 | `bypass_actors` no ruleset | vazio | vazio | vazio | vazio | vazio | vazio |
 | GitHub Projects vinculados | 0 | 0 | 0 | 0 | 0 | 0 |
-| Hooks locais | `lefthook.yml` + `commitlint.config.mjs` (commitlint via `npx` pinado) | idem | `lefthook.yml` + commitlint como devDependencies, `prepare: lefthook install` | `lefthook.yml` + devDependencies pinadas | não | não |
-| Scan de segredos local (`gitleaks git --staged`) | sim | sim | sim | sim | não | não |
+| Hooks locais | `lefthook.yml` + `commitlint.config.mjs` (commitlint via `npx` pinado) | idem | `lefthook.yml` + commitlint como devDependencies, `prepare: lefthook install` | `lefthook.yml` + devDependencies pinadas | `lefthook.yml` + `commitlint.config.mjs` (via `npx` pinado; `type-enum` do releaser) | não |
+| Scan de segredos local (`gitleaks git --staged`) | sim | sim | sim | sim | sim | não |
 | `.editorconfig` | sim | não | não | não | não | não |
+| Runtime declarado na raiz (`.python-version` / `.node-version`) | `.python-version` | ambos | ambos | ambos | `.node-version` (`20`) | nenhum |
 | LICENSE | MIT | MIT | MIT | MIT | MIT | nenhuma |
 | CONTRIBUTING / SECURITY.md / CODE_OF_CONDUCT | não | não | não | não | não | não |
-| `docs/agents/{issue-tracker,triage-labels,workflow}.md` | sim | sim | sim | sim | a confirmar no remoto | sim |
+| `docs/agents/{issue-tracker,triage-labels,workflow}.md` | sim | sim | sim | sim | sim (+ `design.md`, `domain.md`) | sim |
 | Auto-merge permitido (`allow_auto_merge`) | sim | sim | sim | sim | sim | sim |
 | Apagar branch no merge | não | sim | sim | sim | sim | sim |
 | Wiki / Discussions | off / off | off / off | off / off | off / off | **on** / off | off / off |
@@ -118,16 +120,17 @@ Público, MIT, monorepo `apps/web` + `apps/api`.
 
 ### panlabs-tech/tfbox
 
-Público, MIT, topics `aws, terraform`; módulos Terraform + catálogo web (`web/`, `scripts/`, npm). Único dos seis com **wiki ligado** (exceção declarada em `config/org.json` do repo meta: o wiki é gerado pela automação de release). Clone local está em `feature/repo-improvement`; os fatos abaixo vêm de `git -C <clone> show origin/main:<arquivo>` e `git ls-tree origin/main`.
+Público, MIT, topics `aws, terraform`; módulos Terraform + catálogo web (`web/`, `scripts/`, npm). Único dos seis com **wiki ligado** (exceção declarada em `config/org.json` do repo meta: o wiki é gerado pela automação de release). O clone local está em `feature/repo-improvement` e seu `origin/main` (`0ffff2f`, 2026-07-23) é anterior ao PR [#97](https://github.com/panlabs-tech/tfbox/pull/97) "chore: o tfbox conforme, do portão local ao contrato de status check" (mergeado em 2026-07-28), que trouxe o retrofit à anatomia panlabs. Os fatos abaixo vêm do `main` **remoto**: `gh api "repos/panlabs-tech/tfbox/git/trees/main?recursive=1"` e `gh api "repos/panlabs-tech/tfbox/contents/<arquivo>?ref=main"`.
 
 - **Templates de issue** (`.github/ISSUE_TEMPLATE/`): cinco issue forms em inglês, `bug_report.yml` (`labels: ["bug", "triage"]`), `feature_request.yml` (`["enhancement", "feature-request"]`), `documentation.yml` (`["documentation"]`), `question.yml` (`["question", "help-wanted"]`), `performance_issue.yml` (`["performance", "optimization"]`); `config.yml` com `blank_issues_enabled: false` e `contact_links` apontando para `ThiagoPanini/tech-playground/discussions`; `README.md` descrevendo os templates "for the tech-playground repository". Os labels `triage`, `feature-request`, `help-wanted`, `performance`, `optimization`, `documentation` que os forms aplicam **não existem** na lista de labels do repo (`gh label list -R panlabs-tech/tfbox`).
 - **Template de PR**: `.github/pull_request_template.md` em inglês com emojis: "Pull Request Overview", "Related Issues", "Pre-Merge Checklist" (5 itens) e "Additional Notes".
-- **Workflows** (5): `feature.yml` ("⚙️ Feature Branch CI", `push` em branches de feature; chama `./.github/workflows/reusable-modules-validation.yml` e `reusable-catalog-validation.yml`; job abre PR para `main` com `actions/github-script@v9`); `pr-gate.yml` ("🚦 Pull Request Gate and Release", `pull_request` para `main`; mesmas validações; release com `techpivot/terraform-module-releaser@v2`); `deploy.yml` ("🚀 Deploy Catalog to GitHub Pages", `push` em `main` + dispatch; `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`, environment `github-pages`); `reusable-modules-validation.yml` (`workflow_call`, matriz por módulo, `hashicorp/setup-terraform@v4`); `reusable-catalog-validation.yml` (`workflow_call`). Nenhum referencia `panlabs-tech/.github`; actions por tag flutuante.
-- **Dependabot**: `.github/dependabot.yml` com três entradas semanais: `github-actions` em `/` (grupo `actions` com `patterns: ["*"]`), `npm` em `/scripts`, `npm` em `/web`. 75 PRs de `app/dependabot` (ex.: `#120 chore(deps): bump next from 16.2.4 to 16.4.1 in /web`, 2026-10-28), labels `dependencies`, `javascript`, `github_actions`. Security updates `enabled`/pausado; secret scanning e push protection `enabled`.
+- **`.github/workflows/pr-checks.yml`** (138 linhas, remoto): substituiu o `feature.yml` (cabeçalho, linhas 7-11). Gatilho `push` em `feature**`, `docs**`, `[0-9].[0-9].x`, `v[0-9].[0-9].[0-9]`, `v[0-9].[0-9].x`, `feat/**`, `fix/**`, `chore/**`, `config/**`, `ci/**`, `refactor/**`, `test/**`, `worktree/**`, `worktree-**`, `dependabot/**`. Jobs: `checks-terraform` → `./.github/workflows/reusable-modules-validation.yml` (lista explícita de 6 módulos), `checks-node` → `./.github/workflows/reusable-catalog-validation.yml` (local porque `web/` depende de `scripts/` gerar o catálogo antes), rollup `checks` (`if: always()`, `timeout-minutes: 5`), `security-scan` → `panlabs-tech/.github/.github/workflows/security.yml@v1.0.0`, fachada `security`, `open-pr` → `open-pr.yml@v1.0.0` excluindo Dependabot. Os checks publicados no PR #97 (`gh pr checks 97 -R panlabs-tech/tfbox`) incluem `checks`, `security`, `checks-node / Catalog validation`, `checks-terraform / Validate <módulo>`, `open-pr / open-pr`, `security-scan / security`, além de `Terraform validation / …`, `Catalog validation / …` e `Release Terraform modules` do `pr-gate.yml`.
+- **`.github/workflows/pr-gate.yml`** (49 linhas): `pull_request` para `main`; validações pelos reusable locais; job "Release Terraform modules" com `techpivot/terraform-module-releaser@v2` (mantido porque precisa do evento `pull_request: closed`). **`deploy.yml`** (77 linhas): "🚀 Deploy Catalog to GitHub Pages", `push` em `main` + dispatch, `actions/upload-pages-artifact@v5`, `actions/deploy-pages@v5`, environment `github-pages`. **`reusable-modules-validation.yml`** (`workflow_call`, matriz por módulo, `hashicorp/setup-terraform@v4`) e **`reusable-catalog-validation.yml`** (`workflow_call`). Actions de terceiros por tag flutuante.
+- **Dependabot**: `.github/dependabot.yml` (20 linhas) com três entradas semanais: `github-actions` em `/` (grupo `actions`, `patterns: ["*"]`), `npm` em `/scripts`, `npm` em `/web`. 75 PRs de `app/dependabot` (ex.: `#120 chore(deps): bump next from 16.2.4 to 16.4.1 in /web`, 2026-10-28), labels `dependencies`, `javascript`, `github_actions`. Security updates `enabled`/pausado; secret scanning e push protection `enabled`.
 - **Labels** (21): com emoji (`github-bot 🤖`, `app 💻`, `breaking-change 🛠️`, `bug 🐞`, `config ⚙️`, `doc 🖍️`, `enhancement 🍀`, `feature 🚀`, `infra 🧱`, `observability 👁️‍🗨️`, `tests 🛡️`, `in-progress 🔎`), `dependencies`, `javascript`, `github_actions`, `github-bot`, e os cinco de triagem verbatim (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). Sem `wayfinder:*`.
-- **Ruleset** `6659325` "panlabs" (criado 2025-07-12, atualizado 2026-07-28): as mesmas 6 regras, com required checks `checks` e `security`. Os workflows lidos em `origin/main` local não publicam jobs com esses nomes (ver Pendente).
-- **Hooks locais**: raiz de `origin/main` (`git ls-tree --name-only origin/main`) sem `lefthook.yml`, `commitlint.config.mjs`, `.editorconfig`, `.node-version` ou `.python-version`; há `.agents`, `.claude`, `.serena`, `AGENTS.md`, `CLAUDE.md`, `DESIGN.md`, `skills-lock.json`.
-- Environments: `github-pages` e `copilot`. `default_workflow_permissions: read`.
+- **Ruleset** `6659325` "panlabs" (criado 2025-07-12, atualizado 2026-07-28): as mesmas 6 regras do padrão, com required checks `checks` e `security`, que o `pr-checks.yml` remoto publica.
+- **Hooks locais** (remoto): `lefthook.yml` (71 linhas) com `pre-commit` (`terraform fmt -check {staged_files}` em `*.tf`; `gitleaks git --staged --no-banner --redact`; a superfície Node **não** tem hook, decisão registrada nas linhas 32-45: depende de `node_modules` de projeto) e `commit-msg` com commitlint via `npx --yes --package @commitlint/cli@20.1.0 --package @commitlint/config-conventional@20.0.0` (a raiz não tem `package.json`). `commitlint.config.mjs` (37 linhas): `subject-case lower-case` e `type-enum` igual à lista do releaser (`feat, feature, fix, hotfix, chore, docs, config, ci`), porque o subject do commit decide o incremento de versão de cada módulo. `.node-version` = `20`. Sem `.editorconfig`, sem `.python-version`.
+- `docs/agents/`: `design.md`, `domain.md`, `issue-tracker.md`, `triage-labels.md`, `workflow.md` (`gh api repos/panlabs-tech/tfbox/contents/docs/agents`). Environments: `github-pages` e `copilot`. `default_workflow_permissions: read`.
 
 ### ThiagoPanini/panlabs-docs
 
