@@ -6,11 +6,11 @@ Abreviação usada abaixo: `<plugin>/` = `/home/paninit/.claude/plugins/cache/cl
 
 ## Retomada
 
-**Estado**: em andamento (falta só o retoque final).
+**Estado**: completo (2026-11-07). Nada pendente; comentário e fechamento da issue #9 feitos a partir deste arquivo.
 
-- Coberto: Parte 1 inteira; Parte 2 inteira (2.1 a 2.6).
-- Pendente: detalhes do MCP nativo do Coolify (contagem de tools em `capabilities/overview.mdx`, comando do guia Claude Code), seção Fontes consolidada, gist na issue, fechar issue.
-- Onde continuar: `gh api repos/coollabsio/coolify-docs/contents/content/docs/mcp/capabilities/overview.mdx` e `.../clients/claude-code.mdx`; depois comentar e fechar #9.
+- Coberto: Parte 1 (1.1 a 1.5), Parte 2 (2.0 a 2.6), Fontes.
+- Pendente: nada.
+- Onde continuar: se o plugin for atualizado para 1.3.2+, rever 1.4/1.5 (templates de `docs/agents/` mudam; CHANGELOG em https://github.com/mattpocock/skills/blob/main/CHANGELOG.md).
 
 ## Parte 1 — Skills de Matt Pocock
 
@@ -148,6 +148,8 @@ Fontes: https://registry.npmjs.org/@masonator/coolify-mcp, https://github.com/St
 - Transporte Streamable HTTP, endpoint `https://<seu-coolify>/mcp`, header `Authorization: Bearer <token>`; "Every request uses an API token"; nada a instalar ("without a local MCP process") (`setup.mdx`; página de visão geral).
 - Self-hosted: **desligado por default**; "Open **Settings > Advanced**, find the **API and MCP** section, and set **MCP server** to **Enabled**. Until you do this, `/mcp` returns `404`"; só admin da instância (root team) muda; também habilitável por API com token `write`/`root` do root team: `POST /api/v1/mcp/enable` / `/disable`. Precisa estar habilitado também por equipe (**Team > General**, "MCP server: Enabled for this team", default ligado). **Allowed IPs** de Settings > Advanced também valem para `/mcp`. MCP funciona mesmo com "API access" (REST) desligado (`setup.mdx`).
 - Token: criado em **Keys & Tokens > API Tokens** com a equipe desejada ativa; permissões `read` (inventário), `read:sensitive`, `deploy` (deploy, start, stop, restart, cancel, rollback), `write` (`create_*` e `manage_*`), `root` ("Do not use `root` for normal MCP clients"). "MCP shows only the tools that the token's permissions allow"; membros comuns só usam tokens `read`. Verificação: `get_current_team` ou `get_infrastructure_overview`; pontos de partida `coolify_help`, `get_infrastructure_overview`, `search_resources` (`setup.mdx`, `overview.mdx`).
+- Capacidades (`content/docs/mcp/capabilities/overview.mdx`): a documentação **não publica uma contagem de ferramentas**; "MCP lists only the tools that the token's permissions allow". Pontos de partida: `coolify_help` (acha ferramenta por intenção, com receitas como `topic=deploy_app_from_git`), `get_infrastructure_overview`, `search_resources`, `list_unhealthy_resources`. Páginas por área: Teams, Servers, Projects, Applications, Databases, Services, Deployments, Logs, Environment and storage, Integrations (Git sources, S3), Automation, Prompts and resources, Pagination. Mapa permissão → ferramentas: `read` = `list_*`, `get_*` e ações de leitura de `manage_*`; `read:sensitive` = logs, valores de env, corpos de comando; `deploy` = `deploy`, `control`, `cancel_deployment`, `rollback_application`; `write` = `create_*` e `manage_*` ("same REST API routes, validation, and permissions as the API"). "Destructive actions need `confirm=true`. Your client must ask you before it sends it." Listas são paginadas.
+- Guia Claude Code (`content/docs/mcp/clients/claude-code.mdx`): `claude mcp add --transport http coolify https://<seu-coolify>/mcp --header "Authorization: Bearer <token>"`.
 - "MCP does not bypass Coolify authentication, team scope, IP restrictions, token permissions, or sensitive-value redaction" (página de visão geral). Observação de fato: o README do `coolify-mcp` de terceiro diz "At the time of writing Coolify documents its server as read-only, with write operations planned"; a documentação oficial atual já descreve tokens `deploy`/`write` habilitando ferramentas de escrita.
 
 ### 2.3 Cloudflare (MCP remoto oficial)
