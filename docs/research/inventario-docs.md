@@ -4,7 +4,7 @@ Pesquisa do ticket [#6](https://github.com/ThiagoPanini/minimal-me/issues/6), pa
 
 ## Retomada
 
-**Estado**: em andamento (panlabs-docs coberto; campfire pendente).
+**Estado**: **completo** (pesquisa encerrada em 2026-11-07; resta só o comentário na issue e o fechamento, feitos pelo mesmo agente).
 
 | Seção | Estado |
 |---|---|
@@ -14,13 +14,13 @@ Pesquisa do ticket [#6](https://github.com/ThiagoPanini/minimal-me/issues/6), pa
 | 4. panlabs-docs: pastas (`content/`, `docs/`, `contracts/`, `src/`, `static/`, `.design-sync/`, `ds-bundle/`) | coberto |
 | 5. panlabs-docs: documentos de agentes (`CONTEXT.md`, `DECISIONS.md`, `AGENTS.md`, `CLAUDE.md`) e convenções de escrita | coberto |
 | 6. panlabs-docs: CI, deploy e custo | coberto |
-| 7. campfire/docs: ferramenta, `docs.json` e navegação | pendente |
-| 8. campfire/docs: páginas `.mdx`, `.mintignore`, convenções | pendente |
-| 9. campfire/docs: publicação, CI, custo e plano | pendente |
-| 10. Quadro comparativo de fatos | pendente |
-| Comentário na issue e fechamento | pendente |
+| 7. campfire/docs: ferramenta, `docs.json` e navegação | coberto |
+| 8. campfire/docs: páginas `.mdx`, `.mintignore`, convenções | coberto |
+| 9. campfire/docs: publicação, CI, custo e plano | coberto |
+| 10. Quadro comparativo de fatos | coberto |
+| Comentário na issue e fechamento | coberto |
 
-**Onde continuar**: seção 7, lendo `gh api repos/ThiagoPanini/campfire/contents/docs` e `docs/docs.json` remotos; depois URLs oficiais de custo (Mintlify pricing, GitHub Pages/Actions) para a seção 9 e 10.
+**Onde continuar**: nada pendente. Se o campfire ganhar deploy no Mintlify ou o `develop` for promovido, a seção 9 (estado da publicação) e a contagem de páginas da seção 7 ficam defasadas.
 
 ## 1. panlabs-docs: ferramenta e versões
 
@@ -197,8 +197,172 @@ O plugin local `ai-era` emite, em `postBuild`, um `.md` por rota (corpo MDX sem 
 
 ## 7. campfire/docs: ferramenta, `docs.json` e navegação
 
+### Repositório e branches
+
+- `ThiagoPanini/campfire`, público, default branch `main`, descrição "🔥 A web app that helps groups of friends organize and enjoy their music jam sessions." (`gh repo view ThiagoPanini/campfire`). HEAD de `main`: `d354d18`, 2026-04-30, "chore(release): promote develop to main (...) (#35)"; HEAD de `develop`: `8d81c42`, 2026-05-02, "feat: 007-auth-hardening-wave1 (#40)" (`gh api repos/ThiagoPanini/campfire/commits/HEAD`; `.../branches/develop`). Fluxo: branches `NNN-slug` → `develop` → `main`; o CI recusa PR para `main` que não venha de `develop` (`.github/workflows/ci.yml` linhas 264-274).
+- **O clone local está fora do branch canônico**: `/home/paninit/workspaces/campfire` está em `mvp/lofi-style` (`10fc345`, 2026-05-17), com árvore suja, e seu `docs/` contém `decisions/`, `deploy/`, `mvp-scope.md`, Markdown puro, **sem `docs.json`** (`git -C /home/paninit/workspaces/campfire log -1`, `branch --show-current`, `ls docs`). Os branches remotos `mvp/lofi-style` e `mvp/notebook-style` (2026-05-16/17) também têm `docs/` sem Mintlify (`gh api .../contents/docs?ref=mvp/...`). A documentação Mintlify vive em `main` e `develop`. Esta pesquisa leu `main` via `gh api repos/ThiagoPanini/campfire/tarball/main`, extraído no scratchpad; caminhos abaixo são relativos à raiz desse snapshot (`d354d18`).
+- `develop` está à frente: `docs/docs.json` tem blob diferente (`8e03fe9` vs `8601c2e` em `main`), 74 `.mdx` contra 67, e duas pastas a mais, `docs/identity/` e `docs/operations/` (`gh api .../contents/docs?ref=develop`; `git/trees/<sha>?recursive=1`).
+
+### Ferramenta e versões
+
+| Fato | Valor | Fonte |
+|---|---|---|
+| Plataforma | Mintlify (SaaS), tema `mint`, `"$schema": "https://mintlify.com/docs.json"` | `docs/docs.json` linhas 1-3 |
+| Primeiro commit do `docs.json` | `1bce698`, 2026-04-20, "docs: add mintlify documentation site with guides and examples" | `gh api "repos/ThiagoPanini/campfire/commits?path=docs/docs.json"` |
+| Dependência npm | `"mintlify": "4.2.542"` em `dependencies` do `package.json` da raiz (bump do Dependabot, PRs #20 e #28, de 4.2.531); `overrides` fixando `react: 19.2.5` para `@mintlify/previewing` e `@mintlify/cli` | `package.json` linhas 17, 24-31; `gh pr list -R ThiagoPanini/campfire` |
+| Script local | `"docs:dev": "cd docs && mint dev"` | `package.json` linha 11; `docs/development/local-development.mdx` linhas 63-68 ("Mintlify serves from `docs/docs.json`") |
+| CLI oficial hoje | pacote `mint` (`npm i -g mint`), Node "v20.17.0+ (LTS versions recommended)"; "Do not install the legacy `mintlify` package in install scripts or CI pipelines". Comandos: `mint dev`, `mint validate`, `mint format`, `mint update`, `mint new`, `mint deploy`/`mint claim`, `mint agent setup` | https://www.mintlify.com/docs/installation |
+| Skill de agente instalada | `.agents/skills/mintlify/SKILL.md` (autor `mintlify`), que manda consultar mintlify.com/docs e usar `mint dev` / `mint broken-links`; `skills-lock.json` registra `"source": "mintlify.com"` | `.agents/skills/mintlify/SKILL.md` linhas 1-61; `skills-lock.json` linhas 55-56 |
+| `mint.json` legado | não existe (`404`) | `gh api repos/ThiagoPanini/campfire/contents/docs/mint.json` |
+| Node no CI | `actions/setup-node@v6`, `node-version: 22` | `.github/workflows/ci.yml` linhas 36-40 |
+
+### `docs/docs.json` (7,5 KB)
+
+| Chave | Valor no campfire | Semântica oficial | Fonte oficial |
+|---|---|---|---|
+| `theme` | `mint` | "The layout theme for your site"; valores `mint`, `maple`, `palm`, `willow`, `linden`, `almond`, `aspen`, `sequoia`, `luma` | https://www.mintlify.com/docs/organize/settings-reference |
+| `name`, `description` | `Campfire`; "Private music hub for small circles — track what you know, see what you are learning, share with the room." | `name` obrigatório | idem; https://www.mintlify.com/docs/organize/settings |
+| `colors` | `primary #E8813A`, `light #FFFFFF`, `dark #131313` | `colors.primary` obrigatório | idem |
+| `appearance` | `default: dark`, `strict: false` | `strict: true` "hides the light/dark mode toggle" | settings-reference |
+| `background.color` | `dark #131313`, `light #F5F5F5` | "Custom background colors" | settings-reference |
+| `styling.eyebrows` | `section` | "Page eyebrow style shown at the top of the page"; `section` ou `breadcrumbs`, padrão `section` | settings-reference |
+| `contextual.options` | `["copy", "view"]` | "Actions available in the contextual menu. The first item is the default action"; outras: `chatgpt`, `claude`, ... | settings-reference |
+| `navbar` | `title: campfire`; `primary: {type: github, href: github.com/ThiagoPanini/campfire}` | `type: github` é um estilo de botão | settings-reference |
+| `footer.socials` | `github`, `website: https://thiagopanini.dev/` | "Each key is a platform name, each value is your profile URL" | settings-reference |
+| `fonts` | `heading: Anton 400`, `body: Space Grotesk 300` | `family`, `weight`, `source`, `format` | settings-reference |
+| `icons.library` | `lucide` | "All icon names in your docs must come from the selected library"; `fontawesome` (padrão), `lucide`, `tabler` | settings-reference |
+
+Não há no `docs.json` campo de domínio, branch de deploy ou diretório: isso fica no dashboard do Mintlify (ver seção 9).
+
+### Navegação
+
+- Padrão raiz: `navigation.tabs`, **3 abas**: `Docs` (ícone `flame`), `Specs` (`file-text`), `Glossary` (`book-open-text`) (`docs/docs.json` → `navigation.tabs`).
+- **29 grupos**, 3 deles aninhados (nível > 1); **67 páginas referenciadas = 67 `.mdx` em disco, 0 órfãs, 0 faltando** (script Node sobre o snapshot, cruzando `navigation` com `find docs -name '*.mdx'`).
+  - `Docs`: 5 grupos, 28 páginas: `INTRODUCTION` (5), `ARCHITECTURE` (5), `DEVELOPMENT` (6, mistura `development/*` e `contributors/*`), `IMPLEMENTATION REFERENCE` (1 grupo `Backend` com `icon: server`, `expanded: true`, contendo `backend/architecture` + subgrupos `Operations` (`icon: workflow`), `Identity context` (`icon: id-card`, `root: backend/identity/overview`, `expanded: false`, 4 páginas), `Repertoire context` (`icon: music`)), `AI DEVELOPMENT` (4).
+  - `Specs`: 6 grupos, 19 páginas: `OVERVIEW` (2), `METHODOLOGY` (3), `SPECS` (2), `ADRS` (10), `ARTIFACTS` (1), `TRACEABILITY` (1). Espelha a pasta `specs/` do Spec Kit na raiz do repo.
+  - `Glossary`: 14 grupos, 20 páginas: `OVERVIEW` (1) e um grupo por letra inicial (`A`, `B`, `C`, `D`, `E`, `F`, `H`, `J`, `M`, `O`, `R`, `S`, `T`).
+- Rótulos de grupo de topo em CAIXA ALTA; subgrupos em Title case (`docs/docs.json`).
+- Semântica oficial: "Tabs create distinct sections of your documentation with separate URL paths"; grupos exigem `group` e `pages`; "When a group has a root page, clicking the group title in the sidebar navigation opens the root page"; `expanded` controla o estado inicial de grupos aninhados e "Top-level groups always expand and you cannot collapse them"; "You can nest groups within each other, label them with tags, and style them with icons"; "Each navigation element can contain one type of child element at each level"; `pages`: "Each entry must reference the path to a page file" (https://www.mintlify.com/docs/organize/navigation).
+
 ## 8. campfire/docs: páginas `.mdx`, `.mintignore` e convenções
+
+### Inventário de `docs/`
+
+67 `.mdx`, 1 `docs.json`, 1 `custom.css`, 1 `.mintignore`; **nenhum `.md`** e **nenhum `import`** em página alguma (`find docs -type f`; `grep -rl '^import ' docs`). Pastas: `get-started/{introduction,architecture}/`, `development/`, `contributors/`, `backend/{identity,ops}/`, `ai-development/`, `sdd/{methodology,specs,adrs,artifacts}/`, `glossary/` (árvore via `gh api .../git/trees/HEAD?recursive=1`). Maior página: `docs/backend/architecture.mdx`, 16,6 KB; as 19 do glossário têm 470-720 bytes cada.
+
+### Front matter
+
+| Chave | Páginas (de 67) | Exemplo | Fonte |
+|---|---|---|---|
+| `title` | 67 | `"ADR-0001 — PostgreSQL as engine"` | contagem por `awk` sobre o snapshot; `docs/sdd/adrs/0001-postgresql-as-engine.mdx` |
+| `description` | 67 | `"What Campfire is, who it's for, and how these docs are organized."` | `docs/get-started/introduction/overview.mdx` |
+| `icon` | 47 | `"flame"`, `"database"`, `"git-branch"` (slugs Lucide) | idem |
+| `sidebarTitle` | 34 | `"0001 · PostgreSQL"`, `"CI/CD"`, `"Architecture playbook"` | `docs/sdd/adrs/0001-...mdx`; `docs/get-started/architecture/ci-cd.mdx` |
+| `keywords` | 8 | `["campfire", "introduction", "music", "repertoire"]` | `docs/get-started/introduction/overview.mdx` |
+| `tag` | 2 | | contagem |
+
+Oficialmente "All frontmatter fields are optional"; sem `title`, "The last segment of the path becomes the title" (https://www.mintlify.com/docs/organize/pages). Outros campos disponíveis e não usados: `mode`, `url`, `noindex`, `hidden`, `searchable`, `boost`, `deprecated`, `related`, `contextual`, `openapi`/`api`.
+
+### Padrões de página e estilo
+
+- **Kicker**: 65 das 67 páginas abrem o corpo com `<p className="cf-kicker">SEÇÃO · RÓTULO</p>` (ex.: `CAMPFIRE · OVERVIEW`, `GLOSSARY · SPECS`, `ADR · ACCEPTED`, `RECIPE · CANONICAL`, `STAGE 5 · PLANNED`), classe definida em `docs/custom.css` como "Mono kicker — primary information scent" (`grep -rl cf-kicker docs`; `docs/custom.css` linhas 42-56).
+- **Badges de status**: 11 páginas usam `<span className="cf-badge cf-badge--planned">PLANNED</span>` e variantes `--live`, `--partial` (`docs/custom.css` linhas 58-93; `docs/get-started/architecture/ci-cd.mdx` linha 10).
+- `docs/custom.css` (3,2 KB): cabeçalho "Campfire docs — rehearsal-room brutalism. See DESIGN.md"; `@import` de Google Fonts (`Space Mono`); tokens `--cf-*` com hex literais (`#e8813a`, `#131313`...); `!important` em `h1`/`h2`/`h3` e em `code, pre, kbd`; utilitários `cf-swatch`, `cf-rule`, `cf-label` (`docs/custom.css`).
+- **Componentes embutidos usados** (ocorrências de tag): `<Step>` 43, `<Card>` 31, `<Accordion>` 23, `<CardGroup>` 9 (`cols={3}`), `<Steps>` 8, `<AccordionGroup>` 4, `<Note>` 3, `<Tip>` 2, `<Warning>` 1, `<Info>` 1. Nenhum componente próprio; o que não é componente é HTML com classe (`grep -rhoE '<[A-Z][A-Za-z]+' docs`). As 5 ocorrências de `<Context` são texto dentro de blocos de código em `docs/backend/architecture.mdx`.
+- **Tipos de página observados**: visão geral com `CardGroup` de três cartões; verbete de glossário com seções fixas em prosa ("Why it matters here", "Where it appears", "Related terms"); ADR curto (kicker `ADR · ACCEPTED`, decisão em um parágrafo, linha `Related:`); *playbook*/receita longa; páginas de spec que espelham `specs/NNN-*/` (`docs/glossary/adr.mdx`; `docs/sdd/adrs/0001-...mdx`; `docs/backend/architecture.mdx`; `docs/sdd/specs/`).
+- **Links**: internos absolutos à raiz do site (`/sdd/adrs/index`, `/glossary/sdd`); para fonte de spec, link externo ao GitHub (`docs/backend/architecture.mdx` linhas 13-16).
+- **Idioma**: inglês em todas as páginas e no `docs.json`. **Travessão** `—` presente em 29 dos 67 arquivos, inclusive em `title` (`grep -rl '—' docs`).
+
+### `.mintignore` (`docs/.mintignore`, 117 bytes)
+
+Conteúdo: `node_modules/**`, `apps/**`, `specs/**`, `tmp/**`, `.agents/**`, `.claude/**`, `.serena/**`, `.specify/**`, `.vscode/**`, `.git/**`, `*.md`, `**/*.md` (`gh api .../contents/docs/.mintignore | base64 -d`). As entradas `apps/**`, `specs/**`, `.agents/**` etc. nomeiam pastas da raiz do repositório que não existem sob `docs/`. Oficialmente o arquivo fica "na raiz do diretório de documentação", "uses the same pattern syntax as `.gitignore`", e o que ele exclui não é publicado, não entra na busca e "Visitors cannot access them by URL"; `.git`, `.github`, `.claude`, `.agents`, `.idea`, `.vscode`, `.cursor`, `node_modules`, `README.md`, `LICENSE.md`, `CHANGELOG.md`, `CONTRIBUTING.md` já são ignorados por padrão (https://www.mintlify.com/docs/organize/mintignore).
+
+### Convenções declaradas
+
+- Nenhuma menção a `docs/`, `documentation` ou `mdx` em `AGENTS.md`, `CLAUDE.md`, `DESIGN.md` ou `.github/pull_request_template.md` (`grep` no snapshot). As convenções de documentação estão **dentro da própria documentação**:
+  - Constituição, princípio III "Boring, proven stack": "Mintlify for docs"; princípio V "Docs-as-code, continuously": "Every user-facing or architectural change ships its Mintlify update in the same change set. If a change needs no doc update, that must be obvious from the change itself." (`docs/sdd/methodology/constitution.mdx` linhas 34-56).
+  - Definition of done, passo "Docs are updated": "Mintlify reflects the change in the **same** change set." (`docs/contributors/workflow.mdx` linhas 30-40).
+  - "Prettier handles JS, TS, JSON, MD, MDX, and CSS"; "Commit messages: conventional-style is encouraged, not enforced" (`docs/contributors/code-style.mdx` linhas 10-13, 44-46). `.prettierignore` não exclui `docs/`.
+- **CI sobre a documentação**: no job `docs-and-repo-hygiene`, o passo "Validate docs navigation" roda um script Node inline que percorre `navigation.tabs` (`root` e `pages`) e falha se algum alvo não existir como `docs/<caminho>.mdx` (`.github/workflows/ci.yml` linhas 254-316). Não há `mint validate`, `mint broken-links` nem Prettier `--check` sobre `docs/` nos workflows (`grep -n -i 'mint' .github/workflows/*.yml` sem resultado além desse passo). O script valida navegação → arquivo, não arquivo → navegação (órfãs passariam; hoje são zero).
 
 ## 9. campfire/docs: publicação, CI, custo e plano
 
+### Como o Mintlify publica (fatos oficiais)
+
+- O **GitHub App do Mintlify** sincroniza o repositório: "automatically sync your documentation with your GitHub repository"; instala-se em Git Settings do dashboard, escolhendo o repositório; pushes para a branch configurada disparam deploy; a branch de build é trocada no dashboard. Permissões: leitura de `metadata`; leitura e escrita de `checks`, `code`, `deployments`, `pull requests`. "If you have branch protection rules enabled, the app can't push directly to protected branches." (https://www.mintlify.com/docs/deploy/github)
+- **Subdiretório** (caso do campfire, `docs/`): no dashboard, ativar "docs.json is in a subdirectory" e informar `/docs`; "Do not include a trailing slash in the path."; o `docs.json` fica dentro do diretório de documentação (https://www.mintlify.com/docs/deploy/monorepo).
+- **Preview em PR**: gerado para PRs contra a branch de deploy, link postado pelo bot, atualizado a cada commit; "Preview deployments require a Pro or Enterprise plan"; "Preview URLs are publicly viewable by default" (https://www.mintlify.com/docs/deploy/preview-deployments).
+- **Domínio**: endereço padrão `<subdomain>.mintlify.site`, que "stays reachable after you add a custom domain"; domínio próprio via `TXT` de verificação e `CNAME` para `cname.mintlify.builders`, TLS automático; hospedagem em subpath (`/docs`) via toggle "Host at", por DNS direto ou proxy reverso, "not supported for documentation with authentication enabled" (https://www.mintlify.com/docs/customize/custom-domain).
+- **Artefatos para IA**: "Mintlify automatically hosts an `llms.txt` file at the root of your project", idem `llms-full.txt`; "Page links in the `llms.txt` file include a `.md` extension so AI tools can fetch the Markdown version of each page directly"; `markdown.instructions` e `seo.indexing` no `docs.json` ajustam isso (https://www.mintlify.com/docs/ai/llmstxt). O menu `contextual.options: ["copy", "view"]` do campfire usa esse mecanismo.
+
+### Estado real da publicação do campfire
+
+- O GitHub App do Mintlify **está instalado** no repositório: há check-suite do app `mintlify` nos HEADs de `main` e `develop`, ao lado de `codecov`, `infracost`, `vercel`, `render` e `github-actions` (`gh api repos/ThiagoPanini/campfire/commits/<sha>/check-suites`).
+- **Nenhum deploy foi registrado**: em todos os 13 commits que tocaram `docs/` no histórico de `main` (2026-04-20 a 2026-04-30) e nos 9 amostrados em `develop` (até 2026-05-02), o check run "Mintlify Deployment" tem `conclusion: skipped`, título "Skipping deployment", resumo "No eligible deployments found for changes", `details_url: https://mintlify.com` (`gh api repos/ThiagoPanini/campfire/commits/<sha>/check-runs`). Nenhum PR tem comentário de preview (lista de 53 PRs, `gh pr list`). A própria doc diz que o site ainda não foi publicado: "Replace with a site-specific config (`npx mint-mcp add <siteId>`) once the docs site is published." (`docs/ai-development/mcp-servers.mdx` linha 19).
+- **URL hospedada: não encontrada.** `https://campfire.mintlify.app` responde 200, mas é o site de outra organização ("Campfire API Docs", `llms.txt` apontando para `docs.campfire.ai`, 426 URLs no sitemap), não este projeto (`curl -s https://campfire.mintlify.app | grep '<title>'`; `/llms.txt`). `thiagopanini.mintlify.app`, `campfire-docs.mintlify.app` e `thiagopanini-campfire.mintlify.app` respondem 404; `docs.thiagopanini.dev` não resolve. O repositório não tem `homepageUrl` (`gh repo view`). Nada no repositório nomeia o subdomínio.
+- Hospedagem do **app** (não da doc): Render, decidido em ADR-0010 e `render.yaml` na raiz; deploy por `.github/workflows/deploy-develop.yml` e `deploy-production.yml` (`docs/sdd/adrs/0010-render-as-deployment-platform.mdx`; listagem da raiz remota).
+
+### CI do repositório (contexto)
+
+`ci.yml`: `pull_request` para `develop`/`main` e `push` em `develop`, `main`, `[0-9][0-9][0-9]-*`; jobs de frontend, backend (lint, unit, integração Postgres, migrações/contratos), `docs-and-repo-hygiene` e agregador "CI status (aggregate)" (`.github/workflows/ci.yml` linhas 1-30; `gh api .../check-runs` do HEAD). Dependabot semanal para `github-actions`, `npm` (é por aí que o `mintlify` sobe de versão) e `pip`, com alvo `develop` (`.github/dependabot.yml`).
+
+### Custo e plano (https://mintlify.com/pricing, lida em 2026-11-07)
+
+| Plano | Preço | O que inclui, segundo a página |
+|---|---|---|
+| **Starter** | US$ 0; "Starter is free forever for up to five editors" | hospedagem gerenciada, busca, domínio customizado, Git sync, editor web, autenticação, servidor MCP, API playground; 5 "editor seats" |
+| **Pro** | US$ 450/mês (anual) ou US$ 540/mês (mensal) | editores ilimitados, analytics de plataforma e de Agent, Agent incluído, Assistant a 25 créditos por resposta com 10.000 créditos/mês, preview deployments, feedback de usuários |
+| **Enterprise** | sob consulta | self-hosting e EU hosting, insights avançados, créditos customizados |
+
+- **OSS Program**: Pro gratuito para projeto open source não comercial com "a recognized open source license", não financiado por VC ou receita, não mantido principalmente por empresa com fins lucrativos. A listagem da raiz remota do campfire **não mostra arquivo `LICENSE`** (`gh api repos/ThiagoPanini/campfire/contents`).
+- **Startup Program**: 50% de desconto no Pro por 12 meses.
+- O plano em que o campfire está **não é determinável pelo repositório**; como nenhum deploy aconteceu, não há evidência de uso de recurso pago.
+- Custo de máquina no GitHub: só o passo de validação de navegação dentro do job `docs-and-repo-hygiene` (`timeout-minutes: 5`), em repositório público (runners gratuitos, ver seção 10).
+
 ## 10. Quadro comparativo de fatos
+
+Fatos lado a lado, sem recomendação. Fontes: seções 1-9 deste arquivo e as URLs listadas ao fim.
+
+| Dimensão | panlabs-docs (Docusaurus) | campfire/docs (Mintlify) |
+|---|---|---|
+| Gerador / versão | Docusaurus 3.10.2 fixado; React 19; MDX 3; npm; Node `>=20` (CI: 22) | Mintlify SaaS; CLI local `mintlify` 4.2.542 (pacote legado segundo a doc oficial; o atual é `mint`); Node 22 no CI; CLI pede Node v20.17+ |
+| Licença / modelo | MIT (`facebook/docusaurus`), self-hosted estático | Plataforma proprietária hospedada; plano Starter gratuito até 5 editores |
+| Onde o conteúdo mora | `content/` (4 abas = 4 instâncias de `plugin-content-docs`); `docs/` é doc do repo | `docs/` com `docs.json` na raiz do diretório; `.mintignore` exclui `*.md` |
+| Formato das páginas | 33 `.md` autorais + 4 `.mdx` gerados de contrato | 67 `.mdx`, nenhum `.md`, nenhum gerado |
+| Configuração | `docusaurus.config.js`, 445 linhas comentadas, ESM, zero literal de cor | `docs.json`, 7,5 KB, JSON com `$schema`; cores e fontes em literais |
+| Navegação | 6 `sidebars-*.js` explícitos; separador de topo não clicável; teto de profundidade 4; `slug: /` por aba; 1 fragmento gerado | `navigation.tabs` com 3 abas, 29 grupos (3 aninhados, com `root`/`expanded`/`icon`), 67 páginas; CI valida que cada entrada existe |
+| Front matter | `title`, `description` (obrigatória, vira subtítulo/meta/busca/llms), `slug` | `title`, `description`, `icon`, `sidebarTitle`, `keywords`, `tag`; tudo opcional pela doc oficial |
+| Componentes | catálogo fechado de 16 registrados globalmente, nomes espelhando o Mintlify (`Steps`, `Card`, `Accordion`, `ParamField`...); sem `import` | embutidos do Mintlify (`Steps`, `Card`, `Accordion`, `Note`...); sem `import`; HTML com classes `cf-*` para kicker e badges |
+| Tema / CSS | 5 arquivos CSS em 3 camadas, tokens `--pd-*`, único arquivo com literais; dark canônico | `docs.json` (`colors`, `appearance`, `background`, `fonts`) + `custom.css` com `--cf-*`, `!important`, Google Fonts |
+| Ícones | Lucide via `lucide-static` fixado, resolvidos em build (falha se o slug não existe) | `icons.library: lucide`, resolvidos pela plataforma |
+| Fontes | auto-hospedadas (`Inter`, `Paper Mono` em `static/fonts/`) | `Anton`, `Space Grotesk` via `fonts` do `docs.json`; `Space Mono` via `@import` Google Fonts |
+| Diagramas | `.drawio.svg` co-localizado, abas via `?aba=`, irmãos gerados commitados, lightbox próprio | nenhum diagrama em `docs/` (0 svg/png) |
+| Links quebrados | `onBrokenLinks`, `onBrokenAnchors`, `onBrokenMarkdownLinks` todos `throw`, só no `build` | não verificados no CI (`mint broken-links` existe na CLI, não roda) |
+| Busca | índice local embarcado, teto 64 KB, sem serviço externo | busca da plataforma (incluída no Starter) |
+| `llms.txt` / `.md` por rota | plugin local `ai-era` emite `.md` por rota, `llms.txt`, `llms-full.txt` | automático pela plataforma; `contextual.options: copy, view` |
+| Idioma do conteúdo | pt-BR, locale único | inglês |
+| Regras de escrita | voz `you` + imperativo, zero travessão em prosa publicada, `description` obrigatória, `{#id}` em âncoras; em prosa, sem gate | Prettier sobre MDX; "docs no mesmo change set" (constituição e DoD); travessão em 29/67 páginas |
+| Docs para agentes | `AGENTS.md`, `CONTEXT.md` (glossário), `DECISIONS.md` (11 decisões), `docs/agents/` (4), `.claude/rules/` (3, escopadas por `paths`) | `AGENTS.md`/`CLAUDE.md`/`DESIGN.md` sem menção a `docs/`; convenções dentro das próprias páginas; skill `mintlify` em `.agents/skills/` |
+| CI | `gate`: `npm ci` + `npm run build` (único check, obrigatório pelo ruleset da `main`) | passo "Validate docs navigation" num job de higiene; sem `mint validate` |
+| Deploy | `deploy.yml` → GitHub Pages (`build_type: workflow`), um deploy por vez | GitHub App do Mintlify instalado; **nenhum deploy registrado** ("No eligible deployments found for changes") |
+| Hospedagem / URL | `https://thiagopanini.github.io/panlabs-docs/`, sem domínio próprio, HTTPS forçado | sem URL conhecida; padrão seria `<subdomain>.mintlify.site`; domínio próprio e subpath disponíveis |
+| Custo | US$ 0: repo público, Actions e Pages gratuitos; sem serviço externo | US$ 0 no Starter (5 editores); preview em PR só no Pro (US$ 450-540/mês) ou OSS Program (exige licença OSS; repo sem `LICENSE`) |
+| Estado | publicado, último deploy 2026-09-08 com sucesso | escrito (67 páginas em `main`, 74 em `develop`), não publicado; clone local em branch sem Mintlify |
+
+### Fontes externas consultadas (2026-11-07)
+
+- Mintlify, preços: https://mintlify.com/pricing
+- Mintlify, instalação e CLI: https://www.mintlify.com/docs/installation
+- Mintlify, GitHub App: https://www.mintlify.com/docs/deploy/github
+- Mintlify, monorepo/subdiretório: https://www.mintlify.com/docs/deploy/monorepo
+- Mintlify, preview deployments: https://www.mintlify.com/docs/deploy/preview-deployments
+- Mintlify, domínio customizado: https://www.mintlify.com/docs/customize/custom-domain
+- Mintlify, `.mintignore`: https://www.mintlify.com/docs/organize/mintignore
+- Mintlify, navegação: https://www.mintlify.com/docs/organize/navigation
+- Mintlify, configurações globais e referência do `docs.json`: https://www.mintlify.com/docs/organize/settings e https://www.mintlify.com/docs/organize/settings-reference
+- Mintlify, front matter de páginas: https://www.mintlify.com/docs/organize/pages
+- Mintlify, `llms.txt`: https://www.mintlify.com/docs/ai/llmstxt
+- Docusaurus, instalação (Node "version 20.0 or above"): https://docusaurus.io/docs/installation
+- Docusaurus, deploy (GitHub Pages: `organizationName`, `projectName`, `deploymentBranch`, `trailingSlash`; workflows separados de teste e deploy; lista de hosts alternativos): https://docusaurus.io/docs/deployment
+- GitHub Pages, limites ("no larger than 1 GB"; "soft bandwidth limit of 100 GB per month"; "soft limit of 10 builds per hour", que "does not apply if you build and publish your site with a custom GitHub Actions workflow"; não permitido como hospedagem gratuita para operar negócio): https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits
+- GitHub Actions, cobrança (uso em runners padrão em repositórios públicos "remains free independently and does not reduce the included compute usage"): https://docs.github.com/en/billing/concepts/product-billing/github-actions
