@@ -1,2 +1,6 @@
 # worktrees locais das pesquisas do wayfinder
 .worktrees/
+
+# estado local do Claude Code (permissoes e worktrees de subagentes)
+.claude/settings.local.json
+.claude/worktrees/
