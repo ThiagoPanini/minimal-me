@@ -4,10 +4,10 @@ Ticket: [#10](https://github.com/ThiagoPanini/minimal-me/issues/10) (parte de #1
 
 ## Retomada
 
-- **Estado**: em andamento.
-- **Coberto**: insumos lidos (quatro inventários, mapa #1, brief, `docs/agents/` do minimal-me); datas de último commit confirmadas na fonte; seção 1 (perfil comum) e seção 2 (56 divergências D1–D56) escritas.
-- **Pendente**: seções 3 (lacunas) e 4 (perguntas, uma por D<n>); comentário e fechamento da issue.
-- **Onde continuar**: seção 3; as lacunas candidatas vêm do brief ("Requisitos confirmados") e do mapa ("Not yet specified") cruzados com o que a seção 1 mostra que a frota não tem.
+- **Estado**: **completo** (2026-11-07).
+- **Coberto**: insumos lidos (quatro inventários, mapa #1, brief, `docs/agents/` do minimal-me); datas de último commit confirmadas na fonte por `git log`; seção 1 (perfil comum em 13 dimensões), seção 2 (56 divergências D1–D56 com projeto mais recente e impacto), seção 3 (18 lacunas L1–L18), seção 4 (56 perguntas, uma por divergência); comentário e fechamento da issue #10 pelo mesmo agente.
+- **Pendente**: nada. Se reabrir: o tfbox pode mergear `feat/retrofit-anatomia-panlabs` (os fatos **[retrofit]** passam a valer em `main`); o ticket #7 (higiene) pode mudar D23 e D24; o ticket #16 responde a seção 4.
+- **Onde continuar**: não se aplica. A seção 4 é a entrada do ticket "Convenção canônica" (#16).
 
 ## Insumos e forma de citar
 
@@ -261,8 +261,106 @@ Cada linha tem um identificador `D<n>` reutilizado na seção 4. "Mais recente" 
 
 ## 3. Lacunas que nenhum projeto cobre
 
-(pendente)
+Cada item é uma **lacuna**: algo que o brief ou o mapa exige do Minimal Me e que nenhum dos projetos de referência tem, segundo os inventários. Registro de ausência com a evidência; nenhuma solução é proposta aqui.
+
+| # | Lacuna | Evidência de ausência na frota | Por que o Minimal Me precisa |
+|---|---|---|---|
+| L1 | **Camada de IA conversacional**: chat sobre materiais, recuperação (embeddings ou contexto), citação de Fontes, declaração de falta de evidência | O único uso de LLM na frota é extração de comprovante via `@anthropic-ai/bedrock-sdk` no LUC (ADR-0013, inv-LUC §2); nenhum inventário registra chat, RAG, embeddings, vetor no Postgres ou citação | Produto é "assistente fundamentado nos Materiais do Autor e que cita Fontes" (mapa, "Produto em uma linha"); itens listados em "Not yet specified: Camada de IA da v1" |
+| L2 | **Teto de custo por chamada e defesa contra instruções maliciosas** (em documentos e em perguntas de visitantes) | Nenhum projeto tem limite de custo de LLM, orçamento por requisição, filtro de prompt ou sanitização de conteúdo de terceiros (inv-OP, inv-LUC, inv-TF, inv-DOCS, busca por `bedrock`/`anthropic`/`openai` só acha o adapter do LUC) | Requisitos confirmados que nenhum ticket reabre: "limite de custo por chamada" e "proteção contra instruções maliciosas em documentos e em perguntas de visitantes" (mapa, "Notes") |
+| L3 | **Superfície pública anônima com abuso controlado**: rate limiting, quota por visitante, antibot | Cloudflare aparece como DNS, proxy, "WAF/CDN" e R2 (ETH ADR-0003, inv-TF §10), mas nenhum inventário registra regra de WAF, rate limit ou captcha configurado; os três apps são logados (LUC allowlist de 2 e-mails, inv-LUC §5) | "Visitantes leem e interagem", inclusive com o Assistente (brief, "O produto"); "Chat com visitantes: abuso, limites de uso, custo" (mapa, "Not yet specified"); limites do proxy Cloudflare (upload 100 MB, 524 após 100 s, WebSocket com idle timeout, gist #8) tocam streaming de chat |
+| L4 | **Autenticação de um só Autor com área pública anônima** | Os três padrões assumem que todo usuário loga: gate em "tudo menos estáticos" (LUC), cadastro aberto com onboarding (TM), hub com admin e comentaristas autenticados (ETH) (inv-LUC §5, §13-14). Nenhum tem "visitante não loga; só o Autor loga" e nenhuma das três formas de a API reconhecer o usuário (D35) prevê chamada anônima | Brief: "Autor único (eu), com área de administração autenticada. Leitura e interação com a interface abertas ao público"; destrava o ticket Fronteira |
+| L5 | **Funcionalidades ligadas e desligadas por toggle** (feature flags) | Nenhum projeto tem flags por funcionalidade; o mais perto é `LUC_LOCAL_AUTH_BYPASS` por variável, só fora de produção (inv-LUC §5), e `--profile full` do compose (inv-LUC §6) | Hipótese do MVP: "interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle" (brief); termo candidato "Funcionalidade desligada" (mapa) |
+| L6 | **Observabilidade em VPS compartilhada**: logs centralizados, métricas, alertas, uptime, rastreio de erros | Só `HEALTHCHECK` no container da API e smoke `GET` pós-deploy (inv-LUC §6-7, §13); nenhum inventário registra Sentry, Grafana, Loki, uptime checker, alerta ou dashboard | "Observabilidade, backup e operação solo" (mapa, "Not yet specified"); a VPS KVM 2 de 8 GB já hospeda três projetos (gist #8) |
+| L7 | **Backup fora da VPS e restauração testada** | Backup documentado é o do Coolify, diário, local, retenção 7 dias (LUC `docs/runbooks/vincular-google.md`, inv-LUC §7); nada off-site, nada para objetos no R2, nenhum runbook de restore em nenhum projeto | Materiais e memória do Autor são o ativo do produto; "material excluído não é mais recuperável pelo Assistente" exige saber o que o backup retém (mapa, "Requisitos confirmados") |
+| L8 | **Publicação pública de conteúdo autoral**: blog com fluxo rascunho → revisão → publicar, sitemap, RSS, metadados sociais | PD é site estático com `blog: false` (inv-DOCS §1); LUC/ETH/TM são apps logados sem superfície pública de conteúdo (inv-LUC); CF docs nunca publicado (inv-DOCS §9). Nenhum inventário cita sitemap, RSS ou Open Graph | "Blog como componente público" e "nada publicado automaticamente pela IA: ela sugere ou rascunha, eu reviso e publico" (brief); 46 artigos em `hashnode-backup` aguardam destino (mapa) |
+| L9 | **Modelo de dados de Material e Espaço**, exclusão irrecuperável pelo Assistente, preservação de fontes, memória editável | Nenhum projeto modela documentos/materiais; o LUC tem anexos no R2 com espelho de avatar (inv-LUC §4-5), sem semântica de exclusão ou de fonte | "Modelo de dados de Material e Espaço" e "memória sobre o Autor transparente, editável e removível" (mapa) |
+| L10 | **Lembretes por e-mail** como funcionalidade agendada do produto (parcial) | TM lê `RESEND_API_KEY` e `EMAIL_FROM` só para OTP (inv-LUC §13); LUC tem digest diário agendado pelo Coolify, mas por WhatsApp (inv-LUC §5, §7). Nenhum tem e-mail agendado por conteúdo | "E-mail antes de WhatsApp" (brief, hipóteses); "Lembretes por e-mail: se entram na v1, como e por qual provedor" (mapa) |
+| L11 | **Hostname público para a API em domínio de produto** | Universal SSL cobre só o 1º nível de subdomínio; por isso as APIs dos irmãos são internas e o alvo do LUC (subdomínio com allowlist de path) não foi executado (inv-LUC §7, §14; gist #8). Nenhum projeto exerceu `/api` no mesmo host, hostname de 1º nível para a API ou zona própria | Web + API candidata exposta ao público; o nome do domínio depende da tarefa manual de confirmar a zona Cloudflare (brief, "Tarefas manuais") |
+| L12 | **IaC para VPS, Coolify e Cloudflare** | Zero Terraform fora da AWS; nenhum provider para Cloudflare, Hostinger ou Coolify em nenhum repositório; a VPS é operada por webhook, MCPs e ADRs (inv-TF §10-11). A configuração do Coolify (apps, variáveis, domínios) vive só no painel | O mapa prefere MCPs ("usar os MCPs de Hostinger, Coolify e Cloudflare sempre que possível"); fica registrado que não há estado declarativo em nenhum projeto para reproduzir a hospedagem |
+| L13 | **Contrato de CI para repositórios da conta `ThiagoPanini`** | Os reusables, o `security.yml` e o contrato `checks`/`security` vivem em `panlabs-tech/.github` (inv-LUC §8, §14; inv-TF §5); OP e PD, ambos em `ThiagoPanini`, têm CI local com check `gate` e não consomem a org (inv-OP §7; inv-DOCS §6). Não há `.github` de conta em `ThiagoPanini` | O minimal-me é `ThiagoPanini/minimal-me`; herdar a "anatomia panlabs" exige decidir de onde vem o contrato (D16, D17) |
+| L14 | **`GLOSSARY.md` e `docs/agents` alinhados às skills instaladas** | Skills ≥ 1.3.0 leem `GLOSSARY.md`, não `CONTEXT.md`; nenhum projeto tem `GLOSSARY.md`; `AGENTS.md` e `docs/agents/domain.md` do minimal-me dizem `CONTEXT.md` e o `issue-tracker.md` é de template anterior (gist #9; `docs/agents/domain.md` deste repositório) | Brief: "`CONTEXT.md` e ADRs nascem preguiçosamente pela skill domain-modeling"; a skill procura outro nome |
+| L15 | **Testes de interface e de celular no molde web** | Playwright só no tfbox (3 testes, um com viewport 375 px, inv-TF §4); LUC/ETH/TM só Vitest unitário com DOM simulado (inv-LUC §2, §13). Nenhum inventário registra teste de acessibilidade | "Navegação, mapa de telas, estados e jornadas do MVP, incluindo uso no celular"; "boa tipografia, legibilidade e acessibilidade" (brief) |
+| L16 | **Sistema visual preto e branco** com tokens e auditoria de acessibilidade | Tokens existem (PD `tokens.css` com três camadas, inv-DOCS §4; TM `docs/design/tokens.json`, inv-LUC §13; tfbox `DESIGN.md` com HSL e laranja, inv-TF §7), mas nenhum é monocromático nem registra verificação de contraste | Direção visual do brief: fundo preto puro, linhas brancas, sem cor, cinzas só por hachura; fora da stack, registrado porque o `/handoff` de design vai precisar de um formato de tokens (D54) |
+| L17 | **Orçamento de recursos por aplicação na VPS compartilhada** | Coolify pede 2 vCPU/2 GB mínimos; a VPS (KVM 2, 8 GB) já hospeda três projetos (gist #8). Nenhum inventário registra limite de CPU/memória por container, nem medição de uso | Duas aplicações novas (web + API) mais um Postgres entram numa máquina já ocupada; ticket Hospedagem e orçamento |
+| L18 | **Versão e changelog de produto web público** | O trio publica `latest` + SHA sem versão nem changelog (D26); só o OP (pacote) e o tfbox (módulos) versionam | Produto público com visitantes recorrentes; registrado como lacuna porque nenhum produto web da frota responde "o que mudou" |
 
 ## 4. Perguntas para o ticket "Convenção canônica"
 
-(pendente)
+Uma pergunta por divergência da seção 2, com o mesmo identificador. Nenhuma é respondida aqui. As lacunas L1–L18 não geram pergunta de convenção: são requisitos sem precedente na frota e seguem para os tickets que o mapa já lista (Camada de IA, Fronteira, Hospedagem e orçamento, Estrutura do repositório).
+
+### Linguagens, runtimes e dados
+
+- **D1.** Qual é o piso de Python do Minimal Me (`>=3.12`, `>=3.13` ou `>=3.14`) e ele é também a versão de desenvolvimento e da imagem base?
+- **D2.** Qual versão de Node vai em `.node-version` (20, 22 ou 24) e na imagem `node:<v>-alpine`?
+- **D3.** O repositório usa pnpm workspace (molde web) ou npm (PD, tfbox)?
+- **D4.** O layout é monorepo `apps/web` + `apps/api` (LUC/TM), `apps/web` + `packages/*` (ETH) ou outro, e esse layout vira duas aplicações Coolify ou um Compose?
+- **D5.** Dependências do web com specifier `^` (LUC, ETH) ou pinadas exatas (TM)? Vitest 3 ou 4? `jsdom` ou `happy-dom`?
+- **D6.** Postgres 16 (LUC) ou 17 (ETH, TM) no Coolify, no compose e na CI?
+- **D7.** Persistência Python com SQLAlchemy Core + psycopg3 + `dataclass(frozen)` e repositórios (LUC, régua `panlabs-python-standards`) ou ORM = entidade com asyncpg (ETH)?
+- **D8.** Quem é dono do DDL: Drizzle no web (LUC hoje), Alembic na API (ETH, TM) ou outro arranjo?
+- **D9.** Dockerfile da API multi-stage com `HEALTHCHECK` e non-root (LUC) ou single-stage (ETH, TM)? A migração roda no boot do container?
+- **D10.** Ambiente local em duas camadas (deps em container + `next dev` nativo, LUC) ou tudo no compose (ETH, TM)?
+- **D11.** O Minimal Me adota R2 + MinIO (LUC) para os Materiais do Autor desde o MVP, ou object storage fica fora da v1?
+
+### Lint, tipagem e ganchos
+
+- **D12.** Rigor do ruff e do pyright: `extend-select` amplo (OP), `select` curado + `import-linter` (LUC) ou mínimo (ETH, TM)? Pyright `strict` ou `standard`?
+- **D13.** Biome 2 pelo binário direto é o único formatador do web?
+- **D14.** Lefthook, commitlint e gitleaks como "equipamento da máquina" (npx pinado, binários globais) ou como devDependencies com `prepare`?
+- **D15.** O gancho local roda só `--check` em arquivos staged (OP, LUC) ou também tipagem e testes rápidos (ETH)?
+
+### CI, portões e repositório
+
+- **D16.** A CI é local ao repositório (OP, PD) ou consome reusables de `panlabs-tech/.github`, estando o minimal-me em `ThiagoPanini`?
+- **D17.** Qual é o nome do required check: `gate` (OP, PD) ou `checks` + `security` (trio, tfbox)?
+- **D18.** O gatilho da CI é `push` em todas as branches (OP), em tudo exceto `main` (PD) ou numa lista de prefixos (LUC, tfbox)?
+- **D19.** O PR é aberto automaticamente por workflow (`open-pr.yml`) ou manualmente em `--draft` no primeiro push (OP, PD)?
+- **D20.** Método de merge: squash com título do PR (LUC, PD, tfbox) ou merge commit (OP)? O commitlint vale para o título do PR?
+- **D21.** Actions fixadas por SHA com comentário (OP, LUC) ou por tag (tfbox, PD)?
+- **D22.** Há job de segurança na CI (`security.yml` ou equivalente) além do gitleaks local?
+- **D23.** Dependabot (ou equivalente) ligado desde o início, como no tfbox, ou ausente, como no molde? (decisão compartilhada com o ticket #7)
+- **D24.** Templates de issue e PR como no tfbox, só PR como no LUC, ou nenhum? (idem #7)
+
+### Release, deploy e rede
+
+- **D25.** O deploy do web e da API é GHCR → webhook Coolify → smoke (trio) e há alguma peça estática que vai para GitHub Pages?
+- **D26.** O produto web tem versão e changelog (semver + towncrier como o OP) ou só `latest` + SHA como o trio?
+- **D27.** Duas aplicações Coolify (web e api) com dois UUIDs e dois webhooks (LUC ADR 0014, ETH, TM) ou um Compose único?
+- **D28.** Migração no boot do web (LUC), no boot da API (ETH, TM) ou fora do pipeline?
+- **D29.** Qual rota pública o smoke pós-deploy verifica num produto cuja raiz é pública e não `/login`?
+- **D30.** A API fica interna na rede `coolify` (ETH, TM) ou exposta em hostname público com allowlist de path (alvo do LUC), dado o limite do Universal SSL?
+- **D31.** O web fala com a API por alias de container (ETH) ou por `INTERNAL_API_URL` (TM)?
+- **D32.** Tarefas agendadas pelo Coolify com Bearer secret (LUC) e backup diário local de 7 dias são a convenção herdada, ou isso fica para o ticket de Hospedagem?
+
+### Autenticação e fronteira
+
+- **D33.** Auth.js v5 (LUC, TM) ou better-auth self-hosted (ETH) no web? (insumo do ticket Fronteira)
+- **D34.** O Autor entra por Google OAuth com allowlist (LUC), e-mail+senha (ETH) ou OTP por e-mail (TM)? Existe cadastro de visitantes?
+- **D35.** A API reconhece o Autor por JWT interno cunhado pelo BFF (LUC), lendo a sessão no Postgres (ETH) ou sendo ela a autoridade (TM)? Como ela trata chamadas anônimas?
+- **D36.** O gate de rota é parcial por matcher (TM), ausente (ETH) ou total com exceções (LUC)?
+- **D37.** `.env.example` separa produto (raiz + por app, LUC) de infra/MCP, ou mistura (ETH)?
+
+### Commits, branches e idioma
+
+- **D38.** Nome de branch: `feat/<issue>-<slug>` (OP), `feat/<slug>` (trio) ou `feature/<slug>` (tfbox, PD)? `research/<slug>` continua?
+- **D39.** O subject do commit leva escopo (`tipo(escopo):`, trio) ou não (OP), dado que há dois apps?
+- **D40.** `type-enum` do commitlint padrão (OP, trio) ou restrito a tipos que geram versão (tfbox)?
+- **D41.** Worktrees em `.worktrees/` (minimal-me hoje) ou `.claude/worktrees/` (OP, LUC, tfbox)?
+- **D42.** `AGENTS.md`, glossário e registro de decisões em pt-BR (OP, trio) ou em inglês (PD, tfbox)?
+- **D43.** Commits em pt-BR, como em toda a frota panlabs?
+- **D44.** O travessão é proibido na prosa publicada do produto (regra do PD) e nos commits?
+- **D45.** README em inglês para terceiros (OP, PD, tfbox) ou em pt-BR com arquitetura e comandos (LUC)?
+
+### Instruções para agentes e documentação
+
+- **D46.** O `CLAUDE.md` fica em uma linha (`@AGENTS.md`, como ETH e PD) ou importa e acrescenta uma seção específica do Claude Code (LUC, TM, tfbox)?
+- **D47.** O glossário se chama `CONTEXT.md` (frota) ou `GLOSSARY.md` (o que as skills ≥ 1.3.0 leem), e fica na raiz?
+- **D48.** Decisões em `docs/adr/NNNN-slug.md` com o formato do OP ("A razão / Considered Options"), com índice `README.md` (LUC), ou em `DECISIONS.md` único (PD)?
+- **D49.** Quais arquivos de `docs/agents/` o minimal-me ganha antes do spec: `workflow.md`, `mcps.md`, `local-dev.md`, `testing.md`, `design.md`?
+- **D50.** Labels de triagem canônicos verbatim (OP, PD, minimal-me hoje) ou dialeto `status:*` (LUC)?
+- **D51.** Skills e subagentes ficam globais na máquina, com o repo carregando só o marker (LUC, tfbox retrofit), ou vendorizados em `.agents/skills/` com `skills-lock.json` (tfbox main, CF)?
+- **D52.** O repositório usa `.claude/rules/*.md` com `paths:` (OP, PD), sabendo que o Codex não as lê?
+- **D53.** Existe `prompts/` gitignored com arquivos timestampados (trio) ou não?
+- **D54.** O documento de design vive em `DESIGN.md` na raiz (tfbox, CF), em `docs/design/*.md` (LUC) ou em tokens JSON (TM), e `docs/design/references/` continua onde está?
+- **D55.** A documentação de usuário do Minimal Me fica no PD (como o OP), num site próprio (Docusaurus ou Mintlify) ou não existe na v1?
+- **D56.** Se o blog usar MDX, o catálogo de componentes é fechado e global (PD) ou livre?
