@@ -191,7 +191,7 @@ O plugin local `ai-era` emite, em `postBuild`, um `.md` por rota (corpo MDX sem 
 
 ### Custo
 
-- **R$ 0 / US$ 0 de serviço**: repositório público, GitHub Actions em runner padrão e GitHub Pages, ambos gratuitos para repositórios públicos (ver seção 10 para as URLs oficiais e os limites). O próprio `ci.yml` registra a premissa: "A public repo's runner is free" (linha 17).
+- **R$ 0 / US$ 0 de serviço**: repositório público, GitHub Actions em runner padrão e GitHub Pages, ambos gratuitos para repositórios públicos; o plano GitHub Free lista "GitHub Pages in public repositories", e Pages em repositório privado só entra nos planos pagos (ver seção 10 para as URLs oficiais e os limites). O próprio `ci.yml` registra a premissa: "A public repo's runner is free" (linha 17).
 - Nenhuma dependência paga ou externa em runtime: busca local (não Algolia), fontes auto-hospedadas em `static/fonts/`, diagramas renderizados localmente e commitados (`DECISIONS.md` seções "Search Is a Local Index, No External Service" e "A Diagram Tab Is Selected in the Import"; `static/fonts/`).
 - Custo em tempo de máquina: dois workflows por mudança que chega à `main` (o `gate` no branch e o `Deploy` no merge), cada um com `npm ci` + `npm run build`.
 
@@ -365,4 +365,5 @@ Fatos lado a lado, sem recomendação. Fontes: seções 1-9 deste arquivo e as U
 - Docusaurus, instalação (Node "version 20.0 or above"): https://docusaurus.io/docs/installation
 - Docusaurus, deploy (GitHub Pages: `organizationName`, `projectName`, `deploymentBranch`, `trailingSlash`; workflows separados de teste e deploy; lista de hosts alternativos): https://docusaurus.io/docs/deployment
 - GitHub Pages, limites ("no larger than 1 GB"; "soft bandwidth limit of 100 GB per month"; "soft limit of 10 builds per hour", que "does not apply if you build and publish your site with a custom GitHub Actions workflow"; não permitido como hospedagem gratuita para operar negócio): https://docs.github.com/en/pages/getting-started-with-github-pages/github-pages-limits
+- GitHub, planos ("GitHub Pages in public repositories" no Free; Pages em repositório privado listado em Pro e Team; publicação privada exige organização em Enterprise Cloud): https://docs.github.com/en/get-started/learning-about-github/githubs-plans
 - GitHub Actions, cobrança (uso em runners padrão em repositórios públicos "remains free independently and does not reduce the included compute usage"): https://docs.github.com/en/billing/concepts/product-billing/github-actions
