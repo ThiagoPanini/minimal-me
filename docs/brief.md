@@ -45,6 +45,7 @@ REQUISITOS CONFIRMADOS
 - Manutenção compatível com um projeto pessoal de uma pessoa só. Sem microserviços, múltiplos agentes ou infraestrutura adicional sem necessidade demonstrada.
 - Material excluído não pode continuar sendo recuperado pelo assistente; fontes preservadas; privado e público separados; o assistente diz quando não há evidência suficiente; proteção contra instruções maliciosas dentro dos documentos; limite de custo por chamada.
 - A stack e as convenções do Minimal Me seguem as dos meus outros projetos (ver inventário). Desvios exigem justificativa explícita.
+- Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus publicado no GitHub Pages), com os ajustes visuais necessários; Mintlify fica fora (corrigido em 2026-11-07).
 
 HIPÓTESES INICIAIS (desafie-as nos tickets de decisão)
 - MVP: a interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle conforme o que estiver implementado. O esforço se concentra na proposta visual e de design, para que funcionalidades e integrações entrem depois já com forma e comportamento definidos. Quais funcionalidades ficam ligadas na v1 é decisão do mapa. (Corrigido em 2026-11-07; a hipótese anterior era "registrar, consultar com fontes, publicar".)
@@ -70,6 +71,7 @@ DECISÕES — tickets grilling (HITL, uma por sessão; em cada pergunta, dê sua
 - Estrutura de repositório, layout interno e configuração de desenvolvimento (AGENTS.md, skills, MCPs).
 - Convenção canônica onde meus projetos divergem.
 - Hospedagem e orçamento mensal (depende da tarefa manual abaixo).
+- Domínio: permanecer em subdomínio de `panlabs.tech` (padrão da frota, escolhido por facilidade de deploy e custo) ou domínio próprio; pesam o Universal SSL de um só nível e as cotas por zona do plano Free da Cloudflare (reaberto em 2026-11-07).
 
 TAREFAS MANUAIS — tickets task (HITL)
 - Confirmar o plano Hostinger e os recursos disponíveis (CPU, memória, Coolify instalado ou não, domínio na Cloudflare).
