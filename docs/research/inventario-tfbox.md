@@ -164,7 +164,7 @@ Contagens via `grep -c '^variable '`, `grep -c '^output '`, `grep -c 'validation
 ### Branches
 
 - Nomes documentados: `feature/<slug>`, `docs/<slug>`, `v<major>.<minor>.x`, `v<major>.<minor>.<patch>`; "CI only triggers on these patterns" (`AGENTS.md` §7).
-- No clone: 21 branches locais `feature/*` (ex.: `feature/lambda-function-v0.3.0`, `feature/sqs-queue-copy-dlq-config-from-source`), `chore/add-context-economy-protocol`, `feat/retrofit-anatomia-panlabs`, `feature/repo-improvement`; no remoto, também `chore/deps-major-upgrades` e 13 `dependabot/*` (`git branch -a`).
+- No clone: 20 branches locais `feature/*` (ex.: `feature/lambda-function-v0.3.0`, `feature/sqs-queue-copy-dlq-config-from-source`), `chore/add-context-economy-protocol`, `feat/retrofit-anatomia-panlabs`, `feature/repo-improvement`; no remoto, também `chore/deps-major-upgrades` e 16 `dependabot/*` (`git branch -a`).
 - Tags por módulo: `aws/<name>/vX.Y.Z` (`AGENTS.md` §6; `git tag`).
 - **[retrofit]** `pr-checks.yml` amplia os gatilhos para `feat/`, `fix/`, `chore/`, `config/`, `ci/`, `refactor/`, `test/`, `worktree/**`, `worktree-**`, `dependabot/**`; `docs/agents/workflow.md` explica que gatilho e `type-enum` divergem de propósito ("Branch que não dispara CI pendura o PR para sempre, então o gatilho erra para o lado de aceitar; tipo fora da lista publica mudança sem versão, então o `type-enum` erra para o lado de recusar").
 - **[retrofit]** worktrees aninhados em `.claude/worktrees/<nome>` (`docs/agents/workflow.md`, "A esteira").
