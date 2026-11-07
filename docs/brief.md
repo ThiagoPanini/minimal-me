@@ -22,7 +22,7 @@ Fora do alcance deste mapa (fica no nevoeiro; não pré-fatiar em tickets): tudo
 O PRODUTO
 Minimal Me é uma plataforma pessoal — um "sistema operacional pessoal" — para organizar conhecimentos, aprendizados e contextos de diferentes áreas da minha vida, com um assistente de IA calibrado ao meu contexto. Foco inicial: aprendizado técnico (tecnologia e IA). Depois: jogos (Pokémon TCG, Pokémon de console), viagens, lazer e outros interesses.
 - Espaços distintos por contexto, com navegação coerente; nada de uma única tela ou conversa para tudo. "Espaço" deve ser uma abstração genérica: criar um novo espaço é configuração e conteúdo, não código novo. Precisamos definir quando o assistente consulta só um espaço e quando pode cruzar informações.
-- O blog (antigo "Minimal Blog") é um componente público dentro do Minimal Me; eu sou o único autor. Todo o resto é privado.
+- O Minimal Me é exposto ao público: qualquer pessoa consome os conteúdos e interage com a interface, inclusive com o assistente, quando ele estiver disponível. Eu sou o único autor: só eu enriqueço e insiro conteúdo, por uma área de administração autenticada. O blog (antigo "Minimal Blog") é um dos componentes públicos. O que permanece privado (rascunhos, memória sobre mim, espaços pessoais) é decisão do mapa. (Corrigido em 2026-11-07; a versão anterior dizia que só o blog era público.)
 - Não se trata de recriar um modelo: é construir a camada de dados, memória, ferramentas e fluxos sobre uma API de LLM.
 - Já existem explorações iniciais no Claude Design para a versão anterior ("Minimal Blog"); servem apenas como ponto de partida.
 
@@ -38,7 +38,7 @@ VISÃO DE FUNCIONALIDADES (possibilidades de evolução, não requisitos do MVP)
 - Expandir para lazer, viagens e outros contextos.
 
 REQUISITOS CONFIRMADOS
-- Usuário único (eu); área privada autenticada; apenas o blog é público.
+- Autor único (eu), com área de administração autenticada. Leitura e interação com a interface abertas ao público. A fronteira exata entre público, autor e privado é decisão do mapa.
 - Interface minimalista, predominantemente preto e branco, com boa tipografia, legibilidade e acessibilidade.
 - Nada é publicado automaticamente pela IA: ela sugere ou rascunha, eu reviso e publico.
 - Memória sobre mim sempre transparente, editável e removível.
@@ -47,7 +47,7 @@ REQUISITOS CONFIRMADOS
 - A stack e as convenções do Minimal Me seguem as dos meus outros projetos (ver inventário). Desvios exigem justificativa explícita.
 
 HIPÓTESES INICIAIS (desafie-as nos tickets de decisão)
-- MVP: registrar um material, consultá-lo com respostas fundamentadas e com fontes, e publicar um aprendizado revisado no blog.
+- MVP: a interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle conforme o que estiver implementado. O esforço se concentra na proposta visual e de design, para que funcionalidades e integrações entrem depois já com forma e comportamento definidos. Quais funcionalidades ficam ligadas na v1 é decisão do mapa. (Corrigido em 2026-11-07; a hipótese anterior era "registrar, consultar com fontes, publicar".)
 - Um único repositório `minimal-me` (o layout interno — aplicação única ou workspaces — é decidido pela stack herdada), com um GitHub Project para gestão. Compare com múltiplos repositórios e recomende a opção mais simples que atenda ao MVP.
 - Chat por espaço, com consulta cruzada opcional e explícita, em vez de um agente global.
 - E-mail antes de WhatsApp; revisão humana antes de qualquer publicação.
@@ -61,15 +61,15 @@ Cada pesquisa existe para destravar uma decisão nomeada. Salve o resultado como
 5. Estado atual das skills de Matt Pocock e dos MCPs com utilidade concreta no MVP (incluindo os de Hostinger, Coolify e Cloudflare, já declarados nos `.mcp.json` dos projetos panlabs-tech), em fontes oficiais; não presuma nada instalado. Destrava: AGENTS.md e configuração de desenvolvimento.
 
 DECISÕES — tickets grilling (HITL, uma por sessão; em cada pergunta, dê sua recomendação e o impacto; "defaults" significa adotar suas recomendações)
-- Escopo do MVP, critérios de aceite observáveis e uma forma simples de medir utilidade real.
+- Inventário completo de funcionalidades e ideias, anotado por espaço, para organizar o que existe hoje e revisitar depois.
+- Escopo da v1: o que fica ligado, o que fica desligado por toggle, critérios de aceite observáveis e uma forma simples de medir utilidade real.
 - Significado de "consolidação" (resumos, duplicações, atualização de bases, rascunhos) e de "aprender sobre mim" (histórico, memória persistente, recuperação de documentos; sem fine-tuning por padrão).
 - Espaços: modelo genérico e regra para o assistente cruzar espaços.
-- Fronteira público/privado e autenticação single-user.
-- Navegação, espaços e jornadas do MVP (antes de qualquer estética).
-- Estrutura de repositório e layout interno.
+- Fronteira entre público, autor e privado: o que visitantes veem e fazem, o que só o autor faz, o que não é exposto; autenticação do autor.
+- Navegação, mapa de telas, estados e jornadas do MVP, incluindo uso no celular (antes de qualquer estética).
+- Estrutura de repositório, layout interno e configuração de desenvolvimento (AGENTS.md, skills, MCPs).
 - Convenção canônica onde meus projetos divergem.
 - Hospedagem e orçamento mensal (depende da tarefa manual abaixo).
-- Uso no celular (os lembretes sugerem que sim).
 
 TAREFAS MANUAIS — tickets task (HITL)
 - Confirmar o plano Hostinger e os recursos disponíveis (CPU, memória, Coolify instalado ou não, domínio na Cloudflare).
