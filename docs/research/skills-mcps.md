@@ -6,11 +6,11 @@ Abreviação usada abaixo: `<plugin>/` = `/home/paninit/.claude/plugins/cache/cl
 
 ## Retomada
 
-**Estado**: em andamento.
+**Estado**: em andamento (falta só o retoque final).
 
-- Coberto: Parte 1 inteira (1.1 a 1.5), seção 2.5 (declarações dos projetos panlabs-tech) parcial.
-- Pendente: 2.1 Hostinger, 2.2 Coolify, 2.3 Cloudflare, 2.4 GitHub/Postgres/Playwright, 2.6 catálogo overpower, Fontes consolidadas, gist na issue, fechar issue.
-- Onde continuar: dados já coletados (READMEs via `gh api repos/<owner>/<repo>/readme`, registry npm via `curl https://registry.npmjs.org/<pkg>`); falta redigir as seções 2.x.
+- Coberto: Parte 1 inteira; Parte 2 inteira (2.1 a 2.6).
+- Pendente: detalhes do MCP nativo do Coolify (contagem de tools em `capabilities/overview.mdx`, comando do guia Claude Code), seção Fontes consolidada, gist na issue, fechar issue.
+- Onde continuar: `gh api repos/coollabsio/coolify-docs/contents/content/docs/mcp/capabilities/overview.mdx` e `.../clients/claude-code.mdx`; depois comentar e fechar #9.
 
 ## Parte 1 — Skills de Matt Pocock
 
@@ -105,16 +105,129 @@ Fonte: `<plugin>/skills/engineering/setup-matt-pocock-skills/SKILL.md` e os temp
 
 ## Parte 2 — MCPs com utilidade concreta no MVP
 
+Contexto do MVP: aplicação web hospedada em VPS Hostinger, com Coolify como PaaS e Cloudflare na frente (`docs/brief.md` deste repo). Para cada servidor: fonte oficial, autenticação, escopo e custo de contexto (quantas ferramentas expõe). Nada abaixo está presumido instalado neste repo; o minimal-me não tem `.mcp.json` (listagem do worktree).
+
+### 2.0 Como o Claude Code trata MCPs (base para "custo de contexto")
+
+Fonte: https://code.claude.com/docs/en/mcp (lida em 2026-11-07).
+
+- Escopos: `local` (default, `~/.claude.json`, privado), `project` (`.mcp.json` na raiz do repo, "Check `.mcp.json` into version control so everyone on your team gets the same MCP tools and services"), `user` (`~/.claude.json`). Precedência: local > project > user > plugin > conectores claude.ai.
+- Expansão de variáveis em `.mcp.json`: `${VAR}` e `${VAR:-default}`, válida em `command`, `args`, `env`, `url` e `headers`; variável indefinida sem default fica como texto literal `${VAR}`.
+- Servidores de projeto pedem aprovação em sessão interativa ("Claude Code prompts for approval in interactive sessions before using project-scoped servers from `.mcp.json` files"; reset com `claude mcp reset-project-choices`); `claude -p` e o Agent SDK carregam sem perguntar; `disabledMcpjsonServers`/`enabledMcpjsonServers` em settings.
+- Comandos: `claude mcp add --transport http <nome> <url> [--header "Authorization: Bearer ..."]`, `claude mcp add --transport stdio <nome> -e KEY=value -- <comando> <args>`, `--scope local|project|user`; OAuth de servidor remoto via `/mcp` no terminal ou `claude mcp login <nome>`.
+- Custo de contexto: **tool search é o default**: "Only tool names and server instructions load at session start, so adding more MCP servers has minimal impact on your context window"; `ENABLE_TOOL_SEARCH` aceita `true`, `auto` (carrega tudo até 10% da janela, depois difere; `auto:5` muda o limiar) e `false`; `/context` rotula ferramentas `(deferred)`; `/mcp` mostra a contagem de ferramentas por servidor. Saída de ferramenta: aviso acima de 10.000 tokens, limite default de 25.000 (`MAX_MCP_OUTPUT_TOKENS`), resultados de texto acima de 50.000 caracteres vão para arquivo. Descrições de ferramenta: 4.096 caracteres quando carregadas de início, 16.384 via tool search (`CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH`).
+
 ### 2.1 Hostinger (servidor MCP oficial)
 
-### 2.2 Coolify (`@masonator/coolify-mcp`)
+Fontes: https://github.com/hostinger/api-mcp-server (README e `package.json` em `main`, `src/core/instructions.ts`, `src/servers/vps.js`), https://registry.npmjs.org/@hostinger/mcp, https://registry.npmjs.org/hostinger-api-mcp.
+
+- Repositório oficial `hostinger/api-mcp-server`, licença MIT, 171 estrelas, último push 2026-11-06; release mais recente `v3.31.1` (2026-11-06). O `package.json` em `main` chama o pacote `@hostinger/mcp` versão `3.31.1`.
+- Dois nomes no npm: `@hostinger/mcp` (criado 2026-08-28, latest 3.31.1, 140 versões) e o antigo não escopado `hostinger-api-mcp` (latest também 3.31.1, **não marcado deprecated**; a versão `0.2.5` existe, publicada 2026-06-04, com 7 binários: `hostinger-api-mcp`, `hostinger-billing-mcp`, `hostinger-dns-mcp`, `hostinger-domains-mcp`, `hostinger-hosting-mcp`, `hostinger-reach-mcp`, `hostinger-vps-mcp`).
+- **Servidor remoto hospedado**: `https://mcp.hostinger.com` (Streamable HTTP). Claude Code: `claude mcp add --transport http hostinger https://mcp.hostinger.com`; "This opens a browser window to authorize via OAuth" (README, "Quick start: Hosted remote server").
+- **Servidor local**: exige Node.js 24+; `npm install -g @hostinger/mcp`; 14 binários: `hostinger-api-mcp` (unificado, **409 operações**), `hostinger-vps-mcp` (**68 operações** para VPS), `hostinger-dns-mcp` (9), `hostinger-domains-mcp` (43), `hostinger-hosting-mcp` (54), `hostinger-billing-mcp` (10), `hostinger-mail-mcp` (39), `hostinger-wordpress-mcp` (41), `hostinger-reach-mcp` (71), `hostinger-ecommerce-mcp` (30), `hostinger-agency-hosting-mcp` (43), `hostinger-horizons-mcp` (7), `hostinger-gpu-mcp` (5), `hostinger-agent-readiness-mcp` (4) (README, "Binaries").
+- **Custo de contexto**: "Every binary exposes the same three tools; a scoped binary only searches and executes its own group's operations" (README). As três são `search` (acha operações e devolve o `inputSchema`), `execute` (roda uma) e `multi-execute` (encadeia várias) (`src/core/instructions.ts`: "Find operations with search; the inputSchema it returns is authoritative for request shapes. Run one with execute, or chain several with multi-execute"). Comparação: o README na tag `v0.2.5` dizia "`hostinger-api-mcp` — unified server with every tool (129 total)" e "`hostinger-vps-mcp` — 62 tools for vps", ou seja, na 0.2.5 cada operação era uma ferramenta carregada no contexto (`gh api 'repos/hostinger/api-mcp-server/readme?ref=v0.2.5'`).
+- **Autenticação**: `HOSTINGER_API_TOKEN` no `env` (vai no header `Authorization`; "When set, OAuth is bypassed entirely"); `API_TOKEN` é alias deprecado; sem token e em stdio, OAuth 2.0 com PKCE dispara na primeira chamada autenticada (registro dinâmico RFC 7591, navegador, credenciais em `~/.config/hostinger-mcp/credentials.json` modo 0600, compartilhadas entre os binários); `--login`/`--logout`; modo `--http` exige o token (README, "Configuration" e "Authentication"). A 0.2.5 já documentava os dois métodos (README na tag).
+- Aviso do README sobre invocação: "Register Node and the server script by absolute path, never `npx` or a bare `node`/`hostinger-api-mcp`", porque `npx` prioriza o `node_modules/.bin` do projeto e gerenciadores como asdf/mise trocam a versão do Node pelo `.tool-versions` (README, "JSON configuration").
+- Escopo útil ao MVP: o grupo `vps` (68 operações) cobre instâncias VPS; `dns` (9) e `domains` (43) cobrem registros e domínios (nomes dos grupos no README; detalhe das operações só via `search`).
+
+### 2.2 Coolify (`@masonator/coolify-mcp`) e o MCP nativo do Coolify
+
+Fontes: https://registry.npmjs.org/@masonator/coolify-mcp, https://github.com/StuMason/coolify-mcp (README, `docs/tools.md`, `docs/http-mode.md`, `CHANGELOG.md`), https://coolify.io/docs/integrations/mcp e o repositório de docs https://github.com/coollabsio/coolify-docs (`content/docs/mcp/setup.mdx`, `overview.mdx`).
+
+**`@masonator/coolify-mcp` (terceiro, Stu Mason)**
+
+- npm: latest **3.9.0** (publicada 2026-10-02), 92 versões, MIT, repositório `StuMason/coolify-mcp` (620 estrelas, push 2026-11-05); binários `coolify-mcp` (`dist/index.js`, stdio) e `coolify-mcp-http` (`dist/http.js`); dependências `@modelcontextprotocol/core`, `@modelcontextprotocol/server`, `minisearch`, `zod`. Listado no MCP Registry como `io.github.StuMason/coolify`.
+- **Autenticação**: `COOLIFY_BASE_URL` e `COOLIFY_ACCESS_TOKEN` (token em Coolify → Keys & Tokens → API tokens). Claude Code: `claude mcp add coolify -e COOLIFY_BASE_URL="https://your-coolify-instance.com" -e COOLIFY_ACCESS_TOKEN="your-api-token" -- npx @masonator/coolify-mcp@latest`. Subcomando `doctor` valida config ("unexpanded `${VAR}`, pasted whitespace, a doubled `/api/v1`"), alcance, token e faixa de versão. Atrás de Cloudflare Access: `CF_ACCESS_CLIENT_ID`/`CF_ACCESS_CLIENT_SECRET` (service token) ou `--header "Key: Value"` (README).
+- **Custo de contexto**: **46 ferramentas** consolidadas por parâmetro `action`; "The whole tool list costs about 8,900 tokens of context" (README), contra "the 43,000 a tool-per-endpoint design cost in v1" (`docs/tools.md`). `list_*` devolvem `uuid`/`name`/`status` ("90–99% smaller than the raw API"); `get_*` trazem o recurso completo. Categorias (`docs/tools.md`, "The surface"): Infrastructure (`get_infrastructure_overview`, `get_mcp_version`, `get_version`, `system`), Diagnostics (`diagnose_app`, `diagnose_server`, `find_issues`), Links (`coolify_url`), Batch (`restart_project_apps`, `bulk_env_update`, `stop_all_apps`, `redeploy_project`), Servers (`list_servers`, `get_server`, `validate_server`, `server_resources`, `server_domains`, `list_destinations`), Projects (`projects`), Environments (`environments`), Applications (`list_applications`, `get_application`, `application`), Databases (`list_databases`, `get_database`, `database` com 8 engines, `database_backups`), Services (`list_services`, `get_service`, `service`), Control (`control`), Logs (`logs`, `application_logs`), Tags (`tags`), Env Vars (`env_vars`), Storages (`storages`), Scheduled Tasks (`scheduled_tasks`), Deployments (`list_deployments`, `deploy` com `wait`, `rollback_to`; `deployment`), Private Keys (`private_keys`), GitHub Apps (`github_apps`), Teams (`teams`), Cloud Tokens (`cloud_tokens`), Hetzner (`hetzner`), Documentation (`search_docs`, índice offline). Três prompts (`troubleshoot_application`, `explain_failed_deploy`, `estate_health`) e dois resources (`coolify://overview`, `coolify://application/{uuid}`).
+- **Segurança**: operações destrutivas pedem confirmação por elicitation em clientes que suportam (Claude Code, VS Code Copilot); em modo remoto "the guard fails closed"; segredos mascarados na borda da API; saída de log embrulhada como dado não confiável. Compatível com Coolify v4.0 a v4.3 (README).
+- **Linha 3.x vs 2.x** (`CHANGELOG.md`, 3.0.0 em 2026-09-08): modo HTTP como container dentro do Coolify com OAuth 2.1 (guia em `docs/http-mode.md`: Public Repository, Build Pack Dockerfile, porta 8080, variáveis `MCP_TRANSPORT=http`, `COOLIFY_BASE_URL`, `COOLIFY_ACCESS_TOKEN`, `MCP_PUBLIC_URL`; "Do not put Cloudflare Access or another login wall in front of it"); stdio é drop-in; "The 2.x line moves to the `v2` branch and receives security-only backports until the end of January 2027"; SDK v2. A versão `2.12.0` pinada nos projetos panlabs-tech (2.5) é anterior a 2.14.0 (2026-07-11) e pertence a essa linha 2.x.
+
+**MCP nativo do Coolify (primeira parte, dentro do produto)**
+
+- Visão geral em https://coolify.io/docs/integrations/mcp; a documentação completa vive em `content/docs/mcp/` do repositório `coollabsio/coolify-docs` (páginas `what-is-mcp`, `how-mcp-works`, `setup`, `security`, `troubleshooting`, `clients/{claude-code,cursor,other-clients}`, `capabilities/{overview,applications,automation,databases,deployments,environment-and-storage,integrations,logs,pagination,projects,prompts-and-resources,servers,services,teams}`).
+- Transporte Streamable HTTP, endpoint `https://<seu-coolify>/mcp`, header `Authorization: Bearer <token>`; "Every request uses an API token"; nada a instalar ("without a local MCP process") (`setup.mdx`; página de visão geral).
+- Self-hosted: **desligado por default**; "Open **Settings > Advanced**, find the **API and MCP** section, and set **MCP server** to **Enabled**. Until you do this, `/mcp` returns `404`"; só admin da instância (root team) muda; também habilitável por API com token `write`/`root` do root team: `POST /api/v1/mcp/enable` / `/disable`. Precisa estar habilitado também por equipe (**Team > General**, "MCP server: Enabled for this team", default ligado). **Allowed IPs** de Settings > Advanced também valem para `/mcp`. MCP funciona mesmo com "API access" (REST) desligado (`setup.mdx`).
+- Token: criado em **Keys & Tokens > API Tokens** com a equipe desejada ativa; permissões `read` (inventário), `read:sensitive`, `deploy` (deploy, start, stop, restart, cancel, rollback), `write` (`create_*` e `manage_*`), `root` ("Do not use `root` for normal MCP clients"). "MCP shows only the tools that the token's permissions allow"; membros comuns só usam tokens `read`. Verificação: `get_current_team` ou `get_infrastructure_overview`; pontos de partida `coolify_help`, `get_infrastructure_overview`, `search_resources` (`setup.mdx`, `overview.mdx`).
+- "MCP does not bypass Coolify authentication, team scope, IP restrictions, token permissions, or sensitive-value redaction" (página de visão geral). Observação de fato: o README do `coolify-mcp` de terceiro diz "At the time of writing Coolify documents its server as read-only, with write operations planned"; a documentação oficial atual já descreve tokens `deploy`/`write` habilitando ferramentas de escrita.
 
 ### 2.3 Cloudflare (MCP remoto oficial)
 
+Fontes: https://github.com/cloudflare/mcp (README) e https://github.com/cloudflare/mcp-server-cloudflare (README, pasta `apps/`).
+
+- Duas famílias oficiais. (a) **Cloudflare API MCP Server** ("recommended") em `https://mcp.cloudflare.com/mcp`, repositório `cloudflare/mcp` (Apache-2.0, 1.064 estrelas, push 2026-11-07): "A token-efficient MCP server for the entire Cloudflare API. 2500 endpoints in 1k tokens, powered by Code Mode". (b) **Servidores por domínio** `*.mcp.cloudflare.com` no repositório `cloudflare/mcp-server-cloudflare` (Apache-2.0, 4.454 estrelas, push 2026-10-22): ativos `docs.mcp.cloudflare.com/mcp` (documentação), `containers.mcp.cloudflare.com/mcp`, `browser.mcp.cloudflare.com/mcp` (Browser Rendering: buscar páginas, markdown, screenshots), `dex.mcp.cloudflare.com/mcp`, `casb.mcp.cloudflare.com/mcp`, `blog.mcp.cloudflare.com/mcp`, `demo-day.mcp.cloudflare.com/mcp`; **deprecados** (migrar para o API MCP Server): AI Gateway, Audit Logs, AutoRAG, DNS Analytics, GraphQL, Logpush, Observability, Radar, Workers Bindings, Workers Builds. Todo servidor expõe `/mcp` stateless; o antigo `/sse` responde `410 Gone`.
+- **Autenticação** do API MCP Server: Opção 1 OAuth ("Just connect to the MCP server URL - you'll be redirected to Cloudflare to authorize and select permissions"); Opção 2 API token como Bearer (user token ou account token; account token precisa de "Account Resources : Read" para autodetectar a conta; tokens com "Client IP Address Filtering" não são suportados). Falta de escopo → o servidor responde 403 com scope challenge para reautorizar com o escopo adicional (spec MCP de autorização 2026-07-28).
+- **Custo de contexto**: Code Mode expõe **4 ferramentas**: `docs` (busca na documentação de desenvolvedor), `search` (JavaScript sobre `spec.paths`), `execute` (JavaScript chamando `cloudflare.request()`), `whoami`; "~1,100 tokens, 0.5% de 200K", contra 2.594 ferramentas nativas (1.170.523 tokens com schemas completos; 244.047 com parâmetros mínimos). `?codemode=false` registra ~3.000 ferramentas diretas (`get_workers_scripts`, `post_d1_database`...) a ~244k tokens. Resultados de `search`/`execute` são cortados em ~6.000 tokens com marca `--- TRUNCATED ---`.
+- **Escopo**: "Workers, KV, R2, D1, Pages, DNS, Firewall, Load Balancers, Stream, Images, AI Gateway, Vectorize, Access, Gateway, and more"; a spec OpenAPI vem de uma release pinada do Forge. O servidor também serve as Cloudflare skills (Wrangler, Durable Objects, Agents SDK...) via extensão MCP Skills.
+- Configuração JSON do README: `{"cloudflare-api": {"type": "http", "url": "https://mcp.cloudflare.com/mcp"}}`; no Claude Code a autorização OAuth acontece em `/mcp` (2.0).
+
 ### 2.4 Outros: GitHub, Postgres, navegador/Playwright
+
+**GitHub** (https://github.com/github/github-mcp-server, README e `docs/remote-server.md`)
+
+- Repositório oficial, MIT, 34.305 estrelas, release `v2.1.0` (2026-11-03). **Remoto** em `https://api.githubcopilot.com/mcp/` ("hosted by GitHub"); **local** via Docker `ghcr.io/github/github-mcp-server` ou binário Go.
+- **Autenticação**: remoto com OAuth (o host precisa de GitHub App/OAuth App configurado; "Any host application that supports remote MCP servers should support the remote GitHub server with PAT authentication") ou header `Authorization: Bearer <PAT>`; local com `GITHUB_PERSONAL_ACCESS_TOKEN` (tem precedência) ou login OAuth no navegador com token só em memória. Claude Code (README): `claude mcp add github -e GITHUB_PERSONAL_ACCESS_TOKEN=$GITHUB_PAT -- docker run -i --rm -e GITHUB_PERSONAL_ACCESS_TOKEN ghcr.io/github/github-mcp-server`.
+- **Escopo e custo de contexto**: toolsets selecionáveis; no remoto cada toolset tem URL própria `https://api.githubcopilot.com/mcp/x/<toolset>` e sufixo `/readonly`; headers `X-MCP-Toolsets`, `X-MCP-Tools`, `X-MCP-Readonly`, `X-MCP-Lockdown`, `X-MCP-Insiders`; no local `GITHUB_TOOLSETS`, `GITHUB_TOOLS`, `--read-only`. O toolset `default` = `context`, `repos`, `issues`, `pull_requests`, `users`; pela listagem do README isso soma **45 ferramentas** (Context 4, Repositories 20, Issues 10, Pull Requests 10, Users 1); o README lista **97 ferramentas** no total do servidor local (`all`), e o remoto adiciona `copilot_spaces` e `github_support_docs_search`. Toolsets disponíveis: `actions`, `code_quality`, `code_security`, `copilot`, `copilot_issue_intents`, `dependabot`, `discussions`, `gists`, `git`, `governance`, `issues`, `labels`, `notifications`, `orgs`, `projects`, `pull_requests`, `repos`, `secret_protection`, `security_advisories`, `stargazers`, `users`.
+- Relação com as skills: o tracker configurado pelo setup usa a CLI `gh`, não MCP (`docs/agents/issue-tracker.md` deste repo; template em `<plugin>/skills/engineering/setup-matt-pocock-skills/issue-tracker-github.md`).
+
+**Postgres**
+
+- O servidor de referência oficial foi **arquivado**: `@modelcontextprotocol/server-postgres` 0.6.2 traz no npm o aviso "Archived and unmaintained; no security guarantees. See https://github.com/modelcontextprotocol/servers-archived" (https://registry.npmjs.org/@modelcontextprotocol/server-postgres); o README de https://github.com/modelcontextprotocol/servers o lista em "Archived" como "Read-only database access with schema inspection".
+- Alternativa de terceiro com mais uso: **Postgres MCP Pro** (https://github.com/crystaldba/postgres-mcp, MIT, 3.461 estrelas, push 2026-08-17); PyPI `postgres-mcp` 0.3.0 (Python ≥ 3.12, https://pypi.org/pypi/postgres-mcp/json); imagem Docker `crystaldba/postgres-mcp` tag 0.3.0 (2025-05-16). Autenticação por `DATABASE_URI` (`postgresql://user:pass@host:5432/db`); `--access-mode=restricted` (somente leitura) ou `unrestricted`; execução via `uvx`, `pipx`, `uv` ou Docker; transporte stdio ou `--transport=sse`. Ferramentas da tabela "MCP Server API" do README: `list_schemas`, `list_objects`, `get_object_details`, `execute_sql`, `explain_query` (aceita índices hipotéticos), `get_top_queries` (exige `pg_stat_statements`), além das de análise (`analyze_*`) listadas na mesma tabela.
+- Ponto de contato com o Coolify: tanto o `coolify-mcp` de terceiro (`database` com "create 8 types", `database_backups`) quanto o MCP nativo (`capabilities/databases.mdx`) operam bancos no nível do PaaS (criar, parar, backup), não no nível SQL (2.2).
+
+**Navegador / Playwright** (https://github.com/microsoft/playwright-mcp, README; https://registry.npmjs.org/@playwright/mcp)
+
+- Pacote `@playwright/mcp` 0.0.84 (release 2026-10-31; npm 2026-11-03), Apache-2.0, 39.305 estrelas, push 2026-11-06. Requisito: Node.js 18+. Claude Code: `claude mcp add playwright npx @playwright/mcp@latest`.
+- Sem autenticação própria; opera um navegador local via árvore de acessibilidade ("No vision models needed"). Flags: `--headless` (headed por default), `--isolated` (perfil em memória), `--browser chrome|firefox|webkit|msedge`, `--config <path>`, `--extension` (conecta a um Chrome/Edge já aberto), `--caps vision,pdf,devtools`; perfil persistente só serve a uma instância por vez. Docker `mcr.microsoft.com/playwright/mcp` só com Chromium headless. "Playwright MCP is **not** a security boundary".
+- **Custo de contexto**: **25 ferramentas núcleo** (`browser_click`, `browser_close`, `browser_console_messages`, `browser_drag`, `browser_drop`, `browser_emulate_media`, `browser_evaluate`, `browser_file_upload`, `browser_fill_form`, `browser_find`, `browser_handle_dialog`, `browser_hover`, `browser_navigate`, `browser_navigate_back`, `browser_network_request`, `browser_network_requests`, `browser_press_key`, `browser_resize`, `browser_run_code_unsafe`, `browser_select_option`, `browser_snapshot`, `browser_tabs`, `browser_take_screenshot`, `browser_type`, `browser_wait_for`); **72 no total** contando as opt-in por `--caps` (`config`, `network`, `storage`, `devtools`, `vision`, `pdf`, `testing`). O próprio README diz que "Modern coding agents increasingly favor CLI–based workflows exposed as SKILLs over MCP because CLI invocations are more token-efficient" e aponta https://github.com/microsoft/playwright-cli; MCP "remains relevant for specialized agentic loops that benefit from persistent state".
+- Alternativa remota sem navegador local: o servidor Browser Rendering da Cloudflare em `https://browser.mcp.cloudflare.com/mcp` (2.3).
 
 ### 2.5 O que os projetos panlabs-tech já declaram
 
+Fontes: `/home/paninit/workspaces/panlabs-tech/life-under-control/.mcp.json`, `/home/paninit/workspaces/panlabs-tech/ethitorial/.mcp.json`, `/home/paninit/workspaces/panlabs-tech/travelmanager/.mcp.json`. Só nomes, comandos e variáveis; nenhum valor é reproduzido aqui.
+
+| Servidor | Tipo | Comando / URL | Variáveis | Onde |
+| --- | --- | --- | --- | --- |
+| `hostinger-vps` | stdio | `npx -y --package hostinger-api-mcp@0.2.5 hostinger-vps-mcp` | `env: {}` em life-under-control e ethitorial; `HOSTINGER_API_TOKEN` com valor literal em travelmanager | os três |
+| `coolify` | stdio | `npx -y @masonator/coolify-mcp@2.12.0` | `COOLIFY_BASE_URL` (literal em life-under-control; `${COOLIFY_BASE_URL:-<literal>}` em ethitorial e travelmanager) e `COOLIFY_ACCESS_TOKEN` com valor literal nos três | os três |
+| `cloudflare` | http | `https://mcp.cloudflare.com/mcp` | nenhuma (OAuth) | os três |
+| `meta-devtools` | http | `https://mcp.facebook.com/devtools` | nenhuma | só life-under-control |
+| `aws` | stdio | `uvx awslabs.aws-api-mcp-server@1.4.0` | `AWS_REGION` | só life-under-control |
+
+Fatos derivados dessas declarações, cruzados com as fontes oficiais:
+
+- `hostinger-api-mcp@0.2.5` é a versão de 2026-06-04 do pacote não escopado; o pacote atual é `@hostinger/mcp` 3.31.1, e a 0.2.5 expunha 62 ferramentas no grupo `vps` contra 3 ferramentas hoje (2.1). Sem `HOSTINGER_API_TOKEN`, o README (inclusive na tag v0.2.5) prevê OAuth PKCE no navegador na primeira chamada.
+- `@masonator/coolify-mcp@2.12.0` está na linha 2.x, que recebe só backports de segurança até o fim de janeiro de 2027; a atual é 3.9.0 (2.2).
+- A sintaxe `${COOLIFY_BASE_URL:-...}` é a expansão de variáveis do Claude Code (2.0); o catálogo overpower registra que ela "reaches the server literally in the other two runtimes that read the same file" (2.6).
+- Dois dos três `.mcp.json` guardam o token do Coolify em texto plano dentro do arquivo de projeto; a documentação do Claude Code trata `.mcp.json` como arquivo versionado (2.0), e a doc do Coolify diz "Store the token in the client's secret configuration, never commit it" (2.2).
+
 ### 2.6 Receitas do catálogo overpower
 
+Fonte: `/home/paninit/workspaces/overpower/src/overpower/catalog/catalog.yaml` (174 linhas, YAML; chaves de topo `bundles`, `frameworks`, `mcp`).
+
+- `frameworks.matt-pocock`: uma linha de descrição ("Matt Pocock's agent skills for real engineering: grilling, spec and ticket flows, TDD, code review, domain modelling and more"), porque "a framework is a folder with skills inside it and no frontmatter of its own" e o `plugin.json` upstream fica fora da fatia vendorizada.
+- `mcp.cloudflare`: `transport: http`, `server.url: https://mcp.cloudflare.com/mcp`, sem slots ("the connection authorises in the browser the first time an agent uses it"). Comentário: é a entrada que "three repositories of this organisation already keep by hand, in three copies that happen to agree".
+- `mcp.coolify`: `transport: stdio`, `server.command: npx`, `args: [-y, @masonator/coolify-mcp@2.12.0]`, `server.env.COOLIFY_BASE_URL` escrito no arquivo (endereço do painel tratado como configuração, não segredo), slot `COOLIFY_ACCESS_TOKEN` com `role: env`, precondição `command_exists: npx`. Comentário: "Measured across four repositories of this organisation, this one server produced five configurations that disagree: two spell the address as `${COOLIFY_BASE_URL:-…}`, which is Claude Code's syntax alone and reaches the server literally in the other two runtimes that read the same file; one pastes the token in plain text."
+- `mcp.github`: `transport: http`, `server.url: https://api.githubcopilot.com/mcp`, slot `GITHUB_PAT_TOKEN` com `role: bearer` (o renderizador monta `Authorization: Bearer <secret>`; a palavra `Bearer` não aparece na receita de propósito, para servir também o campo `bearer_token_env_var` do Codex).
+- `mcp.hostinger-vps`: `transport: stdio`, `server.command: npx`, `args: [-y, --package, hostinger-api-mcp@0.2.5, hostinger-vps-mcp]`, slot `HOSTINGER_API_TOKEN` com `role: env`, precondição `command_exists: npx`. Comentário: "four repositories of this organisation keep by hand, and the four disagree about whether it needs a token at all — three carry `env: {}` and one carries the slot"; "The version is pinned exactly, and `@latest` is forbidden in an embedded recipe".
+- Regras do arquivo citadas nos comentários: ADR 0006 ("what the overpower writes only carries what the tree cannot know. A path, never"), ADR 0021 (um arquivo, um formato YAML, um leitor; chaves de topo fechadas), receitas vieram de `catalog/mcps/<slug>.toml` na issue #164.
+
 ## Fontes
+
+Locais (somente leitura):
+
+- `/home/paninit/.claude/plugins/installed_plugins.json`; `/home/paninit/.claude/plugins/cache/claude-plugins-official/mattpocock-skills/1.3.1/` (`.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `README.md`, `CHANGELOG.md`, `.agents/install-block.md`, `.changeset/`, `skills/engineering/*/SKILL.md`, `skills/productivity/*/SKILL.md`, `skills/engineering/setup-matt-pocock-skills/{domain.md,issue-tracker-github.md,triage-labels.md}`).
+- Worktree `/home/paninit/workspaces/minimal-me/.worktrees/skills-mcps`: `AGENTS.md`, `CLAUDE.md`, `docs/agents/{domain.md,issue-tracker.md,triage-labels.md}`, `git log -- docs/agents AGENTS.md CLAUDE.md`.
+- `/home/paninit/workspaces/panlabs-tech/{life-under-control,ethitorial,travelmanager}/.mcp.json`; `/home/paninit/workspaces/overpower/src/overpower/catalog/catalog.yaml`.
+
+Remotas (acessadas em 2026-11-07, via `gh api`, `curl` ao registry npm/PyPI ou leitura da página):
+
+- https://github.com/mattpocock/skills (`releases`, `tags`, `commits`, `.claude-plugin/plugin.json`, `CHANGELOG.md`, `.changeset/`, `skills/engineering/setup-matt-pocock-skills/*`).
+- https://code.claude.com/docs/en/mcp
+- https://github.com/hostinger/api-mcp-server (README em `main` e na tag `v0.2.5`, `package.json`, `src/core/instructions.ts`, `src/servers/vps.js`); https://registry.npmjs.org/@hostinger/mcp; https://registry.npmjs.org/hostinger-api-mcp
+- https://registry.npmjs.org/@masonator/coolify-mcp; https://github.com/StuMason/coolify-mcp (README, `docs/tools.md`, `docs/http-mode.md`, `CHANGELOG.md`, releases)
+- https://coolify.io/docs/integrations/mcp; https://github.com/coollabsio/coolify-docs (`content/docs/mcp/setup.mdx`, `content/docs/mcp/overview.mdx`, listagem de `content/docs/mcp/`)
+- https://github.com/cloudflare/mcp (README); https://github.com/cloudflare/mcp-server-cloudflare (README, `apps/`)
+- https://github.com/github/github-mcp-server (README, `docs/remote-server.md`, releases)
+- https://github.com/modelcontextprotocol/servers (README); https://registry.npmjs.org/@modelcontextprotocol/server-postgres; https://github.com/crystaldba/postgres-mcp (README); https://pypi.org/pypi/postgres-mcp/json; https://hub.docker.com/v2/repositories/crystaldba/postgres-mcp/tags
+- https://github.com/microsoft/playwright-mcp (README, releases); https://registry.npmjs.org/@playwright/mcp
