@@ -4,13 +4,11 @@ Pesquisa do ticket [#3](https://github.com/ThiagoPanini/minimal-me/issues/3) (pa
 
 ## Retomada
 
-**Estado**: em andamento.
+**Estado**: completo (2026-11-07).
 
-**Coberto**: 1 (linguagem), 2 (bibliotecas), 4 (gerenciador/lock), 5 (lint/format/tipagem).
+**Coberto**: as 13 dimensões e a síntese final.
 
-**Falta**: 3 (estrutura de pastas), 6 (testes), 7 (CI/release), 8 (documentação), 9 (deploy), 10 (segredos), 11 (MCPs), 12 (commits/branches), 13 (instruções para agentes).
-
-**Onde continuar**: fontes já lidas e não gravadas: `.github/workflows/{ci,release,tag}.yml`, `docs/agents/*.md`, `CLAUDE.md`, `.claude/`, `lefthook.yml` (commit-msg/post-merge), `git log`. Falta ler `tests/conftest.py`, docstrings de `src/overpower/*.py`, `docs/research/`, `prototype/`, `CHANGELOG.md` (cabeçalho).
+**Falta**: nada. Se for retomar para revisão, os dois pontos que merecem releitura na fonte são `docs/agents/domain.md` (46 KB, lido só pelos cabeçalhos) e `docs/auditoria-75.md` (69 KB, lido só pelo cabeçalho); nenhum dos dois altera as dimensões de stack e convenção.
 
 ## Dimensões
 
@@ -109,3 +107,17 @@ _pendente_
 ### 13. Arquivos de instrução para agentes
 
 _pendente_
+
+## Síntese: o que pesa para decidir a stack do Minimal Me
+
+Fatos extraídos acima, reunidos sem opinião:
+
+1. **Stack mínima e justificada linha a linha**: Python `>=3.12` (dev em 3.14), `uv` + `uv.lock`, `hatchling`, `typer`/`rich`/`questionary` para CLI, `ruff` (100 colunas, `extend-select` amplo, docstrings Google) e `pyright strict`; sem task runner, sem `pytest-cov`, sem plugin de snapshot.
+2. **Portão é mecanismo, não disciplina**: ruleset em `main` sem bypass (nem para o dono), checks `gate` e `release-ready`; lefthook local é atalho. Publicação por merge com bump, tag automática e PyPI por OIDC, sem segredo no repo.
+3. **Changelog por fragmentos towncrier** com sete tipos, e o tipo decide o nível do bump (ADR 0012).
+4. **Commits**: Conventional Commits, subject minúsculo, pt-BR, sem escopo, `(#N)` no fim; branches `tipo/<issue>-<slug>`; um worktree por issue; PR draft no primeiro push.
+5. **Código em inglês, prosa em pt-BR** (commits, tickets, ADRs, `docs/agents/`, `CLAUDE.md`); README em inglês.
+6. **Instruções de agentes**: `CLAUDE.md` com a seção "Agent skills" embutida e **sem `AGENTS.md`**, o que diverge do `minimal-me` (`CLAUDE.md` → `@AGENTS.md`); `.claude/rules/*.md` com escopo por `paths`; protocolo de economia de contexto rastreado como marker de hooks de máquina.
+7. **Triagem**: vocabulário canônico verbatim (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) e labels `wayfinder:*`, iguais aos do `minimal-me`.
+8. **Documentação de usuário fora do repo** (`panlabs-docs`), com acoplamento restaurado por um `post-merge` que lança um agente; `docs/` no repo guarda só ADRs, docs de agentes, research e auditoria.
+9. **Inconsistências observadas**: dois ADRs numerados 0013; `pyproject.toml:146-147, 153-154` cita "os quatro comandos do README" que o README atual não contém (a documentação migrou na #151); `prototype/` sem nada rastreado.
