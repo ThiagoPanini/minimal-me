@@ -16,7 +16,7 @@ Como usar (Claude Code, em ~/workspaces/minimal-me no WSL):
 Este brief é o contexto para mapear, com /wayfinder, o caminho até o spec do MVP do "Minimal Me". Nesta sessão de mapeamento: confirme o destino comigo, encontre as decisões em aberto, crie o mapa e os tickets no tracker, dispare as pesquisas e pare. Não produza arquitetura, documentos ou código. Responda em português do Brasil, direto. Diferencie sempre requisitos confirmados, hipóteses e decisões pendentes.
 
 DESTINO
-Um spec do MVP do Minimal Me pronto para /to-spec, sem perguntas em aberto, com a stack herdada confirmada, a estrutura de repositório decidida e a fronteira público/privado definida. Teste de chegada: /to-spec consegue escrever o spec sem me perguntar nada que o mapa não tenha respondido.
+Um spec do MVP do Minimal Me pronto para /to-spec, sem perguntas em aberto, com a stack herdada confirmada, a estrutura de repositório decidida e a fronteira público/privado definida. Teste de chegada: /to-spec consegue escrever o spec sem me perguntar nada que o mapa não tenha respondido. (Corrigido em 2026-11-07, no redesenho do mapa: o MVP é uma página pública minimalista com identidade visual escolhida sobre protótipos e as funcionalidades da visão anunciadas como "em breve"; a fronteira público/privado volta com a primeira funcionalidade que exigir área do Autor.)
 Fora do alcance deste mapa (fica no nevoeiro; não pré-fatiar em tickets): tudo além do MVP — jogos, viagens, WhatsApp, servidor MCP, consolidação automática avançada, novos espaços. Registre em "Out of scope" ou "Not yet specified".
 
 O PRODUTO
@@ -48,7 +48,7 @@ REQUISITOS CONFIRMADOS
 - Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus publicado no GitHub Pages), com os ajustes visuais necessários; Mintlify fica fora (corrigido em 2026-11-07).
 
 HIPÓTESES INICIAIS (desafie-as nos tickets de decisão)
-- MVP: a interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle conforme o que estiver implementado. O esforço se concentra na proposta visual e de design, para que funcionalidades e integrações entrem depois já com forma e comportamento definidos. Quais funcionalidades ficam ligadas na v1 é decisão do mapa. (Corrigido em 2026-11-07; a hipótese anterior era "registrar, consultar com fontes, publicar".)
+- MVP: uma página pública minimalista, com identidade visual definida e validada em protótipos no Claude Design, e as funcionalidades da visão anunciadas como "em breve". Depois do MVP, as funcionalidades entram uma a uma, cada uma discutida isoladamente em esforço próprio. (Corrigido em 2026-11-07, no redesenho do mapa; antes: a interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle; e, antes disso, "registrar, consultar com fontes, publicar".)
 - Um único repositório `minimal-me` (o layout interno — aplicação única ou workspaces — é decidido pela stack herdada), com um GitHub Project para gestão. Compare com múltiplos repositórios e recomende a opção mais simples que atenda ao MVP.
 - Chat por espaço, com consulta cruzada opcional e explícita, em vez de um agente global.
 - E-mail antes de WhatsApp; revisão humana antes de qualquer publicação.
@@ -81,16 +81,16 @@ DIREÇÃO VISUAL (referências em docs/design/references/, com README do que ext
 - Muito espaço negativo; ilustração vale mais que "chrome" de interface; tipografia fina, leve, com espaçamento generoso.
 - Elementos recorrentes: um gato preto de olhos grandes e redondos (candidato a mascote e presença do assistente); uma grade de painéis estilo mangá (candidata à representação dos espaços); uma figura ao centro de ondas concêntricas sob um céu de planetas (candidata à metáfora da home: eu no centro, os espaços ao redor).
 - Tom: calmo, contemplativo, nostálgico e brincalhão. Referência de clima, não de reprodução: mascote e ilustrações do produto devem ser originais.
-- O briefing para o Claude Design (até três direções visuais comparáveis sobre as mesmas telas, com estados vazio, carregando, erro e mobile) será gerado via /handoff depois que o ticket de navegação e jornadas fechar. Não é parte deste mapa.
+- Os protótipos são desenhados pelo agente direto no Claude Design: três direções comparáveis sobre as mesmas telas (home, uma funcionalidade "em breve", texto técnico longo e conversa com o Assistente), no desktop e no celular; o Autor reage, itera e escolhe. (Corrigido em 2026-11-07, no redesenho do mapa; antes: briefing gerado via /handoff depois do ticket de navegação e jornadas.)
 
 DESENVOLVIMENTO ASSISTIDO
 - Claude Code e Codex, com as skills de Matt Pocock (https://github.com/mattpocock/skills). Uma fonte de instruções: AGENTS.md (criado pelo setup); CLAUDE.md apenas o importa. Sem regras duplicadas ou conflitantes.
 - Sempre que possível, usar os MCPs de Hostinger, Coolify e Cloudflare para configurar e hospedar o Minimal Me com segurança, em vez de passos manuais no painel. Herdar a declaração dos projetos panlabs-tech; nada está configurado neste repositório ainda.
-- As resoluções dos tickets são o registro de decisões. CONTEXT.md e ADRs nascem preguiçosamente pela skill domain-modeling quando um ticket fecha uma decisão — nunca em lote, nunca antes.
-- Depois do mapa: /to-spec → /to-tickets → /implement (com /tdd e /code-review) → /pr. /handoff para o briefing de design e para trocar de agente. /retro ao fim das sessões, anotando o que vale virar template.
+- As resoluções dos tickets são o registro de decisões. GLOSSARY.md e ADRs nascem preguiçosamente pela skill domain-modeling quando um ticket fecha uma decisão — nunca em lote, nunca antes.
+- Depois do mapa: /to-spec → /to-tickets → /implement (com /tdd e /code-review) → /pr. /handoff para trocar de agente. /retro ao fim das sessões, anotando o que vale virar template.
 
 OBJETIVO SECUNDÁRIO — PROJETO-REFERÊNCIA
-Este projeto deve servir de exemplo e referência para meus próximos projetos pessoais. Regra: construir bem o primeiro e extrair o template depois do MVP, nunca antes. Manter separado o que é genérico (AGENTS.md, docs/agents/, convenções) do que é específico (este brief, CONTEXT.md, specs).
+Este projeto deve servir de exemplo e referência para meus próximos projetos pessoais. Regra: construir bem o primeiro e extrair o template depois do MVP, nunca antes. Manter separado o que é genérico (AGENTS.md, docs/agents/, convenções) do que é específico (este brief, GLOSSARY.md, specs).
 
 ARMADILHAS A EVITAR
 - Mapear além do destino ou pré-fatiar o nevoeiro em tickets.
