@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Horizonte · Texto longo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&amp;family=IBM+Plex+Mono:wght@200;300;400&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:inherit;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:6px}
+a:focus-visible{outline:2px solid #fff;outline-offset:6px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #000; color: #fff; font-family: 'Jost', sans-serif; font-weight: 300; padding: 0 72px 96px">
+<nav style="max-width: 1180px; margin: 0 auto; padding-top: 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px">
+<a href="B-home-desktop.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; font-size: 13px; letter-spacing: 0.3em">← minimal me</a>
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 11px; letter-spacing: 0.3em">TEXTO DE AMOSTRA</span>
+</nav>
+
+<article style="max-width: 640px; margin: 0 auto">
+<header style="margin-top: 112px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 11px; letter-spacing: 0.3em">NOV 2026 · 4 MIN DE LEITURA</p>
+<h1 style="margin: 26px 0 0; font-weight: 200; font-size: 50px; line-height: 1.16; letter-spacing: 0.01em">Rodar duas vezes, dar o mesmo resultado</h1>
+<p style="margin: 26px 0 0; font-size: 19px; line-height: 1.7">Idempotência na prática: por que todo job e toda API que pode ser repetido precisa terminar no mesmo estado, e três jeitos de chegar lá.</p>
+</header>
+<div style="height: 1px; background: #fff; margin: 64px 0 56px"></div>
+
+<div style="font-size: 18.5px; line-height: 1.85; font-weight: 350">
+<p style="margin: 0 0 24px">Todo sistema que conversa com o mundo real vai, cedo ou tarde, executar a mesma coisa duas vezes. A rede cai depois que o servidor processou o pedido, mas antes de a resposta chegar. O orquestrador acha que a tarefa morreu e a reinicia. Alguém clica duas vezes no botão de pagar. Nenhum desses casos é exceção: é o funcionamento normal de sistemas distribuídos.</p>
+<p style="margin: 0 0 24px">Uma operação é idempotente quando executá-la uma vez ou várias deixa o sistema no mesmo estado. Não é a mesma coisa que devolver a mesma resposta: o que importa é o efeito.</p>
+
+<h2 style="margin: 64px 0 22px; font-weight: 300; font-size: 14px; letter-spacing: 0.34em">O PROBLEMA</h2>
+<p style="margin: 0 0 24px">Pense num job diário que lê os pedidos do dia e grava numa tabela analítica. A versão mais simples acrescenta as linhas no fim da tabela:</p>
+<figure style="margin: 36px 0 36px">
+<figcaption style="margin-bottom: 10px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.24em">PYTHON</figcaption>
+<pre style="margin: 0; border-top: 1px solid #fff; border-bottom: 1px solid #fff; padding: 22px 0; overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.75; font-weight: 300"><code>def carregar_pedidos(dia: date) -&gt; None:
+    pedidos = extrair_pedidos(dia)
+    tabela.append(pedidos)  # cada execução acrescenta de novo</code></pre>
+</figure>
+<p style="margin: 0 0 24px">Se o job falhar depois de gravar metade das linhas e o orquestrador tentar outra vez, a primeira metade entra em dobro. Se ele rodar inteiro duas vezes, o dia inteiro aparece duplicado. Nada quebra, nenhum alerta dispara, e os números do painel ficam errados em silêncio.</p>
+
+<h2 style="margin: 64px 0 22px; font-weight: 300; font-size: 14px; letter-spacing: 0.34em">TRÊS SAÍDAS</h2>
+<p style="margin: 0 0 24px">Há três jeitos comuns de tornar esse job idempotente. Eles diferem no que exigem dos dados e no quanto custam.</p>
+<div style="overflow-x: auto; margin: 32px 0 40px">
+<table style="width: 100%; border-collapse: collapse; font-size: 15.5px; line-height: 1.6; font-weight: 300">
+<thead>
+<tr>
+<th style="text-align: left; padding: 0 16px 12px 0; border-bottom: 1px solid #fff; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.22em">ESTRATÉGIA</th>
+<th style="text-align: left; padding: 0 16px 12px 0; border-bottom: 1px solid #fff; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.22em">COMO FUNCIONA</th>
+<th style="text-align: left; padding: 0 0 12px; border-bottom: 1px solid #fff; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.22em">QUANDO USAR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top; font-weight: 400">Sobrescrever a partição</td>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top">Apaga e regrava o dia inteiro a cada execução</td>
+<td style="padding: 14px 0; border-bottom: 1px solid #fff; vertical-align: top">Dados particionados por data e reprocessamento barato</td>
+</tr>
+<tr>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top; font-weight: 400">Upsert por chave</td>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top">Insere ou atualiza cada linha pela chave natural</td>
+<td style="padding: 14px 0; border-bottom: 1px solid #fff; vertical-align: top">Registros com identificador estável</td>
+</tr>
+<tr>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top; font-weight: 400">Chave de idempotência</td>
+<td style="padding: 14px 16px 14px 0; border-bottom: 1px solid #fff; vertical-align: top">Registra cada operação já feita e ignora repetições</td>
+<td style="padding: 14px 0; border-bottom: 1px solid #fff; vertical-align: top">APIs e efeitos externos, como cobranças e e-mails</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 style="margin: 48px 0 16px; font-weight: 400; font-size: 19px; letter-spacing: 0.06em">sobrescrever a partição</h3>
+<p style="margin: 0 0 24px">Com dados particionados por dia, a correção mais direta é trocar o <code style="font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; font-weight: 400">append</code> pela sobrescrita da partição. O dia é sempre regravado por inteiro:</p>
+<figure style="margin: 36px 0 36px">
+<figcaption style="margin-bottom: 10px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.24em">PYTHON</figcaption>
+<pre style="margin: 0; border-top: 1px solid #fff; border-bottom: 1px solid #fff; padding: 22px 0; overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.75; font-weight: 300"><code>def carregar_pedidos(dia: date) -&gt; None:
+    pedidos = extrair_pedidos(dia)
+    tabela.sobrescrever_particao(pedidos, particao={"dia": dia})</code></pre>
+</figure>
+<p style="margin: 0 0 24px">Rodar uma, duas ou dez vezes deixa a partição com o mesmo conteúdo. O custo é regravar o dia inteiro a cada tentativa, o que costuma ser aceitável quando a partição é pequena.</p>
+
+<figure style="margin: 48px 0 44px">
+<svg viewBox="0 0 640 220" style="width: 100%; height: auto; display: block" role="img" aria-label="Linha do tempo: a primeira execução falha no meio, a segunda regrava; as duas chegam à mesma partição e ao mesmo estado">
+<path d="M10 64 H252 M292 64 H630" stroke="#fff" stroke-width="1.2"></path>
+<path d="M264 56 L280 72 M280 56 L264 72" stroke="#fff" stroke-width="1.4" stroke-linecap="round"></path>
+<path d="M110 56 V72 M440 56 V72" stroke="#fff" stroke-width="1.2"></path>
+<text x="110" y="40" text-anchor="middle" fill="#fff" font-family="'Jost', sans-serif" font-weight="300" font-size="14" letter-spacing="2">execução 1</text>
+<text x="440" y="40" text-anchor="middle" fill="#fff" font-family="'Jost', sans-serif" font-weight="300" font-size="14" letter-spacing="2">execução 2</text>
+<text x="272" y="96" text-anchor="middle" fill="#fff" font-family="'IBM Plex Mono', monospace" font-weight="300" font-size="11" letter-spacing="2">falha</text>
+<path d="M110 72 L296 156 M440 72 L344 156" stroke="#fff" stroke-width="1.6" stroke-dasharray="0.1 6" stroke-linecap="round"></path>
+<rect x="232" y="156" width="176" height="46" fill="#000" stroke="#fff" stroke-width="1.2"></rect>
+<text x="320" y="184" text-anchor="middle" fill="#fff" font-family="'IBM Plex Mono', monospace" font-weight="300" font-size="13">partição 07/11</text>
+<text x="428" y="184" fill="#fff" font-family="'Jost', sans-serif" font-weight="300" font-size="14" letter-spacing="2">mesmo estado</text>
+</svg>
+<figcaption style="margin-top: 16px; font-size: 14px; line-height: 1.6; letter-spacing: 0.04em">Duas execuções, um só estado: a segunda regrava a partição em vez de somar a ela.</figcaption>
+</figure>
+
+<h3 style="margin: 48px 0 16px; font-weight: 400; font-size: 19px; letter-spacing: 0.06em">chave de idempotência</h3>
+<p style="margin: 0 0 24px">Quando o efeito sai do seu sistema, como uma cobrança, um e-mail ou uma chamada a outra API, não dá para sobrescrever. A saída é o cliente mandar uma chave única por operação e o servidor guardar o resultado da primeira vez:</p>
+<figure style="margin: 36px 0 36px">
+<figcaption style="margin-bottom: 10px; text-align: right; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.24em">HTTP</figcaption>
+<pre style="margin: 0; border-top: 1px solid #fff; border-bottom: 1px solid #fff; padding: 22px 0; overflow-x: auto; font-family: 'IBM Plex Mono', monospace; font-size: 14.5px; line-height: 1.75; font-weight: 300"><code>POST /pagamentos HTTP/1.1
+Idempotency-Key: 7c1e2f0a-9b4d-4e61-a1f3-2d8c5b9e0f47
+Content-Type: application/json
+
+{"pedido": 4182, "valor": 129.90}</code></pre>
+</figure>
+<p style="margin: 0 0 24px">Se a mesma chave chegar de novo, o servidor devolve a resposta guardada em vez de cobrar outra vez. É o padrão que a Stripe documenta na API dela, e há um trabalho na IETF para padronizar o cabeçalho <code style="font-family: 'IBM Plex Mono', monospace; font-size: 0.86em; font-weight: 400">Idempotency-Key</code>.</p>
+
+<h2 style="margin: 64px 0 22px; font-weight: 300; font-size: 14px; letter-spacing: 0.34em">ANTES DE COLOCAR EM PRODUÇÃO</h2>
+<ul style="list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px">
+<li style="display: flex; gap: 18px; align-items: baseline"><span style="flex: none; width: 14px; height: 1px; background: #fff; transform: translateY(-6px)"></span><span>Decida qual é o estado final esperado, não só a ação.</span></li>
+<li style="display: flex; gap: 18px; align-items: baseline"><span style="flex: none; width: 14px; height: 1px; background: #fff; transform: translateY(-6px)"></span><span>Escolha a chave: a partição, a chave natural ou uma chave enviada pelo cliente.</span></li>
+<li style="display: flex; gap: 18px; align-items: baseline"><span style="flex: none; width: 14px; height: 1px; background: #fff; transform: translateY(-6px)"></span><span>Teste o retry de propósito: rode o job duas vezes e compare o resultado.</span></li>
+<li style="display: flex; gap: 18px; align-items: baseline"><span style="flex: none; width: 14px; height: 1px; background: #fff; transform: translateY(-6px)"></span><span>Guarde as chaves de idempotência pelo tempo em que um retry ainda pode chegar.</span></li>
+</ul>
+<p style="margin: 80px 0 0; font-weight: 200; font-size: 27px; line-height: 1.5; text-align: center">Idempotência não evita a falha; ela torna a falha barata. Com ela, tentar de novo deixa de ser um risco e vira a estratégia padrão.</p>
+</div>
+
+<div style="position: relative; height: 1px; background: #fff; margin-top: 150px">
+<svg viewBox="0 0 240 130" style="position: absolute; left: 50%; bottom: 0; width: 92px; transform: translateX(-50%); display: block" role="img" aria-label="O gato espiando por cima da linha final">
+<path d="M34 130 C31 106 32 84 42 66 L48 22 Q50 13 58 18 L94 46 Q120 40 146 46 L182 16 Q190 11 193 20 L195 36 L189 42 L198 48 L200 66 C210 84 211 106 208 130" fill="#000" stroke="#fff" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"></path>
+<circle cx="94" cy="96" r="16" fill="#fff"></circle>
+<circle cx="148" cy="96" r="16" fill="#fff"></circle>
+<circle cx="90" cy="100" r="8.5" fill="#000"></circle>
+<circle cx="144" cy="100" r="8.5" fill="#000"></circle>
+</svg>
+</div>
+<p style="margin: 20px 0 0; text-align: center; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 11px; letter-spacing: 0.4em">FIM</p>
+
+<footer style="margin-top: 72px; display: flex; flex-direction: column; gap: 14px">
+<span style="font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.3em">FONTES</span>
+<ol style="margin: 0; padding-left: 20px; font-size: 14.5px; line-height: 1.8">
+<li>RFC 9110, HTTP Semantics, seção 9.2.2: Idempotent Methods.</li>
+<li>Stripe API Reference: Idempotent requests.</li>
+<li>IETF HTTPAPI: The Idempotency-Key HTTP Header Field.</li>
+</ol>
+</footer>
+</article>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

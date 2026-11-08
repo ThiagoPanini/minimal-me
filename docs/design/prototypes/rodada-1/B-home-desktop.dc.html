@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Horizonte · Home</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@100..900&amp;family=IBM+Plex+Mono:wght@200;300;400&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:inherit;text-decoration:none}
+a:hover{text-decoration:underline;text-underline-offset:6px}
+a:focus-visible{outline:2px solid #fff;outline-offset:6px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #000; color: #fff; font-family: 'Jost', sans-serif; font-weight: 300; display: flex; flex-direction: column; align-items: center; padding: 0 72px">
+
+<div style="margin-top: 150px; display: flex; flex-direction: column; align-items: center; gap: 14px">
+<p style="margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 200; font-size: 44px; line-height: 1; letter-spacing: 0.16em">{{hora}}</p>
+<p style="margin: 0; font-size: 11px; letter-spacing: 0.5em">AGORA</p>
+</div>
+
+<div style="position: relative; width: 100%; max-width: 1180px; height: 1px; margin-top: 330px">
+<h1 style="position: absolute; left: 0; bottom: 16px; margin: 0; font-weight: 200; font-size: 30px; line-height: 1; letter-spacing: 0.3em; white-space: nowrap">minimal me</h1>
+<p style="position: absolute; left: 0; top: 20px; margin: 0; font-size: 12px; letter-spacing: 0.28em; white-space: nowrap">um sistema operacional pessoal</p>
+<div style="position: absolute; left: 0; top: 0; width: 27%; height: 1px; background: #fff"></div>
+<div style="position: absolute; left: 27%; top: -3px; width: 7px; height: 7px; margin-left: -3px; border-radius: 50%; background: #fff"></div>
+<div style="position: absolute; left: 27%; right: 0; top: -1px; height: 3px; background-image: radial-gradient(circle, #fff 1.1px, transparent 1.5px); background-size: 10px 3px"></div>
+<p style="position: absolute; right: 0; bottom: 16px; margin: 0; font-family: 'IBM Plex Mono', monospace; font-weight: 300; font-size: 11px; letter-spacing: 0.32em">EM BREVE</p>
+
+<svg viewBox="0 0 240 130" style="position: absolute; left: 57%; bottom: 0; width: 132px; transform: translateX(-50%); display: block" role="img" aria-label="O gato espiando por cima do horizonte, olhando para o relógio">
+<path d="M34 130 C31 106 32 84 42 66 L48 22 Q50 13 58 18 L94 46 Q120 40 146 46 L182 16 Q190 11 193 20 L195 36 L189 42 L198 48 L200 66 C210 84 211 106 208 130" fill="#000" stroke="#fff" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"></path>
+<circle cx="94" cy="96" r="16" fill="#fff"></circle>
+<circle cx="148" cy="96" r="16" fill="#fff"></circle>
+<circle cx="97" cy="90" r="8.5" fill="#000"></circle>
+<circle cx="151" cy="90" r="8.5" fill="#000"></circle>
+<circle cx="100" cy="87" r="2.6" fill="#fff"></circle>
+<circle cx="154" cy="87" r="2.6" fill="#fff"></circle>
+</svg>
+
+<div style="position: absolute; left: 33%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">espaços</span>
+<span style="font-size: 12.5px; line-height: 1.55">um lugar por assunto</span>
+</div>
+<div style="position: absolute; left: 45%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">materiais</span>
+<span style="font-size: 12.5px; line-height: 1.55">notas, artigos, referências</span>
+</div>
+<a href="B-embreve-desktop.dc.html" style="position: absolute; left: 57%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; padding-bottom: 6px">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">assistente →</span>
+<span style="font-size: 12.5px; line-height: 1.55">responde e cita a fonte</span>
+</a>
+<div style="position: absolute; left: 69%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">blog</span>
+<span style="font-size: 12.5px; line-height: 1.55">textos escolhidos</span>
+</div>
+<div style="position: absolute; left: 81%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">consolidação</span>
+<span style="font-size: 12.5px; line-height: 1.55">sínteses do que aprendi</span>
+</div>
+<div style="position: absolute; left: 93%; top: 0; width: 130px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center">
+<span style="display: block; width: 1px; height: 14px; background: #fff"></span>
+<span style="font-size: 15px; letter-spacing: 0.18em">memória</span>
+<span style="font-size: 12.5px; line-height: 1.55">à vista e editável</span>
+</div>
+</div>
+
+<p style="margin: auto 0 56px; padding-top: 160px; font-size: 13px; letter-spacing: 0.1em; text-align: center">o que eu aprendo sobre tecnologia e ia, organizado. quase tudo ainda está no horizonte.</p>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+componentDidMount() { this.timer = setInterval(() => this.forceUpdate(), 20000); }
+componentWillUnmount() { clearInterval(this.timer); }
+renderVals() {
+const hora = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+return { hora: hora };
+}
+}
+</script>
+</body>
+</html>

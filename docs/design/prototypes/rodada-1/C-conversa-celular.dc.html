@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Órbita · Conversa no celular</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=DM+Mono:ital,wght@0,300;0,400;1,300&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:inherit;text-decoration:none}
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid #fff;outline-offset:4px}
+input::placeholder{color:#fff;opacity:1;font-style:italic}
+</style>
+</helmet>
+<div style="width: 390px; min-height: 1500px; box-sizing: border-box; position: relative; overflow: hidden; background: #000; color: #fff; font-family: 'Newsreader', serif; padding: 0 22px 40px; display: flex; flex-direction: column">
+<svg viewBox="0 0 390 1500" style="position: absolute; inset: 0; width: 100%; height: 100%" aria-hidden="true">
+<path d="{{stars}}" fill="#fff"></path>
+<circle cx="195" cy="-250" r="300" fill="none" stroke="#fff" stroke-width="0.9"></circle>
+<circle cx="195" cy="-250" r="336" fill="none" stroke="#fff" stroke-width="0.8" stroke-dasharray="90 7 30 5"></circle>
+<circle cx="195" cy="-250" r="376" fill="none" stroke="#fff" stroke-width="1.3" stroke-dasharray="0.1 7" stroke-linecap="round"></circle>
+</svg>
+<nav style="position: relative; padding-top: 18px; display: flex; flex-direction: column; gap: 6px">
+<a href="C-home-celular.dc.html" style="align-self: flex-start; display: inline-flex; align-items: center; min-height: 44px; font-style: italic; font-weight: 300; font-size: 18px">← Minimal Me</a>
+<span style="font-family: 'DM Mono', monospace; font-weight: 300; font-size: 10px; line-height: 1.6; letter-spacing: 0.16em">ASSISTENTE · CONVERSA DE EXEMPLO,<br>AINDA NÃO ESTÁ NO AR</span>
+</nav>
+
+<div style="position: relative; margin-top: 40px; display: flex; flex-direction: column; gap: 28px">
+<p style="align-self: flex-end; max-width: 300px; margin: 0; border: 1px solid #fff; border-radius: 26px; padding: 14px 20px; font-family: 'DM Mono', monospace; font-weight: 300; font-size: 14px; line-height: 1.6">Se um job de ingestão rodar duas vezes no mesmo dia, as linhas duplicam?</p>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; align-items: center; gap: 10px; font-style: italic; font-weight: 300; font-size: 15px">
+<svg viewBox="-20 -22 40 40" style="width: 30px; height: 30px" role="img" aria-label="Assistente"><path d="M-9 -6 L-7 -17 L-2 -11 Z M9 -6 L7 -17 L2 -11 Z" fill="#000" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"></path><circle r="11" fill="#000" stroke="#fff" stroke-width="1.4"></circle><circle cx="-4" cy="-1" r="3.2" fill="#fff"></circle><circle cx="4" cy="-1" r="3.2" fill="#fff"></circle><circle cx="-3.5" cy="-0.5" r="1.6" fill="#000"></circle><circle cx="4.5" cy="-0.5" r="1.6" fill="#000"></circle></svg>
+Assistente</span>
+<p style="margin: 0; font-weight: 350; font-size: 17.5px; line-height: 1.65">Duplicam, se o job só acrescenta linhas. O texto sobre idempotência descreve esse caso: uma falha no meio da escrita, o retry roda de novo e o dia fica em dobro na tabela.<sup style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 3px; border: 1px solid #fff; border-radius: 50%; font-family: 'DM Mono', monospace; font-size: 9.5px; vertical-align: super">1</sup> A saída sugerida lá é trocar o append por sobrescrever a partição do dia, para que rodar duas vezes deixe o mesmo resultado.<sup style="display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; margin-left: 3px; border: 1px solid #fff; border-radius: 50%; font-family: 'DM Mono', monospace; font-size: 9.5px; vertical-align: super">2</sup></p>
+<div style="margin-top: 6px; display: flex; flex-direction: column; gap: 4px">
+<span style="font-family: 'DM Mono', monospace; font-weight: 300; font-size: 10.5px; letter-spacing: 0.2em">FONTES</span>
+<a href="C-texto-celular.dc.html" style="display: flex; gap: 12px; align-items: flex-start; min-height: 48px; padding-top: 6px; box-sizing: border-box"><span style="flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid #fff; border-radius: 50%; font-family: 'DM Mono', monospace; font-size: 10px">1</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-style: italic; font-weight: 300; font-size: 16px; line-height: 1.3">Rodar duas vezes, dar o mesmo resultado</span><span style="font-family: 'DM Mono', monospace; font-weight: 300; font-size: 11px">O problema</span></span></a>
+<a href="C-texto-celular.dc.html" style="display: flex; gap: 12px; align-items: flex-start; min-height: 48px; padding-top: 6px; box-sizing: border-box"><span style="flex: none; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border: 1px solid #fff; border-radius: 50%; font-family: 'DM Mono', monospace; font-size: 10px">2</span><span style="display: flex; flex-direction: column; gap: 2px"><span style="font-style: italic; font-weight: 300; font-size: 16px; line-height: 1.3">Rodar duas vezes, dar o mesmo resultado</span><span style="font-family: 'DM Mono', monospace; font-weight: 300; font-size: 11px">Três saídas</span></span></a>
+</div>
+</div>
+
+<p style="align-self: flex-end; max-width: 300px; margin: 0; border: 1px solid #fff; border-radius: 26px; padding: 14px 20px; font-family: 'DM Mono', monospace; font-weight: 300; font-size: 14px; line-height: 1.6">E no Delta Lake, quanto custa sobrescrever a partição?</p>
+
+<div style="display: flex; flex-direction: column; gap: 10px">
+<span style="display: flex; align-items: center; gap: 10px; font-style: italic; font-weight: 300; font-size: 15px">
+<svg viewBox="-20 -22 40 40" style="width: 30px; height: 30px" role="img" aria-label="Assistente"><path d="M-9 -6 L-7 -17 L-2 -11 Z M9 -6 L7 -17 L2 -11 Z" fill="#000" stroke="#fff" stroke-width="1.4" stroke-linejoin="round"></path><circle r="11" fill="#000" stroke="#fff" stroke-width="1.4"></circle><circle cx="-4" cy="-1" r="3.2" fill="#fff"></circle><circle cx="4" cy="-1" r="3.2" fill="#fff"></circle><circle cx="-4" cy="1" r="1.6" fill="#000"></circle><circle cx="4" cy="1" r="1.6" fill="#000"></circle></svg>
+Assistente
+<span style="display: inline-flex; align-items: center; gap: 6px; font-style: normal; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.14em"><svg viewBox="0 0 20 20" style="width: 14px; height: 14px" aria-hidden="true"><circle cx="10" cy="10" r="8" fill="none" stroke="#fff" stroke-width="1.3" stroke-dasharray="2 2.6"></circle></svg>SEM EVIDÊNCIA</span></span>
+<p style="margin: 0; font-weight: 350; font-size: 17.5px; line-height: 1.65">Não encontrei isso nos materiais daqui. O texto trata de sobrescrever partições em geral, mas não fala de Delta Lake nem de custo. Prefiro não chutar um número.</p>
+</div>
+</div>
+
+<form style="position: relative; margin: 48px 0 0; display: flex; flex-direction: column; gap: 10px">
+<div style="display: flex; align-items: center; gap: 10px">
+<label for="cm-pergunta" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap">Sua pergunta</label>
+<input id="cm-pergunta" type="text" placeholder="Pergunte sobre os materiais…" style="flex: 1; min-width: 0; height: 54px; box-sizing: border-box; border: 1px solid #fff; border-radius: 999px; background: #000; color: #fff; padding: 0 20px; font-family: 'Newsreader', serif; font-size: 17px">
+<button type="button" aria-label="Enviar" style="flex: none; width: 54px; height: 54px; border: 1px solid #fff; border-radius: 50%; background: #000; color: #fff; font-family: 'Newsreader', serif; font-size: 22px; cursor: pointer">→</button>
+</div>
+<p style="margin: 0; padding-left: 20px; font-family: 'DM Mono', monospace; font-weight: 300; font-size: 11px; line-height: 1.6">Responde só com o que está nos materiais e mostra as fontes.</p>
+</form>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1500}}'>
+class Component extends DCLogic {
+renderVals() {
+let seed = 61;
+const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+let d = '';
+for (let i = 0; i < 100; i++) {
+const x = rnd() * 390, y = rnd() * 1500, r = 0.45 + rnd() * rnd() * 1.1;
+const rs = r.toFixed(2);
+d += 'M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + 'a' + rs + ' ' + rs + ' 0 1 0 ' + (2 * r).toFixed(2) + ' 0a' + rs + ' ' + rs + ' 0 1 0 ' + (-2 * r).toFixed(2) + ' 0';
+}
+return { stars: d };
+}
+}
+</script>
+</body>
+</html>

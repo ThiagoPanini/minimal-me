@@ -1,0 +1,53 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-08T00:29:46Z"},
+  "title": "Direções do Minimal Me",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1440, "h": 900, "title": "A · Home · desktop", "expand": "fill", "is_interactive": true},
+    "B-home-desktop.dc.html": {"x": 2150, "y": 0, "w": 1440, "h": 900, "title": "B · Home · desktop", "expand": "fill", "is_interactive": true},
+    "C-home-desktop.dc.html": {"x": 4300, "y": 0, "w": 1440, "h": 900, "title": "C · Home · desktop", "expand": "fill", "is_interactive": true},
+    "A-home-celular.dc.html": {"x": 1520, "y": 0, "w": 390, "h": 1640, "title": "A · Home · celular", "is_interactive": true},
+    "B-home-celular.dc.html": {"x": 3670, "y": 0, "w": 390, "h": 1100, "title": "B · Home · celular", "is_interactive": true},
+    "C-home-celular.dc.html": {"x": 5820, "y": 0, "w": 390, "h": 1240, "title": "C · Home · celular", "is_interactive": true},
+    "A-embreve-desktop.dc.html": {"x": 0, "y": 1760, "w": 1440, "h": 900, "title": "A · Em breve (Assistente) · desktop", "expand": "fill", "is_interactive": true},
+    "B-embreve-desktop.dc.html": {"x": 2150, "y": 1760, "w": 1440, "h": 900, "title": "B · Em breve (Assistente) · desktop", "expand": "fill", "is_interactive": true},
+    "C-embreve-desktop.dc.html": {"x": 4300, "y": 1760, "w": 1440, "h": 900, "title": "C · Em breve (Assistente) · desktop", "expand": "fill", "is_interactive": true},
+    "A-embreve-celular.dc.html": {"x": 1520, "y": 1760, "w": 390, "h": 1500, "title": "A · Em breve (Assistente) · celular", "is_interactive": true},
+    "B-embreve-celular.dc.html": {"x": 3670, "y": 1760, "w": 390, "h": 1100, "title": "B · Em breve (Assistente) · celular", "is_interactive": true},
+    "C-embreve-celular.dc.html": {"x": 5820, "y": 1760, "w": 390, "h": 1240, "title": "C · Em breve (Assistente) · celular", "is_interactive": true},
+    "A-conversa-desktop.dc.html": {"x": 0, "y": 3380, "w": 1440, "h": 1100, "title": "A · Conversa · desktop", "expand": "fill", "is_interactive": true},
+    "B-conversa-desktop.dc.html": {"x": 2150, "y": 3380, "w": 1440, "h": 1100, "title": "B · Conversa · desktop", "expand": "fill", "is_interactive": true},
+    "C-conversa-desktop.dc.html": {"x": 4300, "y": 3380, "w": 1440, "h": 1100, "title": "C · Conversa · desktop", "expand": "fill", "is_interactive": true},
+    "A-conversa-celular.dc.html": {"x": 1520, "y": 3380, "w": 390, "h": 1700, "title": "A · Conversa · celular", "is_interactive": true},
+    "B-conversa-celular.dc.html": {"x": 3670, "y": 3380, "w": 390, "h": 1500, "title": "B · Conversa · celular", "is_interactive": true},
+    "C-conversa-celular.dc.html": {"x": 5820, "y": 3380, "w": 390, "h": 1500, "title": "C · Conversa · celular", "is_interactive": true},
+    "A-texto-desktop.dc.html": {"x": 0, "y": 5200, "w": 1440, "h": 4600, "title": "A · Texto longo · desktop", "expand": "fill", "is_interactive": true},
+    "B-texto-desktop.dc.html": {"x": 2150, "y": 5200, "w": 1440, "h": 4900, "title": "B · Texto longo · desktop", "expand": "fill", "is_interactive": true},
+    "C-texto-desktop.dc.html": {"x": 4300, "y": 5200, "w": 1440, "h": 5000, "title": "C · Texto longo · desktop", "expand": "fill", "is_interactive": true},
+    "A-texto-celular.dc.html": {"x": 1520, "y": 5200, "w": 390, "h": 7400, "title": "A · Texto longo · celular", "is_interactive": true},
+    "B-texto-celular.dc.html": {"x": 3670, "y": 5200, "w": 390, "h": 7000, "title": "B · Texto longo · celular", "is_interactive": true},
+    "C-texto-celular.dc.html": {"x": 5820, "y": 5200, "w": 390, "h": 7200, "title": "C · Texto longo · celular", "is_interactive": true}
+  },
+  "order": [
+    "Main.dc.html", "B-home-desktop.dc.html", "C-home-desktop.dc.html",
+    "A-home-celular.dc.html", "B-home-celular.dc.html", "C-home-celular.dc.html",
+    "A-embreve-desktop.dc.html", "B-embreve-desktop.dc.html", "C-embreve-desktop.dc.html",
+    "A-embreve-celular.dc.html", "B-embreve-celular.dc.html", "C-embreve-celular.dc.html",
+    "A-conversa-desktop.dc.html", "B-conversa-desktop.dc.html", "C-conversa-desktop.dc.html",
+    "A-conversa-celular.dc.html", "B-conversa-celular.dc.html", "C-conversa-celular.dc.html",
+    "A-texto-desktop.dc.html", "B-texto-desktop.dc.html", "C-texto-desktop.dc.html",
+    "A-texto-celular.dc.html", "B-texto-celular.dc.html", "C-texto-celular.dc.html"
+  ],
+  "notes": {
+    "intro": {"x": -760, "y": 0, "w": 600, "size": "m", "text": "Rodada 1 · 7 nov 2026\n\nTrês direções sobre as mesmas quatro telas, no desktop e no celular. Linhas, de cima para baixo: home, em breve (Assistente), conversa com o Assistente, texto técnico longo.\n\nConversa e texto não vão ao ar no MVP: testam se a identidade aguenta. O texto é uma amostra escrita para o protótipo.\n\nComente em qualquer artboard: o que fica, o que sai, o que vale misturar. No Play, os links levam de uma tela a outra."},
+    "pA": {"x": 0, "y": -1220, "w": 560, "size": "m", "text": "Painel · a home é uma página de mangá. Cada funcionalidade é um quadro, o gato é o protagonista e \"em breve\" é carimbo. Texto longo em papel branco; conversa em balões."},
+    "pB": {"x": 2150, "y": -1220, "w": 560, "size": "m", "text": "Horizonte · uma linha organiza tudo. O traço contínuo é o que existe agora; o pontilhado é o que vem. O gato espia por cima. Quase nada na tela, e um relógio de verdade."},
+    "pC": {"x": 4300, "y": -1220, "w": 560, "size": "m", "text": "Órbita · eu no centro, as funcionalidades como planetas em órbita. Serifa literária, astros em hachura e retícula. O Assistente é o planeta com orelhas de gato."},
+    "tA": {"x": 0, "y": -420, "text": "A · Painel", "kind": "title1", "maxW": 1910},
+    "tB": {"x": 2150, "y": -420, "text": "B · Horizonte", "kind": "title1", "maxW": 1910},
+    "tC": {"x": 4300, "y": -420, "text": "C · Órbita", "kind": "title1", "maxW": 1910}
+  },
+  "designSystems": []
+}

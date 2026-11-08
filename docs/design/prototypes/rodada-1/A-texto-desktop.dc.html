@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Painel · Texto longo</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+1:wght@100..900&amp;family=M+PLUS+1+Code:wght@300..600&amp;display=swap">
+<style>
+body{margin:0;background:#000}
+a{color:inherit}
+a:focus-visible{outline:3px solid #fff;outline-offset:4px}
+</style>
+</helmet>
+<div style="min-height: 100vh; box-sizing: border-box; background: #000; color: #fff; font-family: 'M PLUS 1', sans-serif; padding: 32px 48px 64px">
+<svg width="0" height="0" style="position: absolute" aria-hidden="true"><defs>
+<pattern id="at-dots" width="7" height="7" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><circle cx="3.5" cy="3.5" r="1.3" fill="#000"></circle></pattern>
+</defs></svg>
+<nav style="max-width: 900px; margin: 0 auto 18px; display: flex; align-items: center; justify-content: space-between; gap: 16px">
+<a href="Main.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 14px; border: 2px solid #fff; font-size: 13px; font-weight: 800; letter-spacing: 0.14em; text-decoration: none">← MINIMAL ME</a>
+<span style="font-size: 12px; font-weight: 500; letter-spacing: 0.24em">TEXTO DE AMOSTRA</span>
+</nav>
+
+<article style="max-width: 900px; margin: 0 auto; box-sizing: border-box; background: #fff; color: #000; padding: 56px 80px 64px">
+<header style="position: relative; border: 3px solid #000; padding: 0 32px 30px; overflow: hidden">
+<svg viewBox="0 0 100 100" preserveAspectRatio="none" style="position: absolute; right: 0; top: 0; width: 30%; height: 100%" aria-hidden="true"><rect width="100" height="100" fill="url(#at-dots)"></rect></svg>
+<p style="position: relative; display: inline-block; margin: 0 0 26px -32px; background: #000; color: #fff; padding: 6px 14px; font-size: 12px; font-weight: 700; letter-spacing: 0.18em">TEXTO DE AMOSTRA · NOV 2026 · 4 MIN DE LEITURA</p>
+<h1 style="position: relative; margin: 0; max-width: 560px; font-size: 46px; line-height: 1.12; font-weight: 900; letter-spacing: -0.01em">Rodar duas vezes, dar o mesmo resultado</h1>
+<p style="position: relative; margin: 18px 0 0; max-width: 520px; background: #fff; font-size: 17px; line-height: 1.7; font-weight: 500">Idempotência na prática: por que todo job e toda API que pode ser repetido precisa terminar no mesmo estado, e três jeitos de chegar lá.</p>
+</header>
+
+<div style="margin-top: 44px; font-size: 17.5px; line-height: 1.85; font-weight: 400">
+<p style="margin: 0 0 22px">Todo sistema que conversa com o mundo real vai, cedo ou tarde, executar a mesma coisa duas vezes. A rede cai depois que o servidor processou o pedido, mas antes de a resposta chegar. O orquestrador acha que a tarefa morreu e a reinicia. Alguém clica duas vezes no botão de pagar. Nenhum desses casos é exceção: é o funcionamento normal de sistemas distribuídos.</p>
+<p style="margin: 0 0 22px">Uma operação é idempotente quando executá-la uma vez ou várias deixa o sistema no mesmo estado. Não é a mesma coisa que devolver a mesma resposta: o que importa é o efeito.</p>
+
+<h2 style="display: inline-block; margin: 26px 0 18px; background: #000; color: #fff; padding: 4px 14px 6px; font-size: 24px; line-height: 1.3; font-weight: 900; letter-spacing: 0.04em">O PROBLEMA</h2>
+<p style="margin: 0 0 22px">Pense num job diário que lê os pedidos do dia e grava numa tabela analítica. A versão mais simples acrescenta as linhas no fim da tabela:</p>
+<div style="position: relative; margin: 30px 0 36px">
+<span style="position: absolute; left: 0; top: -13px; background: #000; color: #fff; padding: 2px 10px; font-family: 'M PLUS 1 Code', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em">PYTHON</span>
+<pre style="margin: 0; border: 3px solid #000; box-shadow: 7px 7px 0 #000; background: #fff; padding: 26px 22px 20px; overflow-x: auto; font-family: 'M PLUS 1 Code', monospace; font-size: 14.5px; line-height: 1.7; font-weight: 400"><code>def carregar_pedidos(dia: date) -&gt; None:
+    pedidos = extrair_pedidos(dia)
+    tabela.append(pedidos)  # cada execução acrescenta de novo</code></pre>
+</div>
+<p style="margin: 0 0 22px">Se o job falhar depois de gravar metade das linhas e o orquestrador tentar outra vez, a primeira metade entra em dobro. Se ele rodar inteiro duas vezes, o dia inteiro aparece duplicado. Nada quebra, nenhum alerta dispara, e os números do painel ficam errados em silêncio.</p>
+
+<h2 style="display: inline-block; margin: 26px 0 18px; background: #000; color: #fff; padding: 4px 14px 6px; font-size: 24px; line-height: 1.3; font-weight: 900; letter-spacing: 0.04em">TRÊS SAÍDAS</h2>
+<p style="margin: 0 0 22px">Há três jeitos comuns de tornar esse job idempotente. Eles diferem no que exigem dos dados e no quanto custam.</p>
+<div style="overflow-x: auto; margin: 28px 0 34px">
+<table style="width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.55">
+<thead>
+<tr>
+<th style="background: #000; color: #fff; text-align: left; padding: 10px 14px; border: 2px solid #000; font-size: 12.5px; font-weight: 800; letter-spacing: 0.08em">ESTRATÉGIA</th>
+<th style="background: #000; color: #fff; text-align: left; padding: 10px 14px; border: 2px solid #000; font-size: 12.5px; font-weight: 800; letter-spacing: 0.08em">COMO FUNCIONA</th>
+<th style="background: #000; color: #fff; text-align: left; padding: 10px 14px; border: 2px solid #000; font-size: 12.5px; font-weight: 800; letter-spacing: 0.08em">QUANDO USAR</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="border: 2px solid #000; padding: 12px 14px; font-weight: 800; vertical-align: top">Sobrescrever a partição</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">Apaga e regrava o dia inteiro a cada execução</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">Dados particionados por data e reprocessamento barato</td>
+</tr>
+<tr>
+<td style="border: 2px solid #000; padding: 12px 14px; font-weight: 800; vertical-align: top">Upsert por chave</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">Insere ou atualiza cada linha pela chave natural</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">Registros com identificador estável</td>
+</tr>
+<tr>
+<td style="border: 2px solid #000; padding: 12px 14px; font-weight: 800; vertical-align: top">Chave de idempotência</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">Registra cada operação já feita e ignora repetições</td>
+<td style="border: 2px solid #000; padding: 12px 14px; vertical-align: top">APIs e efeitos externos, como cobranças e e-mails</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<h3 style="display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; font-size: 20px; line-height: 1.4; font-weight: 900"><span style="flex: none; width: 12px; height: 12px; background: #000"></span>Sobrescrever a partição</h3>
+<p style="margin: 0 0 22px">Com dados particionados por dia, a correção mais direta é trocar o <code style="font-family: 'M PLUS 1 Code', monospace; font-size: 0.9em; border: 1.5px solid #000; padding: 0 5px">append</code> pela sobrescrita da partição. O dia é sempre regravado por inteiro:</p>
+<div style="position: relative; margin: 30px 0 36px">
+<span style="position: absolute; left: 0; top: -13px; background: #000; color: #fff; padding: 2px 10px; font-family: 'M PLUS 1 Code', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em">PYTHON</span>
+<pre style="margin: 0; border: 3px solid #000; box-shadow: 7px 7px 0 #000; background: #fff; padding: 26px 22px 20px; overflow-x: auto; font-family: 'M PLUS 1 Code', monospace; font-size: 14.5px; line-height: 1.7; font-weight: 400"><code>def carregar_pedidos(dia: date) -&gt; None:
+    pedidos = extrair_pedidos(dia)
+    tabela.sobrescrever_particao(pedidos, particao={"dia": dia})</code></pre>
+</div>
+<p style="margin: 0 0 22px">Rodar uma, duas ou dez vezes deixa a partição com o mesmo conteúdo. O custo é regravar o dia inteiro a cada tentativa, o que costuma ser aceitável quando a partição é pequena.</p>
+
+<figure style="margin: 36px 0 34px; display: flex; flex-direction: column; gap: 14px">
+<div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+<div style="position: relative; border: 3px solid #000; padding: 34px 8px 8px">
+<span style="position: absolute; left: -3px; top: -3px; background: #000; color: #fff; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em">1ª EXECUÇÃO</span>
+<svg viewBox="0 0 200 140" style="width: 100%; height: auto; display: block" role="img" aria-label="A primeira execução grava a partição do dia 07/11 inteira">
+<path d="M6 62 H30 M10 76 H34 M6 90 H30" stroke="#000" stroke-width="2.2" stroke-linecap="round"></path>
+<rect x="46" y="30" width="120" height="96" fill="#fff" stroke="#000" stroke-width="3"></rect>
+<path d="M58 50 H154 M58 64 H154 M58 78 H154 M58 92 H154 M58 106 H154" stroke="#000" stroke-width="3"></path>
+<text x="46" y="20" font-family="'M PLUS 1 Code', monospace" font-size="12" font-weight="600">dia=07/11</text>
+</svg>
+</div>
+<div style="position: relative; border: 3px solid #000; padding: 34px 8px 8px">
+<span style="position: absolute; left: -3px; top: -3px; background: #000; color: #fff; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em">FALHA NO MEIO</span>
+<svg viewBox="0 0 200 140" style="width: 100%; height: auto; display: block" role="img" aria-label="Uma falha interrompe a escrita na metade">
+<rect x="46" y="30" width="120" height="96" fill="url(#at-dots)" stroke="#000" stroke-width="3"></rect>
+<rect x="49" y="33" width="114" height="42" fill="#fff"></rect>
+<path d="M58 50 H154 M58 64 H154" stroke="#000" stroke-width="3"></path>
+<polygon points="150,56 158,38 166,54 184,44 176,62 196,68 176,76 186,94 166,84 160,102 152,84 136,92 142,74 126,66 144,62" fill="#fff" stroke="#000" stroke-width="2.5" stroke-linejoin="round"></polygon>
+<text x="161" y="74" text-anchor="middle" font-family="'M PLUS 1', sans-serif" font-size="13" font-weight="900">KRAK</text>
+<text x="46" y="20" font-family="'M PLUS 1 Code', monospace" font-size="12" font-weight="600">dia=07/11</text>
+</svg>
+</div>
+<div style="position: relative; border: 3px solid #000; padding: 34px 8px 8px">
+<span style="position: absolute; left: -3px; top: -3px; background: #000; color: #fff; padding: 3px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.1em">2ª EXECUÇÃO</span>
+<svg viewBox="0 0 200 140" style="width: 100%; height: auto; display: block" role="img" aria-label="A segunda execução regrava a partição inteira e chega ao mesmo estado">
+<rect x="46" y="30" width="120" height="96" fill="#fff" stroke="#000" stroke-width="3"></rect>
+<path d="M58 50 H154 M58 64 H154 M58 78 H154 M58 92 H154 M58 106 H154" stroke="#000" stroke-width="3"></path>
+<g transform="rotate(-8 108 118)">
+<rect x="58" y="106" width="100" height="24" fill="#fff" stroke="#000" stroke-width="2.5"></rect>
+<text x="108" y="122.5" text-anchor="middle" font-family="'M PLUS 1', sans-serif" font-size="11" font-weight="900" letter-spacing="1">MESMO ESTADO</text>
+</g>
+<text x="46" y="20" font-family="'M PLUS 1 Code', monospace" font-size="12" font-weight="600">dia=07/11</text>
+</svg>
+</div>
+</div>
+<figcaption style="font-size: 14px; line-height: 1.6; font-weight: 500">Duas execuções, um só estado: a segunda regrava a partição em vez de somar a ela.</figcaption>
+</figure>
+
+<h3 style="display: flex; align-items: center; gap: 12px; margin: 30px 0 14px; font-size: 20px; line-height: 1.4; font-weight: 900"><span style="flex: none; width: 12px; height: 12px; background: #000"></span>Chave de idempotência</h3>
+<p style="margin: 0 0 22px">Quando o efeito sai do seu sistema, como uma cobrança, um e-mail ou uma chamada a outra API, não dá para sobrescrever. A saída é o cliente mandar uma chave única por operação e o servidor guardar o resultado da primeira vez:</p>
+<div style="position: relative; margin: 30px 0 36px">
+<span style="position: absolute; left: 0; top: -13px; background: #000; color: #fff; padding: 2px 10px; font-family: 'M PLUS 1 Code', monospace; font-size: 11px; font-weight: 600; letter-spacing: 0.12em">HTTP</span>
+<pre style="margin: 0; border: 3px solid #000; box-shadow: 7px 7px 0 #000; background: #fff; padding: 26px 22px 20px; overflow-x: auto; font-family: 'M PLUS 1 Code', monospace; font-size: 14.5px; line-height: 1.7; font-weight: 400"><code>POST /pagamentos HTTP/1.1
+Idempotency-Key: 7c1e2f0a-9b4d-4e61-a1f3-2d8c5b9e0f47
+Content-Type: application/json
+
+{"pedido": 4182, "valor": 129.90}</code></pre>
+</div>
+<p style="margin: 0 0 22px">Se a mesma chave chegar de novo, o servidor devolve a resposta guardada em vez de cobrar outra vez. É o padrão que a Stripe documenta na API dela, e há um trabalho na IETF para padronizar o cabeçalho <code style="font-family: 'M PLUS 1 Code', monospace; font-size: 0.9em; border: 1.5px solid #000; padding: 0 5px">Idempotency-Key</code>.</p>
+
+<h2 style="display: inline-block; margin: 26px 0 18px; background: #000; color: #fff; padding: 4px 14px 6px; font-size: 24px; line-height: 1.3; font-weight: 900; letter-spacing: 0.04em">ANTES DE COLOCAR EM PRODUÇÃO</h2>
+<ul style="list-style: none; margin: 0 0 26px; padding: 0; display: flex; flex-direction: column; gap: 10px">
+<li style="display: flex; gap: 14px; align-items: baseline"><span style="flex: none; width: 9px; height: 9px; background: #000; transform: translateY(-2px)"></span><span>Decida qual é o estado final esperado, não só a ação.</span></li>
+<li style="display: flex; gap: 14px; align-items: baseline"><span style="flex: none; width: 9px; height: 9px; background: #000; transform: translateY(-2px)"></span><span>Escolha a chave: a partição, a chave natural ou uma chave enviada pelo cliente.</span></li>
+<li style="display: flex; gap: 14px; align-items: baseline"><span style="flex: none; width: 9px; height: 9px; background: #000; transform: translateY(-2px)"></span><span>Teste o retry de propósito: rode o job duas vezes e compare o resultado.</span></li>
+<li style="display: flex; gap: 14px; align-items: baseline"><span style="flex: none; width: 9px; height: 9px; background: #000; transform: translateY(-2px)"></span><span>Guarde as chaves de idempotência pelo tempo em que um retry ainda pode chegar.</span></li>
+</ul>
+<p style="margin: 34px 0 0; border: 3px solid #000; padding: 20px 24px; font-size: 18px; line-height: 1.75; font-weight: 700">Idempotência não evita a falha; ela torna a falha barata. Com ela, tentar de novo deixa de ser um risco e vira a estratégia padrão.</p>
+</div>
+
+<footer style="margin-top: 48px; border-top: 3px solid #000; padding-top: 22px; display: flex; flex-direction: column; gap: 12px">
+<span style="align-self: flex-start; background: #000; color: #fff; padding: 2px 9px; font-size: 11px; font-weight: 800; letter-spacing: 0.2em">FONTES</span>
+<ol style="margin: 0; padding-left: 22px; font-size: 14.5px; line-height: 1.7">
+<li>RFC 9110, HTTP Semantics, seção 9.2.2: Idempotent Methods.</li>
+<li>Stripe API Reference: Idempotent requests.</li>
+<li>IETF HTTPAPI: The Idempotency-Key HTTP Header Field.</li>
+</ol>
+<p style="align-self: flex-end; margin: 18px 0 0; font-size: 28px; font-weight: 900; letter-spacing: 0.1em">FIM.</p>
+</footer>
+</article>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":4600}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
