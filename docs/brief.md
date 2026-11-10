@@ -1,104 +1,96 @@
-# Minimal Me — brief para o /wayfinder
+# Brief do Minimal Me
 
-Como usar (Claude Code, em ~/workspaces/minimal-me no WSL):
-1. Repositório público `minimal-me` já criado no GitHub e clonado (pré-requisito
-   do tracker do wayfinder). Por ser público, mapa, tickets e resoluções não
-   carregam segredos, dados pessoais nem valores de contrato; o que for sensível
-   fica fora das issues e é referenciado por localização.
-2. Plugin `mattpocock-skills` instalado; `/setup-matt-pocock-skills` executado
-   com tracker GitHub e `AGENTS.md` como arquivo de instruções; `CLAUDE.md`
-   apenas importa o `AGENTS.md`.
-3. Linha "Projetos de referência" preenchida (PESQUISAS, item 1) em 2026-11-07.
-4. Mensagem 1 = este brief. Mensagem 2 = `/wayfinder`.
+Este documento define o que o Minimal Me é. Ele foi reescrito do zero em 2026-11-09 e substitui tudo o que o brief anterior dizia sobre o produto; a versão antiga fica no histórico do git. Vale até segunda ordem.
 
----
+O vocabulário está em `GLOSSARY.md`; a identidade visual, em `docs/design/`.
 
-Este brief é o contexto para mapear, com /wayfinder, o caminho até o spec do MVP do "Minimal Me". Nesta sessão de mapeamento: confirme o destino comigo, encontre as decisões em aberto, crie o mapa e os tickets no tracker, dispare as pesquisas e pare. Não produza arquitetura, documentos ou código. Responda em português do Brasil, direto. Diferencie sempre requisitos confirmados, hipóteses e decisões pendentes.
+## O produto
 
-DESTINO
-Um spec do MVP do Minimal Me pronto para /to-spec, sem perguntas em aberto, com a stack herdada confirmada, a estrutura de repositório decidida e a fronteira público/privado definida. Teste de chegada: /to-spec consegue escrever o spec sem me perguntar nada que o mapa não tenha respondido. (Corrigido em 2026-11-07, no redesenho do mapa: o MVP é uma página pública minimalista com identidade visual escolhida sobre protótipos e as funcionalidades da visão anunciadas como "em breve"; a fronteira público/privado volta com a primeira funcionalidade que exigir área do Autor.)
-Fora do alcance deste mapa (fica no nevoeiro; não pré-fatiar em tickets): tudo além do MVP — jogos, viagens, WhatsApp, servidor MCP, consolidação automática avançada, novos espaços. Registre em "Out of scope" ou "Not yet specified".
+Minimal Me é um hub pessoal: um espaço onde o Autor consolida frentes de que gosta, para consumo próprio e, eventualmente, para a curiosidade de Visitantes. É público e tem um só Autor.
 
-O PRODUTO
-Minimal Me é uma plataforma pessoal — um "sistema operacional pessoal" — para organizar conhecimentos, aprendizados e contextos de diferentes áreas da minha vida, com um assistente de IA calibrado ao meu contexto. Foco inicial: aprendizado técnico (tecnologia e IA). Depois: jogos (Pokémon TCG, Pokémon de console), viagens, lazer e outros interesses.
-- Espaços distintos por contexto, com navegação coerente; nada de uma única tela ou conversa para tudo. "Espaço" deve ser uma abstração genérica: criar um novo espaço é configuração e conteúdo, não código novo. Precisamos definir quando o assistente consulta só um espaço e quando pode cruzar informações.
-- O Minimal Me é exposto ao público: qualquer pessoa consome os conteúdos e interage com a interface, inclusive com o assistente, quando ele estiver disponível. Eu sou o único autor: só eu enriqueço e insiro conteúdo, por uma área de administração autenticada. O blog (antigo "Minimal Blog") é um dos componentes públicos. O que permanece privado (rascunhos, memória sobre mim, espaços pessoais) é decisão do mapa. (Corrigido em 2026-11-07; a versão anterior dizia que só o blog era público.)
-- Não se trata de recriar um modelo: é construir a camada de dados, memória, ferramentas e fluxos sobre uma API de LLM.
-- Já existem explorações iniciais no Claude Design para a versão anterior ("Minimal Blog"); servem apenas como ponto de partida.
+O hub tem três Frentes. Cada uma é pensada, discutida e construída em esforço próprio.
 
-VISÃO DE FUNCIONALIDADES (possibilidades de evolução, não requisitos do MVP)
-- Registrar notas, artigos, referências e materiais de estudo; organizar por espaço, tema e categoria.
-- Conversar com um assistente que consulta meus materiais e cita as fontes.
-- Publicar conteúdos selecionados no blog.
-- Consolidar periodicamente aprendizados, produzindo sínteses ou rascunhos.
-- Atualizar as bases de conhecimento usadas pelo assistente.
-- Manter preferências e memórias pessoais visíveis, revisáveis e removíveis.
-- Enviar lembretes por e-mail e, futuramente, WhatsApp.
-- Expor o próprio Minimal Me como servidor MCP para uso a partir do Claude Code e do Codex.
-- Expandir para lazer, viagens e outros contextos.
+### Frames & Fables
 
-REQUISITOS CONFIRMADOS
-- Autor único (eu), com área de administração autenticada. Leitura e interação com a interface abertas ao público. A fronteira exata entre público, autor e privado é decisão do mapa.
-- Interface minimalista, predominantemente preto e branco, com boa tipografia, legibilidade e acessibilidade.
-- Nada é publicado automaticamente pela IA: ela sugere ou rascunha, eu reviso e publico.
-- Memória sobre mim sempre transparente, editável e removível.
-- Manutenção compatível com um projeto pessoal de uma pessoa só. Sem microserviços, múltiplos agentes ou infraestrutura adicional sem necessidade demonstrada.
-- Material excluído não pode continuar sendo recuperado pelo assistente; fontes preservadas; privado e público separados; o assistente diz quando não há evidência suficiente; proteção contra instruções maliciosas dentro dos documentos; limite de custo por chamada.
-- A stack e as convenções do Minimal Me seguem as dos meus outros projetos (ver inventário). Desvios exigem justificativa explícita.
-- Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus publicado no GitHub Pages), com os ajustes visuais necessários; Mintlify fica fora (corrigido em 2026-11-07).
+Um álbum de fotos com histórias, com clima de rede social, à maneira do Instagram. O objetivo é compartilhar momentos e reflexões com quem se interessar.
 
-HIPÓTESES INICIAIS (desafie-as nos tickets de decisão)
-- MVP: uma página pública minimalista, com identidade visual definida e validada em protótipos no Claude Design, e as funcionalidades da visão anunciadas como "em breve". Depois do MVP, as funcionalidades entram uma a uma, cada uma discutida isoladamente em esforço próprio. (Corrigido em 2026-11-07, no redesenho do mapa; antes: a interface completa da visão, com funcionalidades e integrações ligadas ou desligadas por toggle; e, antes disso, "registrar, consultar com fontes, publicar".)
-- Um único repositório `minimal-me` (o layout interno — aplicação única ou workspaces — é decidido pela stack herdada), com um GitHub Project para gestão. Compare com múltiplos repositórios e recomende a opção mais simples que atenda ao MVP.
-- Chat por espaço, com consulta cruzada opcional e explícita, em vez de um agente global.
-- E-mail antes de WhatsApp; revisão humana antes de qualquer publicação.
+Interação (comentários, curtidas) e música vinculada a cada foto ou post são desejáveis e podem ficar fora do MVP.
 
-PESQUISAS — tickets research (AFK, subagentes em paralelo)
-Cada pesquisa existe para destravar uma decisão nomeada. Salve o resultado como a skill research determina, com citações (caminhos de arquivo ou URLs). Não pesquise "melhores práticas" genéricas.
-1. Inventário da stack herdada — um ticket por projeto de referência. Projetos de referência: Python `/home/paninit/workspaces/overpower`; front-end + API (principal) `/home/paninit/workspaces/panlabs-tech/life-under-control`, com `/home/paninit/workspaces/panlabs-tech/ethitorial` e `/home/paninit/workspaces/panlabs-tech/travelmanager` como irmãos do mesmo molde, lidos no mesmo ticket apenas para registrar divergências; Terraform `/home/paninit/workspaces/panlabs-tech/tfbox`; documentação `/home/paninit/workspaces/panlabs-docs` (Docusaurus; Mintlify existe apenas em `/home/paninit/workspaces/campfire/docs`, inventariado no mesmo ticket como fatia de comparação). Para cada um: linguagens e versões, frameworks, estrutura de pastas, gerenciadores de pacotes, lint/format/tipagem, testes, CI, Terraform (módulos, providers, estado), ferramenta de documentação, deploy, segredos, MCPs declarados (`.mcp.json`), convenções de commits e branches, arquivos de instrução para agentes. Destrava: stack do Minimal Me e layout do repositório.
-2. Consolidação do inventário — compare os perfis e liste as divergências entre projetos. Destrava: o ticket de decisão "convenção canônica".
-3. Higiene de repositório nos meus projetos — o que eles já fazem (templates de issue e PR, proteção de branch ou rulesets, CI, Dependabot ou Renovate, CODEOWNERS, GitHub Projects). Só depois, documentação oficial do GitHub para as lacunas. Destrava: configuração do repositório.
-4. Coolify e Cloudflare com o layout candidato de repositório (deploy a partir do GitHub; diretório base por aplicação, se workspaces), na documentação oficial. Destrava: estrutura do repositório e deploy do MVP.
-5. Estado atual das skills de Matt Pocock e dos MCPs com utilidade concreta no MVP (incluindo os de Hostinger, Coolify e Cloudflare, já declarados nos `.mcp.json` dos projetos panlabs-tech), em fontes oficiais; não presuma nada instalado. Destrava: AGENTS.md e configuração de desenvolvimento.
+É a primeira Frente a ser construída.
 
-DECISÕES — tickets grilling (HITL, uma por sessão; em cada pergunta, dê sua recomendação e o impacto; "defaults" significa adotar suas recomendações)
-- Inventário completo de funcionalidades e ideias, anotado por espaço, para organizar o que existe hoje e revisitar depois.
-- Escopo da v1: o que fica ligado, o que fica desligado por toggle, critérios de aceite observáveis e uma forma simples de medir utilidade real.
-- Significado de "consolidação" (resumos, duplicações, atualização de bases, rascunhos) e de "aprender sobre mim" (histórico, memória persistente, recuperação de documentos; sem fine-tuning por padrão).
-- Espaços: modelo genérico e regra para o assistente cruzar espaços.
-- Fronteira entre público, autor e privado: o que visitantes veem e fazem, o que só o autor faz, o que não é exposto; autenticação do autor.
-- Navegação, mapa de telas, estados e jornadas do MVP, incluindo uso no celular (antes de qualquer estética).
-- Estrutura de repositório, layout interno e configuração de desenvolvimento (AGENTS.md, skills, MCPs).
-- Convenção canônica onde meus projetos divergem.
-- Hospedagem e orçamento mensal (depende da tarefa manual abaixo).
-- Domínio: permanecer em subdomínio de `panlabs.tech` (padrão da frota, escolhido por facilidade de deploy e custo) ou domínio próprio; pesam o Universal SSL de um só nível e as cotas por zona do plano Free da Cloudflare (reaberto em 2026-11-07).
+### Code & Share
 
-TAREFAS MANUAIS — tickets task (HITL)
-- Confirmar o plano Hostinger e os recursos disponíveis (CPU, memória, Coolify instalado ou não, domínio na Cloudflare).
+Um painel do ambiente de desenvolvimento pessoal do Autor que se atualiza sozinho. Os dados chegam em tempo real ou em pequenos lotes das APIs dos sistemas e ferramentas do dia a dia: GitHub e ferramentas de IA como Claude Code, Codex e ChatGPT.
 
-DIREÇÃO VISUAL (referências em docs/design/references/, com README do que extrair; não invente características além destas)
-- Fundo preto puro; linhas e formas em branco puro; sem cor; "cinzas" apenas por hachura, retícula ou linhas de velocidade, em estilo mangá/ink.
-- Muito espaço negativo; ilustração vale mais que "chrome" de interface; tipografia fina, leve, com espaçamento generoso.
-- Elementos recorrentes: um gato preto de olhos grandes e redondos (candidato a mascote e presença do assistente); uma grade de painéis estilo mangá (candidata à representação dos espaços); uma figura ao centro de ondas concêntricas sob um céu de planetas (candidata à metáfora da home: eu no centro, os espaços ao redor).
-- Tom: calmo, contemplativo, nostálgico e brincalhão. Referência de clima, não de reprodução: mascote e ilustrações do produto devem ser originais.
-- Os protótipos são desenhados pelo agente direto no Claude Design: três direções comparáveis sobre as mesmas telas (home, uma funcionalidade "em breve", texto técnico longo e conversa com o Assistente), no desktop e no celular; o Autor reage, itera e escolhe. (Corrigido em 2026-11-07, no redesenho do mapa; antes: briefing gerado via /handoff depois do ticket de navegação e jornadas.)
+A apresentação é uma narrativa, não uma tabela: quem visita entende o que o Autor está fazendo sem que ele atualize nada à mão. A viabilidade de coletar cada fonte ainda precisa ser analisada.
 
-DESENVOLVIMENTO ASSISTIDO
-- Claude Code e Codex, com as skills de Matt Pocock (https://github.com/mattpocock/skills). Uma fonte de instruções: AGENTS.md (criado pelo setup); CLAUDE.md apenas o importa. Sem regras duplicadas ou conflitantes.
-- Sempre que possível, usar os MCPs de Hostinger, Coolify e Cloudflare para configurar e hospedar o Minimal Me com segurança, em vez de passos manuais no painel. Herdar a declaração dos projetos panlabs-tech; nada está configurado neste repositório ainda.
-- As resoluções dos tickets são o registro de decisões. GLOSSARY.md e ADRs nascem preguiçosamente pela skill domain-modeling quando um ticket fecha uma decisão — nunca em lote, nunca antes.
-- Depois do mapa: /to-spec → /to-tickets → /implement (com /tdd e /code-review) → /pr. /handoff para trocar de agente. /retro ao fim das sessões, anotando o que vale virar template.
+### Write & Learn
 
-OBJETIVO SECUNDÁRIO — PROJETO-REFERÊNCIA
-Este projeto deve servir de exemplo e referência para meus próximos projetos pessoais. Regra: construir bem o primeiro e extrair o template depois do MVP, nunca antes. Manter separado o que é genérico (AGENTS.md, docs/agents/, convenções) do que é específico (este brief, GLOSSARY.md, specs).
+Um agente de IA que escreve um blog autônomo. Os assuntos vêm do interesse do Autor ou de sugestões do próprio agente, a partir do histórico e da base de conhecimento que se forma à medida que o conteúdo é gerado.
 
-ARMADILHAS A EVITAR
-- Mapear além do destino ou pré-fatiar o nevoeiro em tickets.
-- Pesquisa sem uma decisão a destravar.
-- Documentos, arquitetura ou ADRs em lote.
-- Configurações duplicadas entre os dois agentes.
-- Mais de um ticket de decisão por sessão; responder por mim em um ticket HITL.
-- Se o mapeamento não encontrar nevoeiro suficiente para justificar um mapa, diga isso e proponha /grill-me em vez de forçar.
+O agente deve ser capaz de produzir vários formatos: artigos, talvez áudio (podcasts) e vídeo. Boa parte disso fica para o futuro. O essencial é gerar conteúdo de forma autônoma, ajudando o Autor e os Visitantes a aprender.
 
-PRIMEIRA RESPOSTA (sessão de mapeamento)
-Síntese curta do produto e das tensões de escopo; o destino, para eu confirmar; a lista de tickets proposta (research, grilling, task), com o que cada um destrava e o que bloqueia o quê. Só depois da minha confirmação: criar o mapa e os tickets no tracker, disparar as pesquisas e parar.
+## O MVP, em dois marcos
+
+1. **Marco 1**: a Home no ar no domínio próprio, fiel à Home v2.3 e sem nenhuma Funcionalidade. Frames & Fables aparece como "Em desenvolvimento"; Code & Share e Write & Learn, como "Em planejamento". O marco estabelece domínio, infraestrutura, CI/CD e toda a dinâmica de entrega.
+2. **Marco 2**: Frames & Fables disponível, com pelo menos uma publicação real do Autor. Começa pelo protótipo das telas, feito pelo Autor no Claude Design, e ganha um mapa próprio.
+
+Code & Share e Write & Learn vêm depois do MVP.
+
+## Confirmado, hipótese, pendente
+
+**Confirmado**
+
+- O hub tem três Frentes, e Frames & Fables é a primeira.
+- A Home v2.3 é a referência visual. O sistema de design extraído dela é vivo e pode mudar com o protótipo de Frames & Fables.
+- Os textos da Home v2.3 valem como estão e podem ser ajustados a qualquer momento.
+- Write & Learn é um agente autônomo.
+
+**Hipóteses**
+
+- Visitantes não têm conta no MVP; curtidas e comentários ficam para depois.
+- O conceito de Frames & Fables (um feed de posts, ou séries que se leem como um conto) se decide sobre o protótipo das telas, não em texto.
+
+**Pendente**
+
+- Marco 2: como o Autor publica em Frames & Fables e onde as fotos ficam guardadas.
+- Code & Share: quais fontes entram e com que frequência os dados chegam.
+- Write & Learn: como o agente publica (sozinho ou com revisão do Autor), em que formatos e a que custo.
+- A voz dos textos: primeira pessoa ou "você".
+
+## Restrições de engenharia
+
+- Autor único. Repositório público: tickets, mapa e documentos não carregam segredos, dados pessoais nem valores de contrato.
+- Manutenção compatível com um projeto pessoal de uma pessoa só: sem microserviços e sem infraestrutura adicional antes de a necessidade aparecer.
+- Stack e convenções herdadas dos projetos de referência do Autor; desvios exigem justificativa explícita.
+- Domínio próprio (`docs/adr/0001-dominio-proprio.md`), VPS Hostinger com Coolify e Cloudflare na frente. Sempre que possível, a configuração passa pelos MCPs de Hostinger, Coolify e Cloudflare, e não por passos manuais no painel.
+- Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus no GitHub Pages).
+
+## Projetos de referência
+
+O inventário de cada um está nos branches `research/*` deste repositório e resumido no mapa.
+
+- Web e API: `life-under-control`, com `ethitorial` e `travelmanager` como irmãos do mesmo molde.
+- Python: `overpower`.
+- Terraform: `tfbox`.
+- Documentação: `panlabs-docs`.
+
+## Como o trabalho anda
+
+- Claude Code e Codex, com as skills de Matt Pocock. `AGENTS.md` é a única fonte de instruções; `CLAUDE.md` só o importa.
+- O tracker é o GitHub Issues. O caminho até cada spec é um mapa do wayfinder; o do Marco 1 é a issue #1.
+- Depois do mapa: `/to-spec`, `/to-tickets`, `/implement` (com `/tdd` e `/code-review`) e `/pr`. `/retro` ao fim das sessões.
+- Em produto com interface, o protótipo vem antes de qualquer debate de funcionalidade em texto, e protótipo visual se faz no Claude Design.
+- `GLOSSARY.md` e os ADRs nascem quando um termo ou uma decisão fecha; nunca em lote, nunca antes.
+- Em toda pergunta de decisão, o agente dá a recomendação e o impacto; "defaults" adota todas.
+
+## Objetivo secundário
+
+Este projeto deve servir de referência para os próximos projetos pessoais do Autor. A regra é construir bem o primeiro e extrair o template depois do MVP, nunca antes.
+
+## Armadilhas
+
+- Mapear além do destino ou fatiar em tickets o que ainda não tem tela.
+- Debater funcionalidade em texto antes de existir protótipo.
+- Produzir documentos, arquitetura ou ADRs em lote.
+- Duplicar configuração entre os dois agentes.
