@@ -19,3 +19,7 @@ Os projetos da frota vivem em subdomínios de `panlabs.tech` por facilidade de d
 - `minimal-me.panlabs.tech` passa a redirecionar para o domínio próprio, para preservar a entrada pela frota.
 - É um desvio explícito do padrão dos projetos de referência, exigido pelo brief; os demais projetos não mudam.
 - Mais um item com renovação anual; a renovação automática fica ligada no registrador.
+
+## Nota de 2026-11-09
+
+O produto foi redefinido como um hub de três frentes, e o chat aberto a Visitantes, citado acima, deixou de existir. A decisão se mantém: um produto público continua precisando de certificado nativo em qualquer hostname de primeiro nível (API e previews por PR) e das cotas inteiras de proteção do plano Free.

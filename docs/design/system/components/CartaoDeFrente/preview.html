@@ -1,0 +1,102 @@
+<!-- @dsCard group="Frentes" width=1200 height=880 subtitle="Em desenvolvimento, em planejamento e em planejamento com foco" -->
+<style>
+  @property --pw{syntax:'<number>';inherits:true;initial-value:1}
+  body{margin:0;background:var(--chao,#161616);color:var(--luz,#E9E9E6)}
+  .in{--g:24px;padding:28px 48px 44px}
+  .caps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));column-gap:var(--g);margin:0 0 14px;padding:0;list-style:none}
+  .caps li{font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;color:var(--nevoa,#8E8E89)}
+  .row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(5,auto);column-gap:var(--g)}
+  .card{position:relative;grid-row:1 / span 5;display:grid;grid-template-rows:subgrid;row-gap:0;min-width:0}
+  .card > *{min-width:0}
+  .card + .card::before{content:"";position:absolute;grid-row:2 / -1;grid-column:1;left:calc(var(--g) / -2);top:32px;bottom:0;width:1px;background:var(--fio,#3A3A37);pointer-events:none}
+
+  /* picture: 4:5, feathered 2% on every edge, graded per picture, under the grain */
+  .media{position:relative;aspect-ratio:4 / 5;max-width:100%;--cl:calc(var(--g) * .3);--co:calc(var(--g) * .14)}
+  .feather{position:absolute;inset:0;overflow:hidden;transition:opacity .8s var(--ease,ease),filter 1s var(--ease,ease);
+    -webkit-mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);-webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);mask-composite:intersect}
+  .grade{position:absolute;inset:0;transition:filter 1.2s var(--ease,ease)}
+  .grade img{position:absolute;inset:-3%;width:106%;height:106%;max-width:none;display:block;object-fit:cover;transition:transform 1.6s var(--ease-out,ease-out)}
+  .media[data-media="frames"] .grade{filter:brightness(.94) contrast(.9)}
+  .media[data-media="tech"] .grade{filter:brightness(1.5) contrast(.92)}
+  .media[data-media="ai"] .grade{filter:brightness(.78) contrast(.84)}
+  .grain{position:absolute;inset:0;pointer-events:none;background:url(/_blob/c2007a56233c7752ec6375195a5e8ff3) 0 0/160px 160px;opacity:.35;mix-blend-mode:multiply}
+  .wash{position:absolute;inset:0;pointer-events:none;background:var(--chao,#161616);opacity:.42;transition:opacity 1s var(--ease,ease);
+    -webkit-mask-image:linear-gradient(to top,transparent 46%,#000 74%);mask-image:linear-gradient(to top,transparent 46%,#000 74%)}
+
+  /* status label on the picture */
+  .badge{position:absolute;z-index:3;left:var(--selo-recuo,12px);top:var(--selo-recuo,12px);display:inline-flex;align-items:center;gap:7px;padding:6px 9px 6px 8px;border:1px solid var(--selo-borda,rgba(233,233,230,.14));background:var(--selo-fundo,rgba(14,14,15,.42));-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);font:400 10px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.05em;color:var(--selo-texto,rgba(233,233,230,.8));white-space:nowrap;pointer-events:none}
+  .badge i{flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+  .is-plan .badge{color:rgba(233,233,230,.56);border-color:rgba(233,233,230,.1);opacity:calc(.72 + .28 * var(--pw))}
+  .is-plan .badge i{background:none;box-shadow:inset 0 0 0 1px currentColor}
+
+  /* crop marks, sized from the gutter */
+  .cm{position:absolute;width:0;height:0}
+  .cm::before,.cm::after{content:"";position:absolute;background:var(--fio,#3A3A37);transition:background .6s var(--ease,ease)}
+  .cm::before{width:var(--cl);height:1px}
+  .cm::after{width:1px;height:var(--cl)}
+  .cm.tl{left:0;top:0}.cm.tl::before{right:var(--co);top:0}.cm.tl::after{left:0;bottom:var(--co)}
+  .cm.tr{right:0;top:0}.cm.tr::before{left:var(--co);top:0}.cm.tr::after{left:0;bottom:var(--co)}
+  .cm.bl{left:0;bottom:0}.cm.bl::before{right:var(--co);top:0}.cm.bl::after{left:0;top:var(--co)}
+  .cm.br{right:0;bottom:0}.cm.br::before{left:var(--co);top:0}.cm.br::after{left:0;top:var(--co)}
+
+  /* text rhythm: picture · 32 · line · 22 · number · 18 · title · 22 · text · 32 · link */
+  .n{position:relative;margin:var(--ritmo-32,32px) 0 0;padding-top:var(--ritmo-22,22px);font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;color:var(--nevoa,#8E8E89);font-variant-numeric:tabular-nums}
+  .n::before{content:"";position:absolute;left:0;top:0;width:24px;height:1px;background:var(--fio,#3A3A37);transition:width .9s var(--ease-out,ease-out),background .6s var(--ease,ease)}
+  .title{margin:0;padding-top:var(--ritmo-18,18px);font:300 36px/1.08 var(--font-sans,"Jost",sans-serif);letter-spacing:-.005em;text-wrap:balance}
+  .text{margin:0;padding-top:var(--ritmo-22,22px);max-width:40ch;font:300 14px/1.72 var(--font-mono,"IBM Plex Mono",monospace);color:var(--texto,#B6B6B1);text-wrap:pretty}
+  .ft{display:flex;align-items:flex-end;padding-top:var(--ritmo-32,32px)}
+  .link{display:inline-flex;align-items:center;gap:12px;font:400 11px/1.4 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;text-transform:uppercase;color:var(--nevoa,#8E8E89)}
+  .link i{display:block;width:14px;height:1px;background:currentColor;transition:width .6s var(--ease-out,ease-out)}
+
+  /* in development: a little under, the top still in the dark */
+  .is-dev .feather{filter:contrast(.97) brightness(.86)}
+
+  /* in planning: switched off. --pw runs from 0 (off) to .5 (standby, with focus) */
+  .is-plan{--pw:0;transition:--pw .9s var(--ease,ease)}
+  .media[data-media="ai"]{--pe:.32}
+  .media[data-media="tech"]{--pe:.46;--on:1.9}
+  .is-plan .feather{filter:contrast(calc(.82 + .1 * var(--pw))) brightness(calc(var(--pe,.4) + (var(--on,.74) - var(--pe,.4)) * var(--pw)))}
+  .is-plan .n{color:color-mix(in srgb,var(--nevoa,#8E8E89) calc(var(--pw) * 100%),var(--apagado-rotulo,#4A4A46))}
+  .is-plan .title{color:color-mix(in srgb,var(--luz,#E9E9E6) calc(var(--pw) * 100%),var(--apagado-titulo,#5C5C57))}
+  .is-plan .text{color:color-mix(in srgb,var(--texto,#B6B6B1) calc(var(--pw) * 100%),var(--apagado-texto,#575752))}
+  .is-plan .link{color:color-mix(in srgb,var(--nevoa,#8E8E89) calc(var(--pw) * 100%),var(--apagado-rotulo,#4A4A46))}
+
+  /* focus: the card under the cursor (here, also the third card, held in focus) */
+  .card.is-focus .grade,.card:hover .grade{filter:none}
+  .card.is-focus .grade img,.card:hover .grade img{transform:scale(1.025)}
+  .card.is-focus .n::before,.card:hover .n::before{width:100%;background:var(--nevoa,#8E8E89)}
+  .card.is-focus .link i,.card:hover .link i{width:22px}
+  .card.is-focus .wash,.card:hover .wash{opacity:0}
+  .card.is-dev.is-focus .feather,.card.is-dev:hover .feather{filter:contrast(1) brightness(1)}
+  .card.is-plan.is-focus,.card.is-plan:hover{--pw:.5}
+  .card.is-plan.is-focus .cm::before,.card.is-plan.is-focus .cm::after,.card.is-plan:hover .cm::before,.card.is-plan:hover .cm::after{background:var(--nevoa,#8E8E89)}
+  .row:has(.card:hover) .card:not(:hover) .feather{opacity:.55}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+<div class="in">
+  <ol class="caps" aria-hidden="true"><li>em desenvolvimento</li><li>em planejamento · repouso</li><li>em planejamento · foco</li></ol>
+  <div class="row">
+    <article class="card is-dev">
+      <div class="media" data-media="frames"><div class="feather"><div class="grade"><img src="/_blob/d0057303614305c5fdf66d8706fa0b63" alt="Ilustração: numa pedra, uma pessoa fotografa com tripé um sol que se põe atrás de montanhas, visto através das lâminas de um diafragma gigante." style="object-position:50% 52%"></div><div class="wash"></div><div class="grain"></div></div><span class="badge"><i></i>Em desenvolvimento</span></div>
+      <p class="n">01</p>
+      <h3 class="title">Frames &amp; Fables</h3>
+      <p class="text">Histórias contadas por fotografias. Cada série reúne imagens em sequência, com legendas curtas, e se lê como um conto, do primeiro quadro ao último. Um álbum que se folheia como um livro.</p>
+      <div class="ft"><span class="link">Acessar<i></i></span></div>
+    </article>
+    <article class="card is-plan">
+      <div class="media" data-media="tech"><div class="feather"><div class="grade"><img src="/_blob/47eb8427bfe48ca2762025d4630e15c2" alt="Ilustração: uma pessoa programa numa mesa curva, cercada por racks de servidores, cabos e luzes." style="object-position:50% 54%"></div><div class="grain"></div></div><span class="badge"><i></i>Em planejamento</span><span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span></div>
+      <p class="n">02</p>
+      <h3 class="title">Code &amp; Share</h3>
+      <p class="text">Um painel dos seus projetos pessoais. Repositórios, commits e indicadores chegam da API do GitHub, e o uso de cada provedor de IA aparece ao lado, mês a mês.</p>
+      <div class="ft"><span class="link">Acessar<i></i></span></div>
+    </article>
+    <article class="card is-plan is-focus">
+      <div class="media" data-media="ai"><div class="feather"><div class="grade"><img src="/_blob/41461ab0f98d8025a1112c7556cea1e7" alt="Ilustração: uma pessoa lê sentada no centro de um túnel em espiral feito de folhas de papel." style="object-position:50% 56%"></div><div class="grain"></div></div><span class="badge"><i></i>Em planejamento</span><span class="cm tl"></span><span class="cm tr"></span><span class="cm bl"></span><span class="cm br"></span></div>
+      <p class="n">03</p>
+      <h3 class="title">Write &amp; Learn</h3>
+      <p class="text">Uma inteligência que escreve por conta própria. Observa o que te interessa, sugere temas e publica ensaios, listas, notas e roteiros. Um blog que se escreve enquanto você lê.</p>
+      <div class="ft"><span class="link">Acessar<i></i></span></div>
+    </article>
+  </div>
+</div>
