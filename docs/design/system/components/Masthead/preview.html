@@ -1,16 +1,16 @@
 <!-- @dsCard group="Abertura" width=1200 height=230 subtitle="O nome em 8 colunas, o bloco de texto em 4" -->
 <style>
-  body{margin:0;background:var(--chao,#161616);color:var(--luz,#E9E9E6)}
+  body{margin:0;background:var(--ground,#161616);color:var(--light,#E9E9E6)}
   .in{--g:24px;container-type:inline-size;padding:44px 48px 48px}
   .grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--g);align-items:stretch}
-  .nome{grid-column:1 / 9;margin:0 -.06em 0 -.04em;font:300 calc((200cqw - var(--g)) / 18.297)/.76 var(--font-sans,"Jost",sans-serif);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding-top:.06em}
+  .wordmark{grid-column:1 / 9;margin:0 -.06em 0 -.04em;font:300 calc((200cqw - var(--g)) / 18.297)/.76 var(--font-sans,"Jost",sans-serif);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;padding-top:.06em}
   .deck{grid-column:9 / -1;display:flex;flex-direction:column;justify-content:space-between;gap:12px;min-width:0}
-  .kick{margin:0;font:400 11px/1.4 var(--font-sans,"Jost",sans-serif);letter-spacing:.3em;text-transform:uppercase;color:var(--nevoa,#8E8E89)}
-  .tag{margin:0;max-width:34ch;font:300 16px/1.62 var(--font-mono,"IBM Plex Mono",monospace);color:var(--corpo,#C9C9C4);text-wrap:pretty}
+  .kick{margin:0;font:400 11px/1.4 var(--font-sans,"Jost",sans-serif);letter-spacing:.3em;text-transform:uppercase;color:var(--mist,#8E8E89)}
+  .tag{margin:0;max-width:34ch;font:300 16px/1.62 var(--font-mono,"IBM Plex Mono",monospace);color:var(--body,#C9C9C4);text-wrap:pretty}
 </style>
 <div class="in">
   <div class="grid">
-    <h1 class="nome">Minimal Me</h1>
+    <h1 class="wordmark">Minimal Me</h1>
     <div class="deck">
       <p class="kick">hub pessoal e minimalista</p>
       <p class="tag">Uma dinâmica simples e moderna para consumir e gerar conteúdo.</p>

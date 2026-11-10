@@ -1,15 +1,15 @@
 <!-- @dsCard group="Estrutura" width=1200 height=120 subtitle="A mesma grade, fechando a página" -->
 <style>
-  body{margin:0;background:var(--chao,#161616);color:var(--luz,#E9E9E6)}
+  body{margin:0;background:var(--ground,#161616);color:var(--light,#E9E9E6)}
   .in{--g:24px;padding:24px 48px 40px}
   .grid{position:relative;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--g);align-items:center;row-gap:16px;padding-top:36px}
-  .grid::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--fio,#3A3A37)}
+  .grid::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--hairline,#3A3A37)}
   .brand{grid-column:1 / 9;display:flex;align-items:center;gap:14px;margin:0;font:400 12px/1 var(--font-sans,"Jost",sans-serif);letter-spacing:.34em;text-transform:uppercase}
   .brand svg{width:18px;height:18px;flex:none}
-  .ring{fill:none;stroke:var(--nevoa,#8E8E89);stroke-width:1}
-  .dot{fill:var(--luz,#E9E9E6)}
-  .meta{grid-column:9 / -1;margin:0;font:300 12px/1.6 var(--font-mono,"IBM Plex Mono",monospace);color:var(--nevoa,#8E8E89)}
-  .meta a{color:var(--corpo,#C9C9C4);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;text-decoration-color:var(--fio,#3A3A37)}
+  .ring{fill:none;stroke:var(--mist,#8E8E89);stroke-width:1}
+  .dot{fill:var(--light,#E9E9E6)}
+  .meta{grid-column:9 / -1;margin:0;font:300 12px/1.6 var(--font-mono,"IBM Plex Mono",monospace);color:var(--mist,#8E8E89)}
+  .meta a{color:var(--body,#C9C9C4);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;text-decoration-color:var(--hairline,#3A3A37)}
   .meta a:hover{text-decoration-color:currentColor}
   .meta a:focus-visible{outline:1.5px solid currentColor;outline-offset:3px}
 </style>
