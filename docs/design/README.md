@@ -12,6 +12,7 @@ A identidade visual do Minimal Me nasce da Home v2.3, prototipada pelo Autor no 
 | `system/fonts/` | Jost e IBM Plex Mono, pesos 300 e 400, em woff2. São os subconjuntos embutidos no protótipo; as duas famílias usam a licença SIL OFL. |
 | `system/assets/` | A marca em SVG e as notas de uso de cada grupo de imagens. |
 | `prototype/home-v2.3/` | A página de referência, arquivada como foi publicada, com as seis imagens. Abra `index.html` num navegador. |
+| `prompts/` | Os prompts que o Autor cola no Claude Design para pilotar um protótipo. Hoje: `frames-and-fables.md`. |
 
 ## Sistema vivo
 
@@ -30,7 +31,13 @@ Os dois artefatos são privados e abrem com a conta do Autor.
 - [Design System "Minimal Me"](https://claude.ai/artifact/StCJXsKtEb1sG39VzTbNzX): publicado a partir de `system/`. É dele que as próximas telas partem.
 - [Comparativo v2.1 e v2.3](https://claude.ai/artifact/SA4dpdcuXn9NPSDs29ymLD): a home de referência, com as duas versões em abas.
 
-Para republicar o Design System, envie os arquivos alterados de `system/` para o caminho `project/<mesmo caminho>` do artefato. As imagens e os SVG são uploads do próprio artefato, e as prévias os chamam por `/_blob/<id>`; por isso, abertas direto do repositório, as prévias aparecem sem imagem.
+Para republicar o Design System depois de mudar `system/`:
+
+1. Monte uma pasta temporária com os arquivos alterados em `project/<mesmo caminho de system/>`. As imagens e os SVG de `assets/` não entram: são uploads do próprio artefato.
+2. Leia `project/design-system.json` do artefato na hora, mude só o que o seu trabalho tocou (`lastChange`, um grupo ou um registro de asset) e envie-o por último.
+3. Publique tudo numa chamada só. Cada caminho removido ou renomeado vai com `null`; sem isso, o arquivo antigo continua no artefato.
+4. Para uma imagem nova, suba como asset do artefato, registre no índice e use na prévia o `/_blob/<id>` devolvido.
+5. As prévias chamam as imagens por `/_blob/<id>`; por isso, abertas direto do repositório, aparecem sem imagem.
 
 ## Linhagem
 
