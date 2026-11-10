@@ -63,6 +63,7 @@ Code & Share e Write & Learn vêm depois do MVP.
 - Autor único. Repositório público: tickets, mapa e documentos não carregam segredos, dados pessoais nem valores de contrato.
 - Manutenção compatível com um projeto pessoal de uma pessoa só: sem microserviços e sem infraestrutura adicional antes de a necessidade aparecer.
 - Stack e convenções herdadas dos projetos de referência do Autor; desvios exigem justificativa explícita.
+- Código em inglês, prosa em português: componentes, tokens, identificadores e arquivos de código têm nome em inglês; documentos, tickets, commits e textos da interface ficam em português do Brasil. A regra está em `AGENTS.md`.
 - Domínio próprio (`docs/adr/0001-dominio-proprio.md`), VPS Hostinger com Coolify e Cloudflare na frente. Sempre que possível, a configuração passa pelos MCPs de Hostinger, Coolify e Cloudflare, e não por passos manuais no painel.
 - Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus no GitHub Pages).
 

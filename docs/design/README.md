@@ -38,8 +38,26 @@ Para republicar o Design System, envie os arquivos alterados de `system/` para o
 - A Home v2.1 passou por uma revisão crítica que gerou a v2.2, com mudanças visíveis (índice no céu, negativos, folha de contato, diário). A v2.2 não foi adotada.
 - A v2.3 é a v2.1 com seis correções que não mudam o que se vê: fontes embutidas, rolagem por teclado, foco visível na marca, abertura que espera as imagens, laço de animação que para em repouso e nível de standby por imagem.
 
+## Nomes
+
+Tudo o que é código tem nome em inglês: tokens, estilos de texto, componentes, classes, pastas e arquivos do sistema. Guias, notas de uso e textos da interface ficam em português. A regra do repositório está em `AGENTS.md`.
+
+O protótipo arquivado é a exceção: fica como o Autor publicou, com variáveis e arquivos em português. A correspondência com o sistema:
+
+| No protótipo | No sistema |
+|---|---|
+| `--chao` | `ground` |
+| `--ceu` | `sky` |
+| `--tinta` | `ink` |
+| `--luz` | `light` |
+| `--corpo` | `body` |
+| `--texto` | `text` |
+| `--nevoa` | `mist` |
+| `--fio` | `hairline` |
+| `--sans`, `--mono` | `--font-sans`, `--font-mono` |
+| `img/ceu.webp`, `img/dunas.webp` | `sky.webp`, `dunes.webp` |
+
 ## Pendências para a implementação
 
-- Os tokens do protótipo têm nomes em português (`--chao`, `--luz`), e a convenção dos projetos de referência é código em inglês. A escolha fica para [Base técnica do Marco 1](https://github.com/ThiagoPanini/minimal-me/issues/17).
 - Os efeitos vivos em canvas (poeira, luzes dos racks, folhas) e o alinhamento do bloco de texto pela altura das maiúsculas existem só no script do protótipo.
-- O protótipo embute as fontes na página; como servi-las em produção também é decisão da Base técnica.
+- O protótipo embute as fontes na página; como servi-las em produção é decisão de [Base técnica do Marco 1](https://github.com/ThiagoPanini/minimal-me/issues/17).

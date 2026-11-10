@@ -1,22 +1,22 @@
 <!-- @dsCard group="Marca" height=140 subtitle="Sobre o céu e sobre o chão" -->
 <style>
-  body{margin:0;background:var(--chao,#161616)}
+  body{margin:0;background:var(--ground,#161616)}
   .wrap{display:grid;grid-template-columns:1fr 1fr;height:140px}
   .cell{display:flex;align-items:center;justify-content:center;gap:14px}
-  .on-ceu{background:var(--ceu,#F3F3F2)}
+  .on-sky{background:var(--sky,#F3F3F2)}
   .m{display:block;width:26px;height:26px}
   .m.small{width:18px;height:18px}
-  .on-ceu .ring{fill:none;stroke:var(--tinta,#141414);stroke-width:1}
-  .on-ceu .dot{fill:var(--tinta,#141414)}
-  .on-chao .ring{fill:none;stroke:var(--nevoa,#8E8E89);stroke-width:1}
-  .on-chao .dot{fill:var(--luz,#E9E9E6)}
-  .name{margin:0;font:400 12px/1 var(--font-sans,"Jost",sans-serif);letter-spacing:.34em;text-transform:uppercase;color:var(--luz,#E9E9E6)}
+  .on-sky .ring{fill:none;stroke:var(--ink,#141414);stroke-width:1}
+  .on-sky .dot{fill:var(--ink,#141414)}
+  .on-ground .ring{fill:none;stroke:var(--mist,#8E8E89);stroke-width:1}
+  .on-ground .dot{fill:var(--light,#E9E9E6)}
+  .name{margin:0;font:400 12px/1 var(--font-sans,"Jost",sans-serif);letter-spacing:.34em;text-transform:uppercase;color:var(--light,#E9E9E6)}
 </style>
 <div class="wrap">
-  <div class="cell on-ceu">
+  <div class="cell on-sky">
     <svg class="m" viewBox="0 0 26 26" role="img" aria-label="Marca do Minimal Me sobre o céu"><circle class="ring" cx="13" cy="13" r="12"></circle><circle class="dot" cx="13" cy="13" r="4.5"></circle></svg>
   </div>
-  <div class="cell on-chao">
+  <div class="cell on-ground">
     <svg class="m small" viewBox="0 0 26 26" aria-hidden="true"><circle class="ring" cx="13" cy="13" r="12"></circle><circle class="dot" cx="13" cy="13" r="4.5"></circle></svg>
     <p class="name">Minimal Me</p>
   </div>
