@@ -12,7 +12,7 @@ A identidade visual do Minimal Me nasce da Home v2.3, prototipada pelo Autor no 
 | `system/fonts/` | Jost e IBM Plex Mono, pesos 300 e 400, em woff2. São os subconjuntos embutidos no protótipo; as duas famílias usam a licença SIL OFL. |
 | `system/assets/` | A marca em SVG e as notas de uso de cada grupo de imagens. |
 | `prototype/home-v2.3/` | A página de referência, arquivada como foi publicada, com as seis imagens. Abra `index.html` num navegador. |
-| `prompts/` | Os prompts que o Autor cola no Claude Design para pilotar um protótipo. Hoje: `frames-and-fables.md`. |
+| `prompts/` | Os prompts que o Autor cola no Claude Design para pilotar um protótipo. Hoje: `frames-and-fables.md` e `home-spaces.md`. |
 
 ## Sistema vivo
 
@@ -21,6 +21,7 @@ Esta é a versão 1 do sistema. Ele vai mudar: o Autor ainda vai prototipar as t
 ## O que vale como referência
 
 - A Home v2.3 é o critério de aceite visual da home (Marco 1). Isso inclui o estado apagado das frentes em planejamento, com texto abaixo de 3:1 em repouso, registrado como escolha deliberada: o texto fica legível quando o card ganha foco.
+- Desde 2026-11-10 a home está em revisão: as frentes viram spaces, e entra um quarto, Music & Feeling. A abertura fica como está; o que muda é da seção das frentes para baixo. O prompt está em `prompts/home-spaces.md`. Até o Autor escolher uma versão, a v2.3 continua valendo.
 - Onde `system/` e o protótipo divergirem, vale o protótipo, e `system/` é corrigido.
 - Os textos da home valem como estão na v2.3 e podem ser ajustados a qualquer momento.
 
@@ -44,6 +45,7 @@ Para republicar o Design System depois de mudar `system/`:
 - As rodadas 1 e 2 (direções Painel, Horizonte e Órbita, com gato, relógio e painéis de mangá) foram aposentadas. O histórico está em [Protótipos das direções visuais do MVP](https://github.com/ThiagoPanini/minimal-me/issues/21) e no branch `prototype/direcoes-visuais-rodada-1`.
 - A Home v2.1 passou por uma revisão crítica que gerou a v2.2, com mudanças visíveis (índice no céu, negativos, folha de contato, diário). A v2.2 não foi adotada.
 - A v2.3 é a v2.1 com seis correções que não mudam o que se vê: fontes embutidas, rolagem por teclado, foco visível na marca, abertura que espera as imagens, laço de animação que para em repouso e nível de standby por imagem.
+- A primeira rodada das telas de Frames & Fables, no artefato "Minimal Me · Frames & Fables, protótipo das telas" (2026-11-10), foi descartada pelo Autor: ficou diferente do imaginado e não serve de referência nem de inspiração.
 
 ## Nomes
 

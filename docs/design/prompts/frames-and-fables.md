@@ -2,6 +2,8 @@
 
 O Autor pilota a sessão no Claude Design com o prompt abaixo: abra uma conversa nova e cole o bloco inteiro. O resultado abre o mapa do Marco 2 e pode alterar o sistema de design (`docs/design/system/`).
 
+A primeira rodada com este prompt, no artefato "Minimal Me · Frames & Fables, protótipo das telas" (2026-11-10), foi descartada pelo Autor e não serve de referência nem de inspiração. O prompt ainda fala em três frentes: revise-o à luz da home com spaces (`home-spaces.md`) antes de usá-lo de novo.
+
 ````markdown
 # Minimal Me · Frames & Fables, protótipo das telas
 
