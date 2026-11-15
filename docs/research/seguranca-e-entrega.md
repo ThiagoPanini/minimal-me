@@ -4,10 +4,10 @@ Pesquisa do ticket [#50](https://github.com/ThiagoPanini/minimal-me/issues/50), 
 
 ## Retomada
 
-- **Estado**: em andamento.
+- **Estado**: completo.
 - **Mudança de escopo (2026-11-15)**: a forma da web deixou de ser dada. A recomendação atual para o Marco 1 é `output: "export"`, com os arquivos estáticos servidos por um nginx sem privilégio, numa imagem pública no GHCR, com 64 MiB e 0,25 vCPU. O servidor Node do Next (`standalone`, 384 MiB e 0,5 vCPU) só vem quando um space futuro pedir recursos de servidor. Onde a recomendação depende da forma, esta pesquisa cobre primeiro a exportação estática e acrescenta uma nota curta sobre o que muda com `standalone`.
-- **Coberto**: seção 0 (estado do repositório e superfície de ataque de cada forma).
-- **Próximo**: seções 1 a 6 na ordem do ticket, depois a recomendação, as alternativas descartadas, os exageros e as perguntas ao Autor.
+- **Coberto**: seções 0 a 5, a recomendação, as alternativas descartadas, os exageros (item 6 do ticket) e as perguntas ao Autor.
+- **A conferir na implementação**: (a) se o PR de segurança do Dependabot para uma versão com menos de um dia falha mesmo na instalação congelada da CI (seção 2.4); (b) se um merge automático com o `GITHUB_TOKEN` deixa de disparar o workflow de `push` (seção 2.2; irrelevante se o GitHub App for adotado); (c) se os padrões genéricos de secret scanning podem ser ligados num repositório pessoal (seção 1); (d) a memória do nginx sob o limite de 64 MiB (#18).
 - **Data**: 2026-11-15.
 
 Convenções: o que não vem de fonte está marcado como **inferência**. Datas de documentos são as que a página mostra; quando a página não mostra data, cito a data da leitura (2026-11-15).
@@ -41,7 +41,7 @@ O repositório do Next.js publicou 55 advisories entre 2025-12-03 (React2Shell) 
 No React, os dez advisories publicados desde 2025-12-03 estão todos nos pacotes de servidor `react-server-dom-webpack`, `-turbopack` e `-parcel`, dois deles críticos: CVE-2025-55182 e [GHSA-xqc2-xf4c-x3h3](https://github.com/facebook/react/security/advisories/GHSA-xqc2-xf4c-x3h3) (CVE-2026-126187, 2026-10-14) (`gh api repos/facebook/react/security-advisories`, lido em 2026-11-15).
 
 - **Exportação estática.** O guia do Next lista como não suportado, por exigir "a Node.js server": Proxy, Server Actions, ISR, Image Optimization com o `loader` padrão, rewrites, redirects, headers, cookies e Draft Mode; os Server Components rodam durante o `next build` (https://nextjs.org/docs/app/guides/static-exports, atualizado em 2026-08-09). Nenhum dos seis críticos acima tem por onde entrar quando não há servidor do Next em produção: o nginx só entrega arquivos. O `next/og` gera as imagens no build, com o conteúdo do Autor, e não com valor de quem acessa (**inferência**). Os advisories do servidor de desenvolvimento, como [GHSA-39w2-rjm5-chcv](https://github.com/vercel/next.js/security/advisories/GHSA-39w2-rjm5-chcv) e [GHSA-jcc7-9wpm-mj36](https://github.com/vercel/next.js/security/advisories/GHSA-jcc7-9wpm-mj36), atingem só o `next dev`, isto é, a máquina do Autor e dos agentes. Com a exportação, um CVE crítico do Next ou do React vira atualização na cadência normal, e a urgência muda de lugar: a imagem do nginx e do Alpine, a esteira de build (um pacote malicioso no build injeta código no JavaScript que vai ao Visitante) e o JavaScript de cliente (XSS, raro).
-- **`standalone`.** A corrida volta a ser de horas. Foram seis RCEs críticos em pouco mais de onze meses, cerca de um a cada dois meses. O React2Shell teve tentativas de exploração observadas "within hours" da divulgação (https://aws.amazon.com/blogs/security/china-nexus-cyber-threat-groups-rapidly-exploit-react2shell-vulnerability-cve-2025-55182/, 2025-12-04) e entrou no catálogo de vulnerabilidades exploradas da CISA em 2025-12-05, dois dias depois (https://www.cisa.gov/known-exploited-vulnerabilities-catalog, versão 2026.11.13 do feed JSON). Nenhum outro CVE do Next ou do React está nesse catálogo.
+- **`standalone`.** A corrida volta a ser de horas. Foram seis RCEs críticos entre dezembro de 2025 e outubro de 2026, cerca de um a cada dois meses. O React2Shell teve tentativas de exploração observadas "within hours" da divulgação (https://aws.amazon.com/blogs/security/china-nexus-cyber-threat-groups-rapidly-exploit-react2shell-vulnerability-cve-2025-55182/, 2025-12-04) e entrou no catálogo de vulnerabilidades exploradas da CISA em 2025-12-05, dois dias depois (https://www.cisa.gov/known-exploited-vulnerabilities-catalog, versão 2026.11.13 do feed JSON). Nenhum outro CVE do Next ou do React está nesse catálogo.
 
 ## 1. Segredos
 
@@ -68,7 +68,7 @@ Fontes: https://docs.github.com/en/code-security/secret-scanning/introduction/ab
 
 ## 2. Dependências
 
-Fontes: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference · https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/ · https://github.blog/security/supply-chain-security/tame-dependabot-group-your-updates-slow-the-cadence-keep-security-fast/ (2026-07-29) · https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions/ (2026-07-28) · https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions · https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions · https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow · https://github.com/peter-evans/enable-pull-request-automerge (README) · https://docs.renovatebot.com/key-concepts/automerge/ e https://docs.renovatebot.com/mend-hosted/overview/ (Renovate 44.239.1) · `docs/usage/configuration-options.md` e `docs/usage/key-concepts/minimum-release-age.md` do Renovate no commit `9ac3811` · https://pnpm.io/settings/dependency-resolution · https://pnpm.io/cli/audit · notas das versões v11.0.0 e v12.16.0 do pnpm (https://github.com/pnpm/pnpm/releases) · `npm_and_yarn/lib/dependabot/npm_and_yarn/file_updater/pnpm_lockfile_updater.rb` do dependabot-core no commit `1a0125f` · https://github.com/actions/dependency-review-action (v5.0.0) · https://google.github.io/osv-scanner/github-action/ (v2.7.1) · https://github.blog/changelog/2026-03-17-dependabot-now-detects-malware-in-npm-dependencies/ · https://docs.github.com/en/code-security/concepts/supply-chain-security/malware-alerts
+Fontes: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference · https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/ · https://github.blog/security/supply-chain-security/tame-dependabot-group-your-updates-slow-the-cadence-keep-security-fast/ (2026-07-29) · https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions/ (2026-07-28) · https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions · https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions · https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow · https://github.com/peter-evans/enable-pull-request-automerge (README) · https://docs.renovatebot.com/key-concepts/automerge/ e https://docs.renovatebot.com/mend-hosted/overview/ (Renovate 44.239.1) · `docs/usage/configuration-options.md` e `docs/usage/key-concepts/minimum-release-age.md` do Renovate no commit `9ac3811` · https://pnpm.io/settings/dependency-resolution · https://pnpm.io/cli/audit · notas das versões v11.0.0 e v12.16.0 do pnpm (https://github.com/pnpm/pnpm/releases) · `npm_and_yarn/lib/dependabot/npm_and_yarn/file_updater/pnpm_lockfile_updater.rb` do dependabot-core no commit `1a0125f` · https://github.com/actions/dependency-review-action (v5.0.0) · https://google.github.io/osv-scanner/github-action/ (v2.7.1) · https://github.blog/changelog/2026-03-17-dependabot-now-detects-malware-in-npm-dependencies/ · https://github.blog/changelog/2026-07-28-dependabot-alerts-on-malicious-packages-across-more-ecosystems/ · https://docs.github.com/en/code-security/concepts/supply-chain-security/malware-alerts
 
 ### 2.1 O que mudou em 2026 e já protege sem configurar
 
@@ -93,14 +93,14 @@ Fontes: https://docs.github.com/en/code-security/dependabot/working-with-dependa
 | Espera de maturidade | 3 dias por padrão nas versões; zero na segurança | `minimumReleaseAge` só se configurado (o `config:best-practices` liga `security:minimumReleaseAgeNpm`); nulo na segurança |
 | Merge automático | não existe opção no `dependabot.yml`; exige workflow próprio e o token da seção 2.2 | nativo (`automerge`, `platformAutomerge` ligado por padrão), espera os checks passarem |
 | Agrupamento | `groups` com `applies-to`, `dependency-type`, `update-types`, `patterns`; `multi-ecosystem-groups` | `group:monorepos`, `group:recommended` e regras livres |
-| Actions e imagens | ecossistemas `github-actions` e `docker`; atualiza o lockfile de actions no mesmo PR (seção 3) | `helpers:pinGitHubActionDigests` e `docker:pinDigests` no `config:best-practices` |
+| Actions e imagens | ecossistemas `github-actions` e `docker`; atualiza o lockfile de actions no mesmo PR (seção 3.3) | `helpers:pinGitHubActionDigests` e `docker:pinDigests` no `config:best-practices` |
 
 O Renovate é mais capaz e resolve o merge automático sem token extra. O Dependabot é nativo, não dá escrita em `workflows` a um terceiro e abre o PR de segurança sem esperar ciclo de 4 horas. Para um app, um mantenedor e uma Home estática, a diferença de recursos não paga a dependência de um app externo com escrita no repositório; o que o Dependabot não tem (merge automático que dispara o deploy) custa um GitHub App pequeno do próprio Autor (**inferência**, julgamento desta pesquisa).
 
 ### 2.4 O pnpm segura a correção de segurança por até um dia (medido)
 
 O que as fontes dizem:
-- O pnpm aplica `minimumReleaseAge` "to all dependencies, including transitive ones", e a instalação reaplica a regra a cada entrada do lockfile, a menos que `trustLockfile` seja `true`. Desde a v12.16.0, `pnpm install` "fails with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` when a locked version is too new".
+- O pnpm aplica `minimumReleaseAge` "to all dependencies, including transitive ones", e a instalação reaplica a regra a cada entrada do lockfile, a menos que `trustLockfile` seja `true` (opção que existe desde a v11.3, segundo o dependabot-core). A nota da v12.16.0 usa o `pnpm install` como referência: o `pnpm deploy --legacy` passou a conferir o lockfile "as `pnpm install` does, and fails with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` when a locked version is too new".
 - O Dependabot, numa atualização de segurança, passa `--config.minimum-release-age=0` ao pnpm "unconditionally", porque a correção "must not be blocked by a release-age gate", e devolve os arquivos de workspace que ele mesmo calculou, e não as exceções que o pnpm grava (comentários e código de `pnpm_lockfile_updater.rb`).
 - O Renovate não passa idade mínima ao pnpm: "pnpm applies its own config", e um pnpm que recusa a versão falha "and Renovate does not retry".
 
@@ -137,7 +137,7 @@ Consequência (**inferência** das fontes e da medição; conferir no primeiro P
 | PR de segurança do Dependabot | minutos (**inferência**: "as soon as ... disclosed") | igual |
 | Gate verde | só depois de 24 horas da publicação, pela seção 2.4 | igual, o que é tarde: o React2Shell teve exploração em horas |
 | Merge e deploy | merge automático com token de GitHub App, depois build, deploy e smoke (seção 5) | igual |
-| Caminho rápido | desnecessário: nenhum dos seis RCEs críticos de 2026 chega a um site exportado | o agente atualiza com a exceção, a CI passa, o agente mescla; dezenas de minutos (**inferência**) |
+| Caminho rápido | desnecessário: nenhum dos seis RCEs críticos da seção 0 chega a um site exportado | o agente atualiza com a exceção, a CI passa, o agente mescla; dezenas de minutos (**inferência**) |
 
 Para `standalone`, há uma alternativa que encurta o caminho automático sem agente: pôr `next`, `react` e `react-dom` em `minimumReleaseAgeExclude` de forma permanente. As atualizações de versão continuam esperando os 3 dias do Dependabot, e só a verificação do pnpm deixa de segurar esses três pacotes; o custo é perder a camada do pnpm justamente nos pacotes mais visados (**inferência**).
 
@@ -194,7 +194,7 @@ Fontes: https://github.com/nginx/docker-nginx-unprivileged (README e `mainline/a
 
 - **Dois estágios.** Um estágio de build com Node e pnpm roda `pnpm install --frozen-lockfile` e `next build`, que gera a pasta `out` com um HTML por rota e um `404.html`. O estágio final copia `out` para um nginx. O Node e o `node_modules` não entram na imagem final (**inferência** do desenho multi-stage).
 - **Base do estágio final: `nginx-unprivileged` em Alpine slim.** Conferido na imagem `1.30-alpine-slim`: `User: 101`, porta `8080/tcp`, sem `HEALTHCHECK`, `CMD nginx -g 'daemon off;'`, 5,74 MB comprimidos (amd64), com `/bin/sh` e `/usr/bin/wget` (ambos busybox) e sem `curl`. A variante `alpine` (23,4 MB) acrescenta `curl` "to make registering on DNS SD easier"; a `alpine-slim` basta. O projeto troca as tags "whenever there is a new NGINX release or a critical CVE is found and fixed" e toda segunda-feira, e recomenda "use the specific image digest instead of the tag" para estabilidade. O Docker Hub mudou de namespace: a partir do nginx 1.31.7 (mainline) e 1.30.6 (stable) a imagem é `nginx/nginx-unprivileged`, e não mais `nginxinc/nginx-unprivileged`; ela também sai no GHCR como `ghcr.io/nginx/nginx-unprivileged`, o que deixa a esteira inteira num registro só (**inferência**).
-- **Por que não uma imagem endurecida sem shell.** As Docker Hardened Images ficaram gratuitas (Apache 2.0) em 2025-12-17, rodam sem root e têm proveniência SLSA nível 3; o nginx delas escuta em 8080. Mas a variante de runtime não tem shell, e o pull exige `docker login dhi.io` com conta Docker. O health check do Coolify roda dentro do container como `CMD-SHELL` com `curl ... || wget ... || exit 1` (código da v4.1.0), então uma imagem sem `/bin/sh` reprova todo deploy. Pelo mesmo motivo ficam de fora as imagens distroless.
+- **Por que não uma imagem endurecida sem shell.** As Docker Hardened Images ficaram gratuitas (Apache 2.0) em 2025-12-17, rodam sem root e têm proveniência SLSA nível 3; o nginx delas escuta em 8080. Mas a variante de runtime não tem shell, e o guia de início manda fazer `docker login dhi.io` com conta Docker antes do pull. O health check do Coolify roda dentro do container como `CMD-SHELL` com `curl ... || wget ... || exit 1` (código da v4.1.0), então uma imagem sem `/bin/sh` reprova todo deploy. Pelo mesmo motivo ficam de fora as imagens distroless.
 - **pnpm no estágio de build.** O Node deixou de distribuir o Corepack a partir da v25 ("Corepack will no longer be distributed starting with Node.js v25"). Com Node 26, o pnpm entra por `npm install -g pnpm@<versão exata>` ou pela action `pnpm/action-setup` na CI, fixado na versão do campo `packageManager` (**inferência** de procedimento).
 - **Configuração do nginx.** A do guia do Next: `try_files $uri $uri.html $uri/ =404;` e `error_page 404 /404.html;`. Acrescentar `server_tokens off` e cache longo só para `/_next/static/`, cujos nomes têm hash (**inferência**; o cache de borda é decisão do #18).
 
@@ -217,7 +217,7 @@ Para esta imagem: health check HTTP ligado, `GET http://localhost:8080/`, sem po
 ### 4.4 Varredura, SBOM, proveniência e assinatura
 
 - **Superfície.** Na exportação, a imagem final tem pacotes do Alpine e o nginx. As dependências npm que chegam ao Visitante viram JavaScript empacotado, que um scanner de imagem não enxerga; elas estão cobertas pelo Dependabot sobre o lockfile (**inferência**).
-- **Scanner.** Trivy (v0.76.2, com releases imutáveis desde o incidente) e Grype (v0.121.3) cobrem Alpine. O SBOM do BuildKit usa por padrão o "BuildKit Syft scanner (docker/buildkit-syft-scanner)", de Anchore, e segue SPDX; o Grype é do mesmo fabricante e lê esse formato (**inferência** de compatibilidade). Um scanner basta.
+- **Scanner.** Trivy (v0.76.2; o projeto ligou as releases imutáveis do GitHub em 2026-03-03, o que poupou a v0.69.3 no incidente) e Grype (v0.121.3) cobrem Alpine. O SBOM do BuildKit usa por padrão o "BuildKit Syft scanner (docker/buildkit-syft-scanner)", de Anchore, e segue SPDX; o Grype é do mesmo fabricante e lê esse formato (**inferência** de compatibilidade). Um scanner basta.
 - **O que bloqueia.** Nada no caminho de deploy. Um CVE novo sem correção na base faria o scan reprovar todos os deploys, inclusive o de uma correção crítica (**inferência**). O remédio de uma base com CVE é trocar a base, o que o Dependabot do ecossistema `docker` faz ao atualizar o digest. O scan informa: no resumo do job e numa varredura semanal da imagem em produção.
 - **SBOM.** Não é anexado por padrão; `sbom: true` liga. O BuildKit "only scans the final stage of an image" por padrão; `ARG BUILDKIT_SBOM_SCAN_STAGE=true` no estágio de build acrescenta as dependências npm que produziram o JavaScript, que é o inventário que interessa numa exportação (**inferência**).
 - **Atestado de proveniência do GitHub.** Em repositório público, usa a instância pública do Sigstore com log de transparência; sozinho dá SLSA v1.0 Build Level 2, e um workflow reutilizável compartilhado chega ao nível 3. A página avisa: "artifact attestations are *not* a guarantee that an artifact is secure". O Coolify 4.1.0 só faz `docker compose pull` e não verifica assinatura nem atestado (código da v4.1.0). O único verificador possível é o próprio job de deploy, com `gh attestation verify` sobre o digest que ele vai promover: isso garante que só imagem construída pelo workflow da `main` chega à tag de produção (**inferência**).
@@ -248,7 +248,9 @@ O que o Coolify 4.1.0 faz numa aplicação por imagem:
 | Rastreio da versão | o job registra o digest promovido; a imagem também tem a tag `sha-<commit>` | a própria configuração do Coolify |
 | Rollback | mover a tag de volta e chamar `/deploy` | `PATCH` para a tag anterior e `/deploy` |
 
-A VPS hospeda outros projetos no mesmo Coolify (#18). Em 2026 o Coolify publicou dezenas de advisories, entre eles uma checagem de habilidade que deixava um token `read` alterar recursos ([GHSA-f47p-xrgc-977v](https://github.com/coollabsio/coolify/security/advisories/GHSA-f47p-xrgc-977v)), tokens sem expiração ([GHSA-c83f-5ph7-x8xv](https://github.com/coollabsio/coolify/security/advisories/GHSA-c83f-5ph7-x8xv)) e um disparo de deploy sem autenticação por webhook ([GHSA-w8wm-r924-f65v](https://github.com/coollabsio/coolify/security/advisories/GHSA-w8wm-r924-f65v)), todos corrigidos antes da 4.1.0. O menor privilégio aqui é o token `deploy` com a tag móvel. Cada build empurra `sha-<commit>` (imutável por convenção, para rastreio e rollback), e o job de deploy move `production` para o digest verificado (seção 4.4) logo antes de chamar o Coolify.
+A VPS hospeda outros projetos no mesmo Coolify (#18). Em 2026 o Coolify publicou 61 advisories, entre eles uma checagem de habilidade que deixava um token `read` alterar recursos ([GHSA-f47p-xrgc-977v](https://github.com/coollabsio/coolify/security/advisories/GHSA-f47p-xrgc-977v)), tokens sem expiração ([GHSA-c83f-5ph7-x8xv](https://github.com/coollabsio/coolify/security/advisories/GHSA-c83f-5ph7-x8xv)) e um disparo de deploy sem autenticação por webhook ([GHSA-w8wm-r924-f65v](https://github.com/coollabsio/coolify/security/advisories/GHSA-w8wm-r924-f65v)), os três corrigidos em betas anteriores à 4.0.0. O menor privilégio aqui é o token `deploy` com a tag móvel. Cada build empurra `sha-<commit>` (imutável por convenção, para rastreio e rollback), e o job de deploy move `production` para o digest verificado (seção 4.4) logo antes de chamar o Coolify.
+
+Isso contraria de propósito a recomendação da página de imagens do Coolify, que avisa que "A mutable tag can resolve to different image content during a later deployment" e sugere tag de versão ou digest em produção. O risco que ela aponta aparece também no **Restart**, que "also pulls the saved reference again". Aqui ele é contido porque só o job de deploy move `production`, sempre seguido de deploy e smoke, e devolve a tag ao digest anterior quando falha (seção 5.4); a tag nunca aponta para algo que não deveria estar no ar (**inferência** do desenho). O Coolify 4.1.0 aceita digest (o campo guarda `sha256-<digest>`), mas trocá-lo a cada deploy exige o token `write`.
 
 ### 5.2 Ordem dos deploys
 
@@ -281,14 +283,68 @@ A VPS hospeda outros projetos no mesmo Coolify (#18). Em 2026 o Coolify publicou
 
 ### 5.7 O canal do Coolify
 
-- A VPS roda o Coolify 4.1.0, de 2026-05-18; a versão corrente é a v4.7.5, de 2026-11-10 (`gh api repos/coollabsio/coolify/releases`). Nenhum advisory publicado até 2026-11-15 atinge a 4.1.0, mas a distância cresce e o token de deploy atravessa a internet até o painel. Atualizar o Coolify afeta a frota inteira e fica fora deste ticket.
+- A VPS roda o Coolify 4.1.0, de 2026-05-18; a versão corrente é a v4.7.5, de 2026-11-10 (`gh api repos/coollabsio/coolify/releases`). Nenhum dos 70 advisories publicados até 2026-11-15 tem faixa afetada que chegue à 4.1.0 (todas param em betas da 4.0.0 ou na própria 4.0.0), mas a distância cresce e o token de deploy atravessa a internet até o painel. Atualizar o Coolify afeta a frota inteira e fica fora deste ticket.
 - O token expira (no máximo 365 dias). A falha é ruidosa: `/deploy` devolve 401 e o job fica vermelho.
 
 ### 5.8 O que muda com `standalone`
 
 - Nada no desenho de entrega. Muda a porta e o caminho do health check, o limite de recursos do #18 e a urgência do caminho rápido (seção 2.7).
 
-## 6. Exageros para este contexto
+## Recomendação
+
+Para a exportação estática do Marco 1. O nome dos checks, a ordem dos estágios e os testes são do #49 e do #52; aqui fica o que é de segurança e entrega.
+
+| Controle | Estágio | Bloqueia ou informa | Ferramenta | Por quê |
+|---|---|---|---|---|
+| Segredo antes do commit | gancho de pre-commit | bloqueia | gitleaks 8.30.1 (`gitleaks git --pre-commit --redact --staged`); Betterleaks quando a v2 sair estável | única barreira antes da exposição para segredo genérico, que o GitHub não vê neste repositório (1) |
+| Segredo no push | push | bloqueia | push protection do repositório (já ligada) | barra padrões de parceiro no servidor; contorno gera alerta (1) |
+| Segredo nos commits empurrados | CI, gate do branch | bloqueia o merge, não a exposição | o mesmo binário, no intervalo empurrado | pega o que passou sem gancho e avisa onde o agente olha (1) |
+| Segredo no histórico, issues e PRs | contínuo | informa | secret scanning (já ligado) | gratuito em repositório público (1) |
+| Relato de vulnerabilidade por terceiros | contínuo | informa | relato privado de vulnerabilidade | um clique, sem custo até alguém relatar (1) |
+| Vulnerabilidade trazida pela mudança | CI, gate do branch | bloqueia (alta ou crítica, escopo `runtime`) | `actions/dependency-review-action` v5 com `base-ref` e `head-ref` | compara com a base e não reprova o PR pelo que ele não mudou (2.5) |
+| Vulnerabilidade e malware no que já está na `main` | contínuo | informa | alertas do Dependabot e alertas de malware (ligar) | advisory novo não deve travar PR alheio (2.1, 2.5) |
+| Correção de segurança | contínuo | PR automático; merge automático com gate verde | Dependabot security updates e workflow de merge com token de um GitHub App do Autor | publicar é mergear sem humano; o merge com `GITHUB_TOKEN` não dispararia o deploy (2.2) |
+| Atualização de versão | semanal | PR agrupado; merge automático de patch e minor com gate verde | Dependabot (`npm`, `docker`, `github-actions`) com o cooldown padrão de 3 dias; majors com o agente | menos ruído, e a versão nova espera a comunidade (2.1, 2.3) |
+| Maturidade, scripts e confiança na instalação | instalação, local e CI | bloqueia | padrões do pnpm 12 mais `trustPolicy: no-downgrade` | barra versão com menos de um dia, script não aprovado, dependência exótica e queda de proveniência (2.6) |
+| Correção crítica com pressa | sob demanda | (procedimento) | agente com `pnpm up next@<versão>` ou `pnpm audit --fix`, que gravam a exceção | atravessa a maturidade do pnpm em minutos; obrigatório em `standalone` (2.4, 2.7) |
+| Código e workflows | PR | bloqueia (alerta de segurança alto ou mais, nas linhas do diff) | CodeQL default setup e a regra "Require code scanning results" | gratuito, sem arquivo para manter, e não atrasa PR do Dependabot (3.1) |
+| Permissões do token | todo workflow | (configuração) | padrão só leitura (já) e `permissions: {}` com concessão por job | menor privilégio, recomendação do GitHub (3.2) |
+| Fixação das actions | execução | bloqueia | lockfile `actions.lock` com a política "Require lockfile", SHA nos arquivos e `sha_pinning_required` | a proteção mais forte segundo o GitHub; cobre as transitivas, a lição do Trivy (3.3) |
+| Lint de workflows | gancho e CI, gate | bloqueia | actionlint e zizmor | segundos, offline, o mesmo comando no agente e na CI (3.4) |
+| Origem do check obrigatório | merge | bloqueia | ruleset com `integration_id: 15368` (GitHub Actions) | impede status de mesmo nome vindo de outra integração (3.7) |
+| Imagem final | build | (configuração) | `nginx-unprivileged` stable em `alpine-slim`, fixada por digest, do GHCR | UID 101, porta 8080, `sh` e `wget` para o health check, 5,74 MB (4.1) |
+| Cache do build | build | (configuração) | buildx com cache `gha`, escopo por imagem, imagem só na `main` | branch não envenena o cache que a `main` restaura (4.3) |
+| Proveniência e SBOM | build e promoção | informa no build; bloqueia na promoção | proveniência `max` do build-push-action, `sbom: true` com o estágio de build, `actions/attest-build-provenance` e `gh attestation verify` no deploy | só imagem construída pela `main` vira produção (4.4) |
+| Varredura da imagem | pós-build e semanal | informa | Grype, fixado | CVE sem correção na base não pode segurar uma correção crítica (4.4) |
+| Segredo de deploy | deploy | (configuração) | environment `production` só da `main`, sem revisor | o build, onde roda código de terceiros, não vê o token (5.5) |
+| Deploy | pós-merge na `main` | bloqueia (job) | `/deploy` do Coolify com token só `deploy` e tag móvel `production` | menor raio de dano do token numa VPS compartilhada (5.1) |
+| Ordem dos deploys | pós-merge na `main` | (configuração) | `concurrency` `production`, um pendente, sem `cancel-in-progress` | commit velho não sobrescreve novo, e deploy não é cortado (5.2) |
+| Saúde do container | deploy no Coolify | bloqueia a troca de container | health check HTTP, `GET /` na porta 8080 | sem ele o Coolify troca o container às cegas (4.2) |
+| Smoke | pós-deploy | bloqueia (job vermelho) e dispara o rollback | `curl` em `version.json` e quatro conferências de entrega | prova que a versão nova está no ar (5.3) |
+| Rollback | falha do smoke, ou manual | (procedimento) | tag `production` de volta ao digest anterior e `/deploy`; `workflow_dispatch` com o commit | uma tentativa automática; manual por commit (5.4) |
+
+**Com `standalone`**: muda a imagem final (Node sem root, com `wget` ou `curl`), entra o `node_modules` na superfície do scan, e o caminho rápido de correção deixa de ser opcional. O resto da tabela fica.
+
+## Alternativas descartadas
+
+- **Renovate (app Mend)**: app de terceiro com escrita em `contents`, `workflows`, `checks` e `statuses`; PR de segurança preso a um ciclo de até 4 horas e lido dos mesmos alertas do Dependabot. O merge automático nativo é a vantagem real, e um GitHub App próprio a cobre (2.3).
+- **Merge automático com o `GITHUB_TOKEN`**, como no exemplo oficial: o merge chega à `main` e o deploy não roda (2.2).
+- **PAT do Autor no merge automático**: o GitHub aceita, mas o token é pessoal, mais amplo e expira; o GitHub App é o caminho que a documentação põe primeiro (2.2).
+- **`pnpm audit` como gate**: reprova PRs por advisories alheios e depende da rede do registro (2.5).
+- **OSV-Scanner**: repete os dados de vulnerabilidade e malware que o GitHub ingere, e o workflow de PR exige `pull_request` (2.5).
+- **Modo estrito do `minimumReleaseAge`** e **`trustLockfile`**: o primeiro exige aprovar à mão cada versão nova; o segundo desliga a verificação que pega lockfile gerado fora da política (2.6).
+- **`gitleaks/gitleaks-action`**: deixou de ser MIT na v2 e não acrescenta nada ao binário (1).
+- **Betterleaks já**: a v2 está em release candidate com mudanças de CLI e configuração; trocar uma linha depois é barato (1).
+- **Tag por commit ou digest trocada pela API**: exige token `write` no GitHub, com poder sobre todas as aplicações do time na VPS (5.1).
+- **`queue: max`** e **`cancel-in-progress`** no deploy: o primeiro faz a correção crítica esperar a fila; o segundo pode cortar um deploy no meio (5.2).
+- **Imagem sem shell (DHI, distroless, Chainguard)**: o health check do Coolify roda como `CMD-SHELL` e reprovaria todo deploy; o guia da DHI ainda manda fazer login antes do pull (4.1).
+- **Imagem oficial `nginx`**: escuta na 80 e mantém a diretiva `user`, diferenças que a `nginx-unprivileged` remove (4.1).
+- **Scan de imagem bloqueando o deploy** (4.4).
+- **cosign** e **SLSA nível 3**; **harden-runner** por ora; **Scorecard** como workflow; **previews por PR**; **revisor obrigatório no environment** (seção de exageros).
+
+## Exageros para este contexto
+
+Item 6 do ticket.
 
 Um mantenedor, um app, repositório público, Home exportada:
 
@@ -299,10 +355,20 @@ Um mantenedor, um app, repositório público, Home exportada:
 - **Previews por PR**: um container e um token `write` por PR, sem revisor.
 - **Revisor obrigatório ou espera no environment**: quebra "publicar é mergear".
 - **OSV-Scanner** junto do Dependabot: repete dados que o GitHub já ingere desde julho de 2026, e o modo de PR exige `pull_request`.
-- **`pnpm audit` como gate**: reprova PRs por advisories que eles não trouxeram.
-- **Modo estrito do `minimumReleaseAge`**: aprovação manual de cada versão nova, sem ganho proporcional sobre o padrão.
-- **Scan de imagem bloqueando o deploy**: pode segurar uma correção crítica por um CVE sem correção na base.
 - **Imagem endurecida paga ou com login** (DHI Select ou Enterprise, Chainguard): a imagem final tem 5,74 MB de nginx e Alpine, reconstruída toda semana.
 - **Imagem multiplataforma**: a VPS é amd64 (**inferência** do plano KVM do #18).
 - **Checagem de licença na revisão de dependências**: um site pessoal sem distribuição de binário não tem política de licença a impor.
 - **Canary, blue-green ou rollback progressivo**: o Coolify já mantém o container antigo até o novo ficar saudável, e o rollback de uma tentativa cobre o resto.
+
+## Perguntas ao Autor
+
+Só o Autor decide estas; cada uma traz a recomendação e o impacto.
+
+1. **Criar um GitHub App próprio para o merge automático do Dependabot?** Um app do Autor, instalado só neste repositório, com `contents` e `pull_requests` de escrita, e o ID e a chave privada como segredos do Dependabot. *Recomendo sim.* Impacto: correções de segurança e atualizações de patch e minor chegam ao ar sem ninguém; sem o app, os PRs do Dependabot esperam um agente, e um merge feito com o `GITHUB_TOKEN` fica na `main` sem publicar.
+2. **gitleaks agora ou Betterleaks?** *Recomendo gitleaks 8.30.1 agora* e a troca pelo Betterleaks quando a v2.0.0 sair estável. Impacto: o gancho nasce estável; a troca depois é uma linha no lefthook e outra na CI.
+3. **Adotar já o lockfile de workflow, GA desde 2026-10-28?** *Recomendo sim*, com a política "Require lockfile" e o SHA mantido nos arquivos. Impacto: as actions transitivas ficam fixadas e o Dependabot mantém o lockfile; o agente roda `gh actions-lock` quando editar um workflow.
+4. **Ligar os alertas de malware do Dependabot e o relato privado de vulnerabilidade?** São configurações do repositório. *Recomendo ligar os dois.* Impacto: dois cliques; nenhum trabalho até haver alerta ou relato.
+5. **Validade do token de deploy do Coolify: 365 ou 90 dias?** *Recomendo 365 dias*, com uma issue datada para a troca. Impacto: uma rotação por ano; se esquecer, o deploy falha com 401 e o job fica vermelho, sem estrago no ar.
+6. **Atualizar o Coolify da 4.1.0 (maio de 2026) para a linha 4.7 (novembro de 2026)?** Afeta todos os projetos da VPS, por isso fica fora deste ticket. *Recomendo sim, num ticket da frota*, sem bloquear a esteira do Minimal Me. Impacto: o canal por onde passa o token de deploy fica na versão corrente.
+7. **Quando a web virar `standalone`, isentar `next`, `react` e `react-dom` da maturidade do pnpm?** *Recomendo decidir só quando o `standalone` vier*; até lá, o caminho rápido é o do agente. Impacto: com a isenção, o PR de segurança do Dependabot passa no gate no mesmo dia, ao custo de perder a camada do pnpm nos pacotes mais visados.
+8. **Publicar o commit em `version.json`?** *Recomendo sim.* Impacto: o smoke prova a versão no ar; o commit já é público, porque o repositório é.
