@@ -229,3 +229,80 @@ Para esta imagem: health check HTTP ligado, `GET http://localhost:8080/`, sem po
 - O estágio final passa a ser Node, com o `server.js` do `standalone`, usuário sem root e porta própria. A base sem shell continua fora pelo health check do Coolify; uma base Alpine ou Debian slim com `wget` ou `curl` resolve (**inferência**).
 - A superfície do scan passa a incluir o `node_modules` rastreado pelo Next e o binário do Node. Os seis RCEs críticos da seção 0 voltam a valer, e o caminho rápido de correção da seção 2.7 vira obrigatório.
 - Se houver otimização de imagem do Next, entra o `sharp`, que pede `allowBuilds` no pnpm e esteve em dois dos RCEs críticos de 2026 (AVIF e SVG).
+
+## 5. Entrega
+
+Fontes: `app/Jobs/ApplicationDeploymentJob.php`, `routes/api.php`, `app/Http/Controllers/Api/DeployController.php`, `app/Http/Middleware/ApiAbility.php`, `app/Livewire/Security/ApiTokens.php` e `app/Livewire/Project/Application/Rollback.php` do Coolify na tag v4.1.0 (commit `49656aa`) · https://coolify.io/docs/api/endpoints/deployments/deploy-by-tag-or-uuid · https://coolify.io/docs/api/authorization · https://coolify.io/docs/applications/deployments/docker-image · advisories do Coolify (`gh api repos/coollabsio/coolify/security-advisories`, lido em 2026-11-15) · https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency · https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments · https://developers.cloudflare.com/cache/concepts/default-cache-behavior/ · https://docs.docker.com/reference/cli/docker/buildx/imagetools/create/ · `docs/adr/0001-dominio-proprio.md` · [#18](https://github.com/ThiagoPanini/minimal-me/issues/18)
+
+### 5.1 Tag imutável ou móvel, e como o Coolify roda a nova
+
+O que o Coolify 4.1.0 faz numa aplicação por imagem:
+- Monta a imagem como `nome:tag`, ou como `nome@sha256:<hash>` quando a tag começa com `sha256-`; em cada deploy roda `docker compose pull` e depois `up -d`. Uma tag móvel é baixada de novo a cada deploy.
+- `/deploy` exige a habilidade `deploy`; ler o estado de um deploy (`GET /deployments/{uuid}`) exige `read`; mudar a tag da aplicação (`PATCH /applications/{uuid}`) exige `write`. Só `root` passa por cima de tudo (`ApiAbility.php`).
+- O token é de um time e expira: as opções da v4.1.0 são 7, 30, 60, 90 ou 365 dias, com 30 de padrão.
+
+| | Tag móvel (`production`) | Tag por commit ou digest |
+|---|---|---|
+| Token no GitHub | `deploy` | `write` |
+| Raio de dano do token vazado | disparar deploys do time | reconfigurar qualquer aplicação do time na VPS, inclusive comando e variáveis (**inferência** de `write`) |
+| Rastreio da versão | o job registra o digest promovido; a imagem também tem a tag `sha-<commit>` | a própria configuração do Coolify |
+| Rollback | mover a tag de volta e chamar `/deploy` | `PATCH` para a tag anterior e `/deploy` |
+
+A VPS hospeda outros projetos no mesmo Coolify (#18). Em 2026 o Coolify publicou dezenas de advisories, entre eles uma checagem de habilidade que deixava um token `read` alterar recursos ([GHSA-f47p-xrgc-977v](https://github.com/coollabsio/coolify/security/advisories/GHSA-f47p-xrgc-977v)), tokens sem expiração ([GHSA-c83f-5ph7-x8xv](https://github.com/coollabsio/coolify/security/advisories/GHSA-c83f-5ph7-x8xv)) e um disparo de deploy sem autenticação por webhook ([GHSA-w8wm-r924-f65v](https://github.com/coollabsio/coolify/security/advisories/GHSA-w8wm-r924-f65v)), todos corrigidos antes da 4.1.0. O menor privilégio aqui é o token `deploy` com a tag móvel. Cada build empurra `sha-<commit>` (imutável por convenção, para rastreio e rollback), e o job de deploy move `production` para o digest verificado (seção 4.4) logo antes de chamar o Coolify.
+
+### 5.2 Ordem dos deploys
+
+- Um grupo de `concurrency` tem "at most one running job or workflow" e, por padrão, um pendente; um novo pendente cancela o anterior. `cancel-in-progress: true` também cancela o que está rodando. A opção `queue: max` deixa até 100 pendentes, em ordem, e a página usa justamente um deploy de produção como exemplo.
+- Para este caso, o grupo `production` no nível do workflow da `main`, com o padrão de um pendente e sem `cancel-in-progress` (**inferência**): os deploys saem na ordem dos pushes, um commit mais velho não sobrescreve um mais novo, e um deploy nunca é cortado entre mover a tag e rodar o smoke. O `queue: max` faria a correção crítica esperar o deploy de cada commit anterior da fila.
+
+### 5.3 Smoke que prova a versão no ar
+
+- O build grava a versão num arquivo servido pelo nginx, por exemplo `version.json` com o commit. A Cloudflare "does not cache HTML or JSON by default", e o #18 decidiu não cachear HTML; a resposta vem da origem (**inferência** sobre a configuração final da zona).
+- O job chama `/deploy` e consulta a URL pública até o commit bater com o do workflow, com limite de alguns minutos. Com um token só `deploy`, o job não lê o estado do deploy no Coolify; a versão na URL pública é a prova que importa (**inferência**).
+- Depois da versão, poucas conferências de entrega: `/` com 200, uma rota inexistente com 404 servindo o `404.html`, um arquivo de `/_next/static/` com 200 e cache longo, e o cabeçalho `Server` sem versão. Testes de conteúdo e de navegador são do #49.
+- Se o health check do Coolify reprovar, o container antigo continua no ar (seção 4.2) e o smoke estoura o tempo com o commit antigo: job vermelho, sem estrago. Se a versão nova estiver no ar e uma conferência falhar, entra o rollback.
+
+### 5.4 Rollback
+
+- O painel de rollback do Coolify reenfileira um deploy por commit (`rollbackImage($commit)`), o que casa com as imagens de build Git, marcadas pelo commit, e não com uma aplicação que segue uma tag (**inferência** do código).
+- Rollback pela esteira: o job de deploy guarda o digest que `production` apontava antes de mover; se o smoke falhar com a versão nova no ar, ele devolve a tag a esse digest (`docker buildx imagetools create`, que faz "a carbon copy" de um índice já existente no registro), chama `/deploy` e roda o smoke de novo. Uma tentativa só, e o job termina vermelho de qualquer jeito, para alguém olhar (**inferência**).
+- Rollback manual: o mesmo workflow com `workflow_dispatch` e o commit desejado, que promove `sha-<commit>`. Se o Actions estiver fora, o painel do Coolify troca a tag à mão.
+
+### 5.5 Environment `production`
+
+- No plano Free, environments existem só em repositório público, que é o caso. Os segredos de um environment ficam disponíveis "only to workflow jobs that use the environment" e só depois que as regras passam; a opção de branches e tags restringe quem pode fazer deploy.
+- Configuração: environment `production` com deploy só a partir da `main`, o token do Coolify como segredo do environment, sem revisores obrigatórios e sem espera. Revisor obrigatório quebraria "publicar é mergear", porque o Autor não aprova PRs. O zizmor tem uma auditoria para isso (`secrets-outside-env`), que aponta segredo usado fora de environment.
+- O ganho: o job que instala dependências e roda o build, onde código de terceiros executa, nunca vê o token de deploy; e um branch de agente ou de robô não consegue usar o environment (**inferência** do desenho).
+
+### 5.6 Previews por PR
+
+- A API do Coolify aceita previews de aplicação por imagem (`pull_request_id` e `docker_tag`), e "Opening a preview or changing its tag also requires write permission". O ADR 0001 deixou hostnames de primeiro nível e o certificado de origem coringa prontos para isso.
+- Para um mantenedor que não revisa PRs, e com agentes que testam contra o build de produção na CI (#49), um preview custa um container por PR na VPS e um token `write` no GitHub sem ninguém para olhar o resultado (**inferência**). Fica fora do Marco 1, como o #17 já propunha.
+
+### 5.7 O canal do Coolify
+
+- A VPS roda o Coolify 4.1.0, de 2026-05-18; a versão corrente é a v4.7.5, de 2026-11-10 (`gh api repos/coollabsio/coolify/releases`). Nenhum advisory publicado até 2026-11-15 atinge a 4.1.0, mas a distância cresce e o token de deploy atravessa a internet até o painel. Atualizar o Coolify afeta a frota inteira e fica fora deste ticket.
+- O token expira (no máximo 365 dias). A falha é ruidosa: `/deploy` devolve 401 e o job fica vermelho.
+
+### 5.8 O que muda com `standalone`
+
+- Nada no desenho de entrega. Muda a porta e o caminho do health check, o limite de recursos do #18 e a urgência do caminho rápido (seção 2.7).
+
+## 6. Exageros para este contexto
+
+Um mantenedor, um app, repositório público, Home exportada:
+
+- **SLSA Build Level 3** por workflow reutilizável isolado: o nível 2 do atestado padrão, verificado na promoção, já responde à única pergunta que alguém faz aqui ("esta imagem saiu da `main`?").
+- **Assinatura com cosign** além do atestado do GitHub: duas assinaturas Sigstore e nenhum verificador a mais.
+- **OpenSSF Scorecard** como workflow: placar que pune o desenho escolhido (zero aprovações) e repete o que zizmor, ruleset e CodeQL já cobrem.
+- **harden-runner em modo de bloqueio**: lista de domínios para manter, num job que não vê o segredo de deploy; o firewall nativo do GitHub está a caminho.
+- **Previews por PR**: um container e um token `write` por PR, sem revisor.
+- **Revisor obrigatório ou espera no environment**: quebra "publicar é mergear".
+- **OSV-Scanner** junto do Dependabot: repete dados que o GitHub já ingere desde julho de 2026, e o modo de PR exige `pull_request`.
+- **`pnpm audit` como gate**: reprova PRs por advisories que eles não trouxeram.
+- **Modo estrito do `minimumReleaseAge`**: aprovação manual de cada versão nova, sem ganho proporcional sobre o padrão.
+- **Scan de imagem bloqueando o deploy**: pode segurar uma correção crítica por um CVE sem correção na base.
+- **Imagem endurecida paga ou com login** (DHI Select ou Enterprise, Chainguard): a imagem final tem 5,74 MB de nginx e Alpine, reconstruída toda semana.
+- **Imagem multiplataforma**: a VPS é amd64 (**inferência** do plano KVM do #18).
+- **Checagem de licença na revisão de dependências**: um site pessoal sem distribuição de binário não tem política de licença a impor.
+- **Canary, blue-green ou rollback progressivo**: o Coolify já mantém o container antigo até o novo ficar saudável, e o rollback de uma tentativa cobre o resto.
