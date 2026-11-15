@@ -27,3 +27,7 @@ O produto foi redefinido como um hub de três frentes, e o chat aberto a Visitan
 ## Nota de 2026-11-15
 
 O domínio é `minimalme.dev`, registrado no Cloudflare Registrar, com a zona em Full (strict) e a origem ainda por fazer em Hospedagem e orçamento mensal. O `minimal.me` tem dono e está à venda; o `minmal.me`, registrado por engano, não renova. O TLD `.dev` força HTTPS no navegador (HSTS preload), o que reforça a decisão de HSTS em etapas só depois do deploy. A web fica no apex (`minimalme.dev`); o `api.minimalme.dev` do ADR 0002 segue sem uso no Marco 1.
+
+## Nota de 2026-11-15, hospedagem
+
+A Home roda na VPS Hostinger com Coolify, atrás da Cloudflare em modo proxied e em Full (strict). A origem usa um Cloudflare Origin Certificate para `minimalme.dev` e `*.minimalme.dev`, e não o Let's Encrypt: com Full (strict) e Always Use HTTPS ligados, a emissão por HTTP-01 atrás do proxy tende a falhar no primeiro pedido, e trocar o desafio do Traefik alteraria o proxy dos outros projetos da VPS. O `minimal-me.panlabs.tech` redireciona (301) por uma Regra de Redirecionamento da Cloudflare, e o `www.minimalme.dev` redireciona para o apex. O HSTS liga em um passo só, depois do primeiro deploy conferido: como o `.dev` já está na lista de pré-carga dos navegadores, escalonar o `max-age` não protege contra nada, e isso substitui o "HSTS em etapas" da nota anterior. As decisões completas estão em [Hospedagem e orçamento mensal](https://github.com/ThiagoPanini/minimal-me/issues/18).
