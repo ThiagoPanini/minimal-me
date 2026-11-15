@@ -3,9 +3,11 @@ status: accepted
 date: 2026-11-14
 ---
 
-# Fotos de Frames & Fables no Cloudflare R2, com originais privados
+# Fotos de Frames & Songs no Cloudflare R2, com originais privados
 
-Frames & Fables guarda o original de cada foto que o Autor envia e serve aos Visitantes cópias menores, sem os dados do arquivo (lugar, aparelho). Decidimos guardar tudo no Cloudflare R2: os originais num depósito privado, e as cópias públicas num depósito servido por um endereço da própria zona do Minimal Me. Uma cópia só fica pública enquanto a Publicação dela está publicada: um Rascunho nunca tem cópia alcançável, e despublicar ou excluir tira as cópias do ar e limpa o cache. O backup do banco também vai para o R2.
+> **A rever no grilling de Frames & Songs** (2026-11-15): decidido quando o space era Frames & Fables, uma grade de fotos, e fora do MVP desde então.
+
+Frames & Songs guarda o original de cada foto que o Autor envia e serve aos Visitantes cópias menores, sem os dados do arquivo (lugar, aparelho). Decidimos guardar tudo no Cloudflare R2: os originais num depósito privado, e as cópias públicas num depósito servido por um endereço da própria zona do Minimal Me. Uma cópia só fica pública enquanto a Publicação dela está publicada: um Rascunho nunca tem cópia alcançável, e despublicar ou excluir tira as cópias do ar e limpa o cache. O backup do banco também vai para o R2.
 
 ## Considered Options
 
