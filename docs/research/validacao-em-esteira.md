@@ -4,9 +4,9 @@ Pesquisa do ticket [#49](https://github.com/ThiagoPanini/minimal-me/issues/49), 
 
 ## Retomada
 
-- **Feito**: contexto (ticket #49, Base técnica #17, fronteira com #50, critérios da Home em #12, `docs/design/`, ruleset e configurações do repositório); seções 1 (estágios), 2 (checks obrigatórios), 3 (camadas de teste), 4 (velocidade) e 5 (checks do sistema de design).
+- **Feito**: as seis seções do ticket, a comparação com as recomendações anteriores de #17, o esboço dos workflows, a esteira recomendada, as alternativas descartadas, os exageros e as perguntas abertas. Pesquisa concluída em 2026-11-15.
 - **Mudança de escopo (2026-11-15, coordenador)**: a forma da web não está fechada. A recomendação atual para o Marco 1 é `output: "export"` (o Next gera arquivos estáticos no build, servidos por nginx numa imagem de contêiner), com o servidor Node (`standalone`) só quando um space futuro pedir recursos de servidor. Onde a esteira depende da forma, esta pesquisa cobre primeiro a exportação estática e acrescenta uma nota curta sobre o que muda com `standalone`. O "Destrava" do ticket aponta agora para #52, que também pede o nome dos checks no ruleset.
-- **Próximo**: exageros (tópico 6), esteira recomendada, alternativas descartadas e perguntas abertas.
+- **Próximo**: nada nesta pesquisa. A decisão segue em #52, junto com a pesquisa de #50.
 
 ## Pergunta
 
@@ -34,7 +34,7 @@ Fora: segurança da cadeia de suprimentos e entrega (gitleaks, Dependabot, permi
 ## Resposta curta
 
 1. **A CI é a autoridade; o gancho é atalho.** Ganchos locais rápidos (formatação no pre-commit, Conventional Commits no commit-msg, checagens de segundos no pre-push) economizam uma volta de CI para o agente, mas nada que precise valer depende deles, porque todos se pulam com `--no-verify`.
-2. **CI no evento `pull_request`, e `push` só na `main`.** O `pull_request` testa o merge do PR com a `main`, traz o título do PR (que vira a mensagem do squash) e roda igual para o Dependabot.
+2. **CI no evento `pull_request`, e `push` só na `main`.** O `pull_request` testa o merge do PR com a `main`, traz o título do PR (que vira a mensagem do squash) e alcança PRs de fork, que o `push` nunca alcança; para o Dependabot, os dois eventos têm as mesmas restrições, e a validação não precisa de segredo.
 3. **Dois checks obrigatórios com nome estável: `gate` e `pr-title`.** O `gate` agrega os jobs da validação e falha se algum não terminou em sucesso; o `pr-title` valida o título que vira o commit da `main`. Fonte fixada no app GitHub Actions.
 4. **Sem modo strict e sem merge queue.** A merge queue não existe para repositório de conta pessoal; o strict cobra uma atualização e uma nova rodada a cada PR que perde a corrida. Em troca, a mesma validação roda de novo na `main` e segura o deploy.
 5. **Testar o artefato que vai ao ar.** O e2e roda o Playwright no contêiner oficial dele contra a imagem nginx do próprio PR, localmente e na CI, com o mesmo comando. Bloqueiam: funcional, acessibilidade (axe e árvore ARIA), sem JavaScript, movimento reduzido, 404, metadados, cache, peso transferido e regressão visual em Chromium. Informa: LCP do Lighthouse, até provar estabilidade.
@@ -72,9 +72,11 @@ O agente precisa de um comando que responda "a CI vai passar?" sem adivinhar. Re
 
 | Script | O que faz | Onde roda |
 |---|---|---|
-| `pnpm check` | `biome ci .`, checagem de tipos e os checks do sistema de design (`node --test`) | pre-push, job `quality` da CI |
+| `pnpm check` | `biome ci .`, `next typegen && tsc --noEmit` e os checks do sistema de design (`node --test`) | pre-push, job `quality` da CI |
 | `pnpm test:e2e` | build da exportação, imagem nginx, Playwright no contêiner oficial contra ela, Lighthouse | job `e2e` da CI |
 | `pnpm verify` | `pnpm check` e depois `pnpm test:e2e` | o agente, antes de abrir ou atualizar o PR |
+
+A checagem de tipos sem build é a que o Next documenta para CI: "`next typegen && tsc --noEmit`", porque sem o `typegen` o `tsc` não valida os tipos de rota ([next CLI](https://nextjs.org/docs/app/api-reference/cli/next), atualizado em 2026-10-15). O `next build` também roda o TypeScript ("Finished TypeScript" na saída, [Next 16](https://nextjs.org/blog/next-16)); a checagem no `pnpm check` existe para falhar em segundos, sem esperar o build.
 
 O que torna "o mesmo comando" verdadeiro é o ambiente, não o nome do script. O Playwright diz que a renderização "can vary based on the host OS, version, settings, hardware, power source" e que, para capturas consistentes, se roda "in the same environment where the baseline screenshots were generated" ([Visual comparisons](https://playwright.dev/docs/test-snapshots)); a página de CI acrescenta que rodar num contêiner dá um ambiente consistente para comparação de capturas ([Playwright, CI](https://playwright.dev/docs/ci)). Por isso o e2e roda dentro da imagem `mcr.microsoft.com/playwright:v1.65.1-noble` nos dois lugares (detalhes na seção 3.1). A máquina do Autor tem Docker 29.1.3 (`docker --version`, 2026-11-15) e o runner `ubuntu-24.04` tem Docker 28.0.4 e Compose 2.38.2 ([imagem do runner, versão 20261111](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md)).
 
@@ -115,7 +117,7 @@ Os fatos que decidem o desenho:
 - Os checks precisam passar no último commit do PR: "Checks from earlier commits don't satisfy the requirement" (mesma fonte).
 - O ruleset deixa escolher o app de origem do check; com a origem fixada, "If the status is set by any other person or integration, merging won't be allowed" ([Available rules for rulesets](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-rulesets/available-rules-for-rulesets)). O app GitHub Actions tem id `15368` (`gh api apps/github-actions`).
 
-Daí o padrão: um job agregador que depende de todos os outros (`needs`) e roda sempre. Ele precisa de `if: always()`, porque sem isso uma falha numa dependência faz o agregador ser pulado, e pulado vira "Success"; o README do `re-actors/alls-green` descreve exatamente essa armadilha ([alls-green](https://github.com/re-actors/alls-green)). O `always()` "returns `true`, even when canceled" ([Expressions](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions)); num agregador que só lê o resultado dos outros, o risco que a documentação aponta para o `always()` (travar num passo crítico) não existe. Não precisa de action de terceiros: o `jq` já vem no runner ([imagem do runner](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md)).
+Daí o padrão: um job agregador que depende de todos os outros (`needs`) e roda sempre. Ele precisa de `if: always()`: sem isso, quando uma dependência falha, o resultado do agregador é "skipped" e não "failed", como avisa o README do `re-actors/alls-green` ([alls-green](https://github.com/re-actors/alls-green)), e o GitHub trata job pulado por condição como "Success" ([Troubleshooting required status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks)). O `always()` "returns `true`, even when canceled" ([Expressions](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions)); num agregador que só lê o resultado dos outros, o risco que a documentação aponta para o `always()` (travar num passo crítico) não existe. Não precisa de action de terceiros: o `jq` já vem no runner ([imagem do runner](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md)).
 
 ```yaml
 gate:
@@ -290,3 +292,115 @@ Todo caminho `docs/...` citado em Markdown existe, menos a seção "Linhagem" de
 `pnpm check` roda 5.1, 5.2 e 5.4 (segundos, no pre-push e no job `quality`); o `e2e` roda 5.3. Os quatro bloqueiam: são determinísticos e protegem a fonte que a implementação lê.
 
 Fora do pedido, um ponto para #40 e #52: se as variáveis CSS da aplicação forem geradas de `tokens.json` no build, não há como divergirem e nenhum check de deriva é necessário; se forem escritas à mão, falta um quinto check comparando as duas.
+
+## Comparação com as recomendações anteriores de #17
+
+O #52 guarda os itens 4, 5, 6 e 10 do corpo de #17 só como referência. Julgados pelo mérito:
+
+| Item de #17 | O que esta pesquisa conclui | Motivo |
+|---|---|---|
+| 4. CI em `push`, nunca em `pull_request` | **Muda**: `pull_request` nos PRs e `push` só na `main` | Sem `pull_request` não há título do PR para validar, o teste é da ponta do branch e não do merge, e PR de fork nunca recebe o check (seção 1.4) |
+| 5. Check obrigatório `gate`, com CI local | **Fica**, por mérito, e ganha o `pr-title` | O nome descreve o papel e sobrevive à troca de jobs; o título precisa de check próprio (seções 2.1 e 2.2) |
+| 6. Ganchos só com gitleaks e commitlint | **Muda**: Biome no pre-commit e `pnpm check` no pre-push, além do commitlint; o gitleaks fica com #50 | O argumento da régua de Python não vale para a Home, como o próprio #17 anotou; ganchos de segundos poupam rodadas de CI sem tirar da CI a autoridade (seção 1.1) |
+| 10. Primeiros checks | **Fica**, com dois ajustes no check de `var(--x)` e o check de caminhos | As propriedades locais das prévias e o `--font-*` fariam a regra literal falhar sem defeito (seção 5.2) |
+
+## Esboço dos workflows
+
+Só a forma: gatilhos, nomes e grafo de jobs. A fixação de actions por SHA, as permissões e o endurecimento são de #50.
+
+```yaml
+# .github/workflows/ci.yml
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+jobs:
+  quality:   # pnpm/setup (cache) e pnpm check
+  e2e:       # pnpm/setup (cache), cache de apps/web/.next/cache, pnpm test:e2e,
+             # relatório do Playwright e do Lighthouse como artefato nas falhas
+  gate:      # if: always(); needs: [quality, e2e]; jq exige "success" de todos
+```
+
+```yaml
+# .github/workflows/pr-title.yml
+name: pr-title
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+jobs:
+  pr-title:  # commitlint no título, lido de env: PR_TITLE: ${{ github.event.pull_request.title }}
+```
+
+## Esteira recomendada
+
+| Estágio | Check | Bloqueia ou informa | Ferramenta | Por quê |
+|---|---|---|---|---|
+| Gancho `pre-commit` | Formatação e lint dos arquivos em stage, com correção automática | Bloqueia o commit local; pulável com `--no-verify` | lefthook 2 e Biome 2.6 | Feedback em segundos; a CI repete (seção 1.2) |
+| Gancho `commit-msg` | Conventional Commits | Bloqueia o commit local; pulável | lefthook e commitlint (`config-conventional`) | Mesma regra do `pr-title`, aplicada mais cedo |
+| Gancho `pre-push` | `pnpm check` | Bloqueia o push local; pulável | lefthook | Evita uma rodada perdida da CI; sem navegador, segundos |
+| Agente, antes do PR | `pnpm verify` | Instrução no `AGENTS.md` | pnpm e Docker | Mesmo comando e mesmo ambiente da CI (seção 1.3) |
+| CI no PR, job `quality` | `biome ci`, tipos, `tokens.json`, `var(--x)` das prévias, caminhos citados | Bloqueia, via `gate` | Biome, TypeScript, `node --test` | Determinístico e rápido (seção 5) |
+| CI no PR, job `e2e` | Conteúdo e erros de console, teclado e foco, axe (WCAG A e AA até 2.2), árvore ARIA, sem JavaScript, movimento reduzido, 404, metadados, `robots` e sitemap, links internos, cache dos estáticos, subconjunto em WebKit, prévias do sistema | Bloqueia, via `gate` | Playwright 1.65 no contêiner oficial, contra a imagem nginx do PR; `@axe-core/playwright` 4.14 | Testa o artefato que vai ao ar, num ambiente fixo (seções 3.1 e 3.2) |
+| CI no PR, job `e2e` | Regressão visual da Home e da 404 em 390 e 1440 | Bloqueia, via `gate` | `toHaveScreenshot` em Chromium, PNG | Estável com contêiner fixo, movimento reduzido e fontes locais; o diff aparece no PR |
+| CI no PR, job `e2e` | Até 1 MB transferido a 390px | Bloqueia, via `gate` | Lighthouse CI 0.16, `total-byte-weight` com tela de 390px | Determinístico para uma build fixa |
+| CI no PR, job `e2e` | LCP de até 2,5 s em Slow 4G simulado | Informa (`warn`), até a evidência pedir `error` | Lighthouse CI, mediana de 5 rodadas | Estatístico num runner compartilhado |
+| CI no PR | `gate`: todos os jobs em sucesso | **Bloqueia: check obrigatório** | Job agregador com `if: always()` e `jq` | Um nome estável no ruleset; fecha a armadilha do job pulado |
+| CI no PR | `pr-title`: título em Conventional Commits | **Bloqueia: check obrigatório** | commitlint, em workflow próprio | O título vira o commit da `main` (seção 2.2) |
+| Merge | Auto-merge com squash, modo solto, sem merge queue | Espera os dois checks | `gh pr merge --auto --squash` | Merge queue indisponível em conta pessoal; strict custa uma rodada por corrida (seção 1.5) |
+| Pós-merge | A mesma validação no commit da `main`; a entrega espera o `gate` dela | Bloqueia a entrega | O mesmo `ci.yml` | Valida a árvore exata que vai ao ar (seção 1.6) |
+| Pós-deploy | LCP, INP e CLS de visitantes reais, P75 | Informa | Cloudflare Web Analytics | Mede o critério como o web.dev o define, no campo |
+| Repositório | `squash_merge_commit_title` em `PR_TITLE`; ruleset com `gate` e `pr-title`, origem fixada no GitHub Actions (`integration_id` 15368) | Configuração | API do GitHub | O que chega à `main` passa pelo `pr-title`; nenhum status de outra origem satisfaz o check |
+
+## Alternativas descartadas
+
+- **CI em `push` em todo branch**: sem título do PR para validar, testa a ponta do branch e não o merge, e PR de fork nunca recebe o check (seção 1.4).
+- **`push` e `pull_request` para todo branch**: roda tudo duas vezes por atualização.
+- **Merge queue**: só existe em repositório de organização (seção 1.5). Volta à mesa se o repositório mudar de dono.
+- **Modo strict**: uma atualização e uma rodada a mais por PR que perde a corrida, para um risco raro que a validação da `main` já segura antes da produção (seção 1.5).
+- **Um check obrigatório por job**: o ruleset muda sempre que um job muda, e nomes repetidos entre workflows dão resultado ambíguo (seção 2.1).
+- **Um check só, com o título dentro**: ou toda edição do PR roda a validação inteira, ou o `gate` passa com base numa rodada anterior que pode ter falhado (seção 2.1).
+- **`re-actors/alls-green`**: uma dependência de terceiros para o que uma linha de `jq` faz; a página do projeto não mostra releases.
+- **Título padrão `COMMIT_OR_PR_TITLE`**: o que chega à `main` depende do número de commits, e no caso de um commit só foi conferido apenas pelo gancho pulável (seção 2.2).
+- **Ganchos só com gitleaks e commitlint**: o argumento era a régua de Python, que não vale para a Home; ganchos de segundos poupam rodadas sem tirar a autoridade da CI.
+- **Ganchos do agente** (os hooks do Claude Code, por exemplo) **em vez de ganchos do Git**: duplicariam configuração entre Claude Code e Codex, armadilha do brief.
+- **husky com lint-staged**: dois pacotes para o que o lefthook faz sozinho com `glob`, `{staged_files}` e `stage_fixed`.
+- **e2e contra a pasta `out` com um servidor estático qualquer**: deixa de fora o 404, o cache e a compressão, que moram no `nginx.conf` (seção 3.1). `next start` não se aplica à exportação.
+- **Playwright direto no runner, sem contêiner**: local e CI renderizariam em ambientes diferentes, e o Playwright pede o mesmo ambiente para as referências (seção 1.3).
+- **Serviços de regressão visual** (Chromatic, Percy, Argos): guardam referência e aprovação fora do repositório, e a aprovação seria do mesmo Autor que já vê o diff de imagem no PR.
+- **Capturas em WebP**: o diff de imagem do GitHub não lista WebP (seção 3.2).
+- **`budgetsFile` e o preset `lighthouse:recommended`**: os orçamentos saíram do Lighthouse 12, e o preset exige nota perfeita em tudo fora de desempenho, além do que os critérios pedem (seção 3.2).
+- **LCP bloqueando desde o primeiro dia**: o runner compartilhado é volátil, segundo o próprio Lighthouse (seção 3.2).
+- **LCP medido no Playwright com limitação de rede própria**: reimplementa o Lighthouse com mais variância; a limitação por requisição "is not a sufficient model of a slow connection" ([throttling](https://github.com/GoogleChrome/lighthouse/blob/main/docs/throttling.md)).
+- **Peso medido no Playwright com `request.sizes()`**: funciona (`responseBodySize` é o tamanho codificado, [Request](https://playwright.dev/docs/api/class-request)), mas duplica o número que o Lighthouse já mede na mesma rodada.
+- **Verificador de links externos na esteira**: depende de servidores de terceiros; e, para os caminhos de `docs/`, o lychee não serve (seção 5.4).
+- **Firefox no `gate`**: ganho marginal pequeno; o WebKit já cobre o motor do Safari.
+- **Filtros de caminho, Turborepo e Nx**: travam o check obrigatório ou não têm o que escolher num app só (seção 4.3).
+- **Sharding**: custo de partida e de junção de relatório sem ganho numa suíte pequena (seção 4.2).
+
+## Exageros para este contexto
+
+Um mantenedor, um app, repositório público, uma página sem lógica:
+
+- Merge queue, modo strict e regras de aprovação ou `CODEOWNERS`: os agentes abrem PR com a conta do Autor, que não pode aprovar o próprio PR.
+- Sharding, runners maiores, runners próprios e matriz de sistemas operacionais.
+- Turborepo, Nx e filtros de "afetados".
+- Teste unitário ou de componente da Home (Vitest, Storybook, testes de componente do Playwright): todo critério de aceite é observável no navegador; os únicos testes de unidade são os dos checks do sistema de design.
+- Limite de cobertura e teste de mutação.
+- Serviço externo de regressão visual e capturas das prévias do sistema de design.
+- Servidor do Lighthouse CI com histórico, PageSpeed Insights na esteira e Lighthouse em toda variação da página.
+- Verificação de links externos a cada PR.
+- Robôs de PR (tamanho, rótulos automáticos, Danger).
+- Ganchos pesados: build, e2e ou Lighthouse no Git local.
+
+## Perguntas abertas para o Autor
+
+1. **O título do PR passa a ser sempre o commit da `main`?** Recomendação: sim, `squash_merge_commit_title` em `PR_TITLE`, com o check `pr-title`. Impacto: o histórico da `main` fica sempre em Conventional Commits, conferido pela CI e não só pelo gancho; os agentes já escrevem títulos assim.
+2. **A esteira aceita o modo solto (sem strict)?** Recomendação: sim, com os gatilhos de revisão da seção 1.5. Impacto: nenhum agente fica preso atualizando branch; o risco que sobra é a `main` ficar vermelha numa corrida rara, sem chegar à produção, porque a entrega espera o `gate` da `main`.
+3. **Como se mede o "até 1 MB a 390px"?** Recomendação: fator de escala 3 (o dos descritores `iPhone 12` a `iPhone 14`, que usam 390 de largura) e "primeira visita" como a carga sem rolar a página. Impacto: as ilustrações precisam de variantes responsivas e de carga preguiçosa abaixo da dobra; se o orçamento não couber com fator 3, o que se revê é o critério, não o teste.
+4. **Mudança visual exige o olho do Autor antes do merge?** Recomendação: não por enquanto; o diff de imagem fica no PR, o corpo do PR diz por que a referência mudou, e o Autor olha quando quiser. Impacto: um agente pode atualizar uma referência visual e mesclar sozinho. Se o Autor quiser uma trava, os agentes precisam abrir PRs com outra identidade (um GitHub App, por exemplo), para que a aprovação dele possa ser obrigatória; isso é decisão de identidade, não de esteira.
+5. **Como se confere o contraste "no pior ponto" do texto sobre as ilustrações?** Recomendação: conferência manual uma vez, registrada no PR da Home, e a regressão visual guarda o resultado depois. Impacto: nenhum código próprio de análise de pixels para manter; uma mudança que mexa no contraste aparece como diff visual. A alternativa automática (capturar a região atrás do texto e calcular o menor contraste) só vale se a implementação da Home já precisar desse cálculo.
+6. **O LCP trava o merge desde o primeiro dia?** Recomendação: não; nível `warn`, com promoção a `error` quando umas vinte rodadas mostrarem dispersão pequena diante da folga até 2,5 s. Impacto: um PR pode piorar o LCP sem travar, mas o relatório mostra; o teste de peso, que bloqueia, pega a causa mais provável de piora numa página de ilustrações.
