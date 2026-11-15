@@ -4,9 +4,9 @@ Pesquisa do ticket [#49](https://github.com/ThiagoPanini/minimal-me/issues/49), 
 
 ## Retomada
 
-- **Feito**: contexto (ticket #49, Base técnica #17, fronteira com #50, critérios da Home em #12, `docs/design/`, ruleset e configurações do repositório); seções 1 (estágios), 2 (checks obrigatórios) e 3 (camadas de teste).
+- **Feito**: contexto (ticket #49, Base técnica #17, fronteira com #50, critérios da Home em #12, `docs/design/`, ruleset e configurações do repositório); seções 1 (estágios), 2 (checks obrigatórios), 3 (camadas de teste), 4 (velocidade) e 5 (checks do sistema de design).
 - **Mudança de escopo (2026-11-15, coordenador)**: a forma da web não está fechada. A recomendação atual para o Marco 1 é `output: "export"` (o Next gera arquivos estáticos no build, servidos por nginx numa imagem de contêiner), com o servidor Node (`standalone`) só quando um space futuro pedir recursos de servidor. Onde a esteira depende da forma, esta pesquisa cobre primeiro a exportação estática e acrescenta uma nota curta sobre o que muda com `standalone`. O "Destrava" do ticket aponta agora para #52, que também pede o nome dos checks no ruleset.
-- **Próximo**: seção 4 (velocidade), seção 5 (checks do sistema de design), seção 6 (exageros), esteira recomendada, alternativas descartadas e perguntas abertas.
+- **Próximo**: exageros (tópico 6), esteira recomendada, alternativas descartadas e perguntas abertas.
 
 ## Pergunta
 
@@ -226,5 +226,67 @@ Uma limitação do contexto: os agentes abrem PRs com a conta do Autor, e "Pull 
 
 - **Alvo**: a imagem passa a rodar o `server.js` do Node; o resto da camada não muda, porque o teste já mira a imagem e não a forma. O Next define `Cache-Control: public, max-age=31536000, immutable` para os arquivos imutáveis com hash, sem permitir sobrescrita ([Next, Self-hosting](https://nextjs.org/docs/app/guides/self-hosting), atualizado em 2026-10-15); o teste de cache continua valendo, agora contra o Next.
 - **Imagens**: a otimização do `next/image` funciona sem configuração com o servidor (mesma fonte); na exportação, só com um loader próprio ([Static Exports](https://nextjs.org/docs/app/guides/static-exports)). Nos dois casos, é o teste de peso a 390px que prova que as ilustrações chegam em tamanhos responsivos.
-- **A Home continua estática**: no Next 16.4, `export const ensureStatic = 'navigation'` no layout raiz faz o build falhar se algum conteúdo dinâmico entrar na página ([Next 16.4](https://nextjs.org/blog/next-16-4)). Com `standalone`, essa linha transforma o build num check; com a exportação, o próprio build já falha diante do que precisa de servidor ([Static Exports](https://nextjs.org/docs/app/guides/static-exports)).
+- **A Home continua estática**: no Next 16.4, `export const ensureStatic = 'navigation'` no layout raiz faz o build falhar se algum conteúdo dinâmico entrar na página ([Next 16.4](https://nextjs.org/blog/next-16-4)). Com `standalone`, essa linha transforma o build num check. Com a exportação, a guarda já existe: usar um recurso que precisa de servidor dá erro, "similar to setting the `dynamic` option to `error` in the root layout" ([Static Exports](https://nextjs.org/docs/app/guides/static-exports)).
 - **Health check e o que o Coolify consulta**: #50.
+
+## 4. Velocidade
+
+O alvo é um tempo de parede de poucos minutos por PR (hipótese, a medir nas primeiras rodadas), sem nada que precise de manutenção própria. Os minutos não custam: o runner padrão é "free and unlimited on public repositories", com 4 CPUs e 16 GB no repositório público ([GitHub-hosted runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)). O que custa é a espera do agente pelo auto-merge.
+
+### 4.1 Caches
+
+| O quê | Como | Fonte |
+|---|---|---|
+| Store do pnpm | `pnpm/setup@v3` com `cache: true`. A action é do próprio pnpm e é o exemplo atual da documentação de CI dele: instala o pnpm na versão de `packageManager` ou `devEngines.packageManager`, instala o Node de `devEngines.runtime`, roda `pnpm install` e guarda o store. O pnpm entra sozinho em modo `frozen-lockfile` na CI. | [pnpm, CI](https://pnpm.io/continuous-integration); [pnpm/setup](https://github.com/pnpm/setup), v3.2.0 em 2026-11-12 |
+| Build do Next | `actions/cache@v6` em `apps/web/.next/cache`, com chave pelo lockfile e pelos fontes e `restore-keys` pelo lockfile. Desde o 16.3, o Turbopack grava um cache persistente do `next build`, ligado por padrão, e "The cache lives in `.next/cache`, so CI builds only get faster if that directory is restored between runs". | [Turbopack no 16.3](https://nextjs.org/blog/next-16-3-turbopack); [Next, CI Build Caching](https://nextjs.org/docs/app/guides/ci-build-caching); [actions/cache](https://github.com/actions/cache) |
+| Navegadores do Playwright | Nenhum cache: vêm dentro da imagem do Playwright. O próprio Playwright diz que guardar os binários "is not recommended", porque restaurar leva quase o mesmo tempo que baixar e as dependências de sistema não se guardam. | [Playwright, CI](https://playwright.dev/docs/ci) |
+
+Dois detalhes de comportamento: o `actions/cache` só cria um cache novo quando a chave exata não existe e o job termina bem, e o `restore-keys` restaura por prefixo; o limite é de 10 GB por repositório, com despejo do que fica uma semana sem acesso ([actions/cache](https://github.com/actions/cache); [billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions)). Cada job roda numa máquina virtual nova ([GitHub-hosted runners](https://docs.github.com/en/actions/concepts/runners/github-hosted-runners)), então a imagem do Playwright é baixada a cada rodada; é o custo fixo do ambiente fixo.
+
+### 4.2 Paralelismo e sharding
+
+- **Dois jobs em paralelo, mais o agregador.** `quality` (`pnpm check`: Biome, tipos, checks do sistema de design; sem navegador) e `e2e` (build, imagem, Playwright, Lighthouse). O `gate` espera os dois. O Lighthouse roda no mesmo job do e2e, depois do Playwright, porque usa a mesma imagem já de pé; separar só vale se o job crescer.
+- **Sem sharding.** O GitHub Actions suporta dividir a suíte entre jobs ([Playwright, CI](https://playwright.dev/docs/ci)), mas uma página com algumas dezenas de testes pagaria a partida de cada job e a junção dos relatórios sem ganho. **Gatilho para rever**: a suíte passar de uns cinco minutos.
+- **`workers: 1` na CI**, como o Playwright recomenda (seção 3.2). Se a suíte crescer, testar `2` olhando a instabilidade, já que o runner público tem 4 CPUs.
+
+### 4.3 Rodar só o que mudou
+
+Filtro de caminho no workflow deixa o check obrigatório "Pending" e trava o merge ([Troubleshooting required status checks](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks)); pular jobs por `if` exige que o `gate` aceite `skipped`, o que reabre a armadilha da seção 2.1. E neste repositório "só documentação" não é inerte: a aplicação lê fontes e tokens de `docs/design/system/` (recomendação 3 de #17). Recomendação: **rodar tudo sempre** no começo. Ferramentas de "afetados" de monorepo (Turborepo, Nx) não têm o que escolher num repositório com um app. **Gatilho para rever**: se PRs só de `docs/research/` ou `docs/adr/` dominarem e a espera incomodar, um job `changes` decide se o `e2e` roda, olhando `apps/**`, `docs/design/system/**`, o lockfile e `.github/**`, e o `gate` passa a aceitar `skipped` só para o `e2e` e só quando `changes` disse que nada disso mudou.
+
+### 4.4 Concurrency e cancelamento
+
+- **Nos PRs**: `concurrency` com `group: ${{ github.workflow }}-${{ github.ref }}` e `cancel-in-progress: true`, o exemplo da documentação ([Control workflow concurrency](https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency)). No `pull_request`, o `github.ref` é o `refs/pull/N/merge` de cada PR, então um push novo cancela a rodada velha do mesmo PR e só dele.
+- **Na `main`**: `cancel-in-progress` falso, por expressão (a documentação aceita expressão no campo). Por padrão, cada grupo tem no máximo uma rodada em execução e uma pendente, e uma pendente nova substitui a antiga; existe `queue: max` para manter até 100 pendentes, incompatível com `cancel-in-progress: true` (mesma fonte). Para a validação, perder a rodada pendente de um commit intermediário da `main` é aceitável: o commit mais novo é validado e entregue. A fila da entrega é de #50.
+- **`timeout-minutes`** em todo job: o padrão é 360 minutos ([workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)); 15 no `e2e` e 5 nos outros fazem um job travado falhar logo.
+
+## 5. Checks do sistema de design
+
+Os três checks de #17 (recomendação 10) mais o de caminhos (insumo do retro de 2026-11-15 em #17). Os quatro rodam no Node, sem dependência nova: o `node:test` é estável, e o `node --test` já encontra arquivos `*.test.ts` ([Node, test runner](https://nodejs.org/api/test.html)), porque a remoção de tipos está ligada por padrão desde a 23.6.0 e a 22.18.0 e é estável desde a 25.2.0 e a 24.12.0 ([Node, TypeScript](https://nodejs.org/api/typescript.html)).
+
+### 5.1 `tokens.json` válido e com nomes em minúsculas
+
+- **Válido**: `JSON.parse` no teste; o Biome também analisa JSON no `biome ci` (a receita de ganchos dele inclui `json` no `glob`, [Biome, Git Hooks](https://biomejs.dev/recipes/git-hooks/)).
+- **Nomes em minúsculas**: o teste olha só os nomes de token, e não todo campo `name`. Em 2026-11-15, o arquivo tem 44 campos `name`, dos quais quatro são nomes de exibição ("Minimal Me", o tema "Escuro" e os grupos "Jost" e "IBM Plex Mono"); os 40 nomes de token (`color`, `spacing`, `radius`, `easing` e os estilos de `type.groups`) seguem todos `^[a-z0-9]+(-[a-z0-9]+)*$` (conferido com um script sobre [`tokens.json`](../design/system/tokens.json)). A mesma passada pode recusar nome repetido, que viraria duas variáveis CSS com o mesmo nome.
+
+### 5.2 Toda `var(--x)` das prévias existe nos tokens
+
+A regra literal falharia hoje sem haver defeito. Conferido em 2026-11-15 sobre `docs/design/system/components/*/preview.html`:
+
+- As prévias declaram propriedades locais de layout: `--g` em `Footer`, `Masthead` e `FrontCard`; `--cl`, `--co`, `--on`, `--pe` e `--pw` em `FrontCard` (esta com `@property --pw`). Não são tokens.
+- `--font-sans` e `--font-mono` correspondem às famílias `sans` e `mono` de `type.families`, como a tabela "Nomes" de [`docs/design/README.md`](../design/README.md) registra.
+
+Com essas duas regras, nenhuma referência fica sem token hoje. O check, então: toda `var(--x)` usada numa prévia é um nome de token, ou `font-<família>` de `type.families`, ou uma propriedade declarada na própria prévia. Vale acrescentar que uma declaração local não pode ter nome de token, para que uma prévia não esconda um token com um valor próprio.
+
+### 5.3 As prévias renderizam sem erro
+
+Um projeto do Playwright abre cada `preview.html` e falha em `pageerror` ou erro de console. As prévias pedem imagens por `/_blob/<id>`, que só existem no Claude Design ([`docs/design/README.md`](../design/README.md)); o teste responde a essas requisições com `page.route` em vez de deixá-las falhar, para que a falta das imagens não vire ruído. Roda no job `e2e`, porque precisa de navegador. Capturas das prévias seriam exagero: a fonte visual da verdade é o artefato do Claude Design, e a regressão visual que importa é a da Home.
+
+### 5.4 Caminhos citados existem
+
+Todo caminho `docs/...` citado em Markdown existe, menos a seção "Linhagem" de `docs/design/README.md`, que cita pastas apagadas recuperáveis por commit (insumo do retro em #17). Um verificador de links como o lychee não serve: ele procura "broken hyperlinks and mail addresses", e só olha blocos de código com `--include-verbatim` ([lychee](https://github.com/lycheeverse/lychee)); essas referências são caminhos escritos em trecho de código, não links. Um teste de poucas linhas com `existsSync` faz o trabalho e conhece a exceção.
+
+### 5.5 Onde ficam
+
+`pnpm check` roda 5.1, 5.2 e 5.4 (segundos, no pre-push e no job `quality`); o `e2e` roda 5.3. Os quatro bloqueiam: são determinísticos e protegem a fonte que a implementação lê.
+
+Fora do pedido, um ponto para #40 e #52: se as variáveis CSS da aplicação forem geradas de `tokens.json` no build, não há como divergirem e nenhum check de deriva é necessário; se forem escritas à mão, falta um quinto check comparando as duas.
