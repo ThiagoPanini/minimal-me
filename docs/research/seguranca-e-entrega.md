@@ -65,3 +65,78 @@ Fontes: https://docs.github.com/en/code-security/secret-scanning/introduction/ab
 - O gancho de pre-commit é a única camada que impede a exposição de um segredo genérico. Ele falha quando não roda: clone novo sem `lefthook install`, agente em ambiente remoto, `git commit --no-verify` (**inferência**).
 - A varredura na CI roda depois do push. Num repositório público, o branch já está visível quando ela termina, então ela não evita a exposição: só avisa. O valor está no aviso chegar onde o agente olha (o check vermelho no PR, e não um alerta na aba de segurança) e em cobrir os commits que passaram sem o gancho (**inferência**). A resposta a um alerta é sempre girar o segredo; apagar o commit não o tira de circulação.
 - Relato privado de vulnerabilidade: está desligado. A página do GitHub diz que donos de repositórios públicos podem ligá-lo para que pesquisadores relatem "securely"; custa um clique e não gera trabalho até alguém relatar.
+
+## 2. Dependências
+
+Fontes: https://docs.github.com/en/code-security/dependabot/working-with-dependabot/dependabot-options-reference · https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/ · https://github.blog/security/supply-chain-security/tame-dependabot-group-your-updates-slow-the-cadence-keep-security-fast/ (2026-07-29) · https://github.blog/security/supply-chain-security/disrupting-supply-chain-attacks-on-npm-and-github-actions/ (2026-07-28) · https://docs.github.com/en/code-security/dependabot/working-with-dependabot/automating-dependabot-with-github-actions · https://docs.github.com/en/code-security/dependabot/troubleshooting-dependabot/troubleshooting-dependabot-on-github-actions · https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow · https://github.com/peter-evans/enable-pull-request-automerge (README) · https://docs.renovatebot.com/key-concepts/automerge/ e https://docs.renovatebot.com/mend-hosted/overview/ (Renovate 44.239.1) · `docs/usage/configuration-options.md` e `docs/usage/key-concepts/minimum-release-age.md` do Renovate no commit `9ac3811` · https://pnpm.io/settings/dependency-resolution · https://pnpm.io/cli/audit · notas das versões v11.0.0 e v12.16.0 do pnpm (https://github.com/pnpm/pnpm/releases) · `npm_and_yarn/lib/dependabot/npm_and_yarn/file_updater/pnpm_lockfile_updater.rb` do dependabot-core no commit `1a0125f` · https://github.com/actions/dependency-review-action (v5.0.0) · https://google.github.io/osv-scanner/github-action/ (v2.7.1) · https://github.blog/changelog/2026-03-17-dependabot-now-detects-malware-in-npm-dependencies/ · https://docs.github.com/en/code-security/concepts/supply-chain-security/malware-alerts
+
+### 2.1 O que mudou em 2026 e já protege sem configurar
+
+- **Dependabot**: desde 2026-07-14, as atualizações de versão esperam 3 dias depois da publicação ("Apply a default cooldown period of 3 days to version updates, even when cooldown is not configured"), e "This default cooldown does not apply to security updates". O próprio GitHub resume: "Security updates still open immediately, so critical fixes are never held back by the cooldown".
+- **pnpm 11** (2026-04-28): `minimumReleaseAge` passou a valer 1440 minutos (1 dia), com `minimumReleaseAgeStrict: false`; `strictDepBuilds` e `blockExoticSubdeps` passaram a `true`; e nenhum pacote roda script de instalação sem constar em `allowBuilds`. O pnpm 12 (2026-08-26) manteve isso; a versão corrente é a 12.21.0, de 2026-11-13. O Dependabot suporta pnpm da v7 à v12.
+- **npm 12**: desliga os scripts de instalação por padrão (post do GitHub de 2026-07-28). Não afeta este projeto, que usa pnpm, mas confirma a direção.
+- **Alertas de malware do Dependabot**: desde 2026-03-17, opcionais ("Malware alerting is opt-in"), ligados em Settings, Code security, Dependabot, "Malware alerts". Em julho de 2026 passaram a usar também o projeto de pacotes maliciosos da OpenSSF. Só geram alerta, não PR. Este repositório não tem o recurso ligado (não aparece em `security_and_analysis`; **inferência** de que está no padrão, desligado).
+
+### 2.2 A armadilha do merge automático: "publicar é mergear" quebra em silêncio
+
+- O exemplo oficial de merge automático do Dependabot roda em `pull_request`, com `permissions: contents: write, pull-requests: write`, `dependabot/fetch-metadata` e `gh pr merge --auto` usando o `GITHUB_TOKEN`. Workflows disparados pelo Dependabot em `push` e `pull_request` recebem `GITHUB_TOKEN` só de leitura e só os segredos do Dependabot, mas a chave `permissions` pode ampliar o token.
+- A regra do GitHub: "events triggered by the `GITHUB_TOKEN` will not create a new workflow run", com exceção de `workflow_dispatch` e `repository_dispatch`; para disparar outros workflows, a documentação indica "a GitHub App installation access token or a personal access token". O README da action que liga o auto-merge nativo do GitHub é explícito: "if you use the default `GITHUB_TOKEN`, as in the example, the merge will not trigger further workflow runs".
+- Consequência para este projeto: um PR do Dependabot mesclado com o `GITHUB_TOKEN` chega à `main`, mas o workflow de `push` que constrói a imagem e chama o Coolify não roda. A correção fica no repositório e não vai ao ar, sem nenhum check vermelho (**inferência** a partir das duas fontes; conferir no primeiro merge automático).
+- Saídas: um token de GitHub App do próprio Autor no workflow de merge automático (o app só precisa de `contents` e `pull_requests` de escrita neste repositório; ID e chave privada como segredos do Dependabot), ou o Renovate, cujo app mescla com a própria identidade e por isso dispara os workflows (**inferência**: a supressão vale só para eventos do `GITHUB_TOKEN`).
+
+### 2.3 Dependabot ou Renovate
+
+| | Dependabot | Renovate (app Mend, Community Cloud) |
+|---|---|---|
+| Instalação | nativo, já ligado para segurança | app de terceiro; pede `contents`, `workflows`, `pull_requests`, `checks` e `statuses` de escrita (`gh api apps/renovate`) |
+| PR de segurança | "raised as soon as a vulnerability with a fix is disclosed" | lê os mesmos alertas do Dependabot (exige grafo de dependências, alertas ligados e permissão de leitura de alertas no app); o PR "skip the line", mas só sai quando um job roda: a cada 4 horas em repositórios ativos, ou antes, por webhook; um job por vez por conta |
+| Espera de maturidade | 3 dias por padrão nas versões; zero na segurança | `minimumReleaseAge` só se configurado (o `config:best-practices` liga `security:minimumReleaseAgeNpm`); nulo na segurança |
+| Merge automático | não existe opção no `dependabot.yml`; exige workflow próprio e o token da seção 2.2 | nativo (`automerge`, `platformAutomerge` ligado por padrão), espera os checks passarem |
+| Agrupamento | `groups` com `applies-to`, `dependency-type`, `update-types`, `patterns`; `multi-ecosystem-groups` | `group:monorepos`, `group:recommended` e regras livres |
+| Actions e imagens | ecossistemas `github-actions` e `docker`; atualiza o lockfile de actions no mesmo PR (seção 3) | `helpers:pinGitHubActionDigests` e `docker:pinDigests` no `config:best-practices` |
+
+O Renovate é mais capaz e resolve o merge automático sem token extra. O Dependabot é nativo, não dá escrita em `workflows` a um terceiro e abre o PR de segurança sem esperar ciclo de 4 horas. Para um app, um mantenedor e uma Home estática, a diferença de recursos não paga a dependência de um app externo com escrita no repositório; o que o Dependabot não tem (merge automático que dispara o deploy) custa um GitHub App pequeno do próprio Autor (**inferência**, julgamento desta pesquisa).
+
+### 2.4 O pnpm segura a correção de segurança por até um dia (medido)
+
+O que as fontes dizem:
+- O pnpm aplica `minimumReleaseAge` "to all dependencies, including transitive ones", e a instalação reaplica a regra a cada entrada do lockfile, a menos que `trustLockfile` seja `true`. Desde a v12.16.0, `pnpm install` "fails with `ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION` when a locked version is too new".
+- O Dependabot, numa atualização de segurança, passa `--config.minimum-release-age=0` ao pnpm "unconditionally", porque a correção "must not be blocked by a release-age gate", e devolve os arquivos de workspace que ele mesmo calculou, e não as exceções que o pnpm grava (comentários e código de `pnpm_lockfile_updater.rb`).
+- O Renovate não passa idade mínima ao pnpm: "pnpm applies its own config", e um pnpm que recusa a versão falha "and Renovate does not retry".
+
+O que medi (pnpm 12.21.0, 2026-11-15, num diretório vazio, com `@biomejs/biome@2.6.8` publicado havia 5,6 horas fazendo o papel de um patch recém-saído):
+
+| Caso | Resultado |
+|---|---|
+| Resolver a versão nova com a configuração padrão (não estrita) | instala e grava sozinho 11 entradas `nome@versão` em `minimumReleaseAgeExclude` no `pnpm-workspace.yaml` ("Added 11 entries to minimumReleaseAgeExclude") |
+| `install --frozen-lockfile` com essas exceções no arquivo | passa |
+| `install --frozen-lockfile` sem as exceções, store e cache vazios (como num runner) | falha: "The lockfile contains entries that the active policies reject" |
+| O mesmo com `minimumReleaseAge: 1440` explícito (estrito) | falha igual na instalação; e a resolução nova falha com "within the minimumReleaseAge cutoff" |
+| Instalação sem as exceções, mas com o store local que já tinha o pacote | passa (efeito de cache; não vale como prova) |
+
+Consequência (**inferência** das fontes e da medição; conferir no primeiro PR de segurança): um PR de segurança do Dependabot para uma versão com menos de 24 horas chega com o lockfile novo e sem a exceção, e a instalação congelada da CI falha até a versão completar um dia. O caminho automático leva, então, até um dia. O caminho rápido é o do agente: `pnpm up next@<versão corrigida>` (ou `pnpm audit --fix`, que "adds each advisory's minimum patched version to `minimumReleaseAgeExclude`") grava a exceção no mesmo commit, a CI passa e o agente mescla com a credencial do Autor, o que dispara o deploy.
+
+### 2.5 Auditoria: o que bloqueia e o que informa
+
+- `pnpm audit` consulta o endpoint `/-/npm/v1/security/advisories/bulk` do registro e "exits with `1` when an advisory at or above the audit level remains". Como check obrigatório, ele reprova qualquer PR quando sai um advisory novo para o que já está na `main`, inclusive o PR que corrige outra coisa, e depende da rede do registro (**inferência** a partir da semântica de saída). Serve ao agente como ferramenta (`--fix`), não como gate.
+- `actions/dependency-review-action` (v5.0.0, gratuita em repositório público) falha só quando a mudança "introduce[s] vulnerabilities" de severidade igual ou maior que `fail-on-severity`, no escopo `runtime` por padrão, e aceita `base-ref` e `head-ref` "for event types other than `pull_request`", o que serve a uma CI disparada por `push`. É o bloqueio certo: compara com a base e não reprova um PR pelo que ele não mudou.
+- OSV-Scanner (v2.7.1): o modo de PR "fails if the feature branch introduces vulnerabilities that the target branch doesn't have", mas o workflow reutilizável de PR roda só em `pull_request` e `merge_group`. O banco do OSV traz os registros `MAL-` de pacotes maliciosos, alguns vindos do próprio GitHub (o `MAL-2025-46966`, do `ansi-regex`, tem origem `ghsa-malware`). Com os alertas de malware do Dependabot usando o mesmo projeto da OpenSSF desde julho de 2026, o OSV-Scanner repete dados que o GitHub já entrega (**inferência**).
+- Dependabot alerts e alertas de malware: informam o estado da `main` sem bloquear nada, que é o que se quer para um advisory novo sobre código já publicado.
+
+### 2.6 Configuração do pnpm que vale a pena
+
+- Manter os padrões do pnpm 12: um dia de maturidade, não estrito, `strictDepBuilds`, `blockExoticSubdeps` e `allowBuilds` vazio enquanto nenhum pacote precisar de script. A exceção que o pnpm grava aparece no diff do PR, o que deixa a decisão visível. O modo estrito obriga a aprovar à mão cada versão nova e quebra as atualizações automáticas sem ganho de segurança proporcional para um mantenedor (**inferência**).
+- Ligar `trustPolicy: no-downgrade` (padrão `off`): "Install fails if a package's trust level has decreased compared with earlier releases". É o sinal típico de uma versão publicada por conta sequestrada, sem a proveniência das anteriores. Custa uma entrada em `trustPolicyExclude` quando um pacote legítimo regredir.
+- Não ligar `trustLockfile`: ele desliga a verificação que pega um lockfile gerado fora da política, e a página do pnpm recomenda mantê-lo `false` se outros editam o lockfile; aqui editam dois robôs e vários agentes.
+
+### 2.7 Tempo até a produção de uma correção crítica
+
+| Etapa | Exportação estática | `standalone` |
+|---|---|---|
+| Advisory e versão corrigida publicados | o Next publica os dois juntos (as páginas de advisory listam a versão corrigida) | igual |
+| PR de segurança do Dependabot | minutos (**inferência**: "as soon as ... disclosed") | igual |
+| Gate verde | só depois de 24 horas da publicação, pela seção 2.4 | igual, o que é tarde: o React2Shell teve exploração em horas |
+| Merge e deploy | merge automático com token de GitHub App, depois build, deploy e smoke (seção 5) | igual |
+| Caminho rápido | desnecessário: nenhum dos seis RCEs críticos de 2026 chega a um site exportado | o agente atualiza com a exceção, a CI passa, o agente mescla; dezenas de minutos (**inferência**) |
+
+Para `standalone`, há uma alternativa que encurta o caminho automático sem agente: pôr `next`, `react` e `react-dom` em `minimumReleaseAgeExclude` de forma permanente. As atualizações de versão continuam esperando os 3 dias do Dependabot, e só a verificação do pnpm deixa de segurar esses três pacotes; o custo é perder a camada do pnpm justamente nos pacotes mais visados (**inferência**).
