@@ -1,0 +1,1042 @@
+<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Minimal Me - Protótipo do MVP</title><link rel="preload" as="image" href="img/sky.webp" fetchpriority="high"><link rel="preload" as="image" href="img/dunes.webp" fetchpriority="high"></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Jost and IBM Plex Mono come from system/fonts */
+@font-face{font-family:"Jost";font-style:normal;font-weight:300;font-display:block;src:url(../../system/fonts/Jost-300.woff2) format("woff2")}
+@font-face{font-family:"Jost";font-style:normal;font-weight:400;font-display:block;src:url(../../system/fonts/Jost-400.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:300;font-display:block;src:url(../../system/fonts/IBMPlexMono-300.woff2) format("woff2")}
+@font-face{font-family:"IBM Plex Mono";font-style:normal;font-weight:400;font-display:block;src:url(../../system/fonts/IBMPlexMono-400.woff2) format("woff2")}
+/* Minimal Me · Home v2.3 = v2.1 with six fixes that do not change what is seen. One monochrome world with grain.
+   Layout: one 12-column grid from the masthead to the footer, one line per section, a name that leads.
+   Type: Jost (name, titles, labels) + IBM Plex Mono (text, numbers). Emphasis only by weight. No italics anywhere. */
+:root{
+  color-scheme:dark;
+  --sky:#F3F3F2;--ink:#141414;--ground:#161616;--light:#E9E9E6;--body:#C9C9C4;--text:#B6B6B1;--mist:#8E8E89;--hairline:#3A3A37;
+  --font-sans:"Jost","Futura","Avenir Next",system-ui,sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --ease:cubic-bezier(.22,.61,.36,1);--ease-out:cubic-bezier(.16,1,.3,1);--ease-io:cubic-bezier(.65,0,.35,1);
+}
+html,body{height:100%;background:var(--ground);color:var(--light)}
+body{overflow:hidden;font-family:var(--font-mono)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+em,i,cite{font-style:normal}
+a{color:inherit}
+:focus-visible{outline:1.5px solid currentColor;outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;margin:-1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes growX{from{transform:scaleX(0)}to{transform:none}}
+@keyframes growY{from{transform:scaleY(0)}to{transform:none}}
+@keyframes rPulse{0%,100%{opacity:.28}50%{opacity:1}}
+@property --pw{syntax:'<number>';inherits:true;initial-value:1}
+/* a short, failed attempt to switch on, then a dim standby */
+@keyframes rPower{0%{--pw:0}7%{--pw:.62}13%{--pw:.08}21%{--pw:.46}27%{--pw:.12}35%{--pw:.5}100%{--pw:.5}}
+@property --dv{syntax:'<percentage>';inherits:false;initial-value:46%}
+@keyframes rDv{from{--dv:30%}to{--dv:62%}}
+@keyframes lineUp{from{transform:translateY(105%)}to{transform:none}}
+@keyframes rSky{from{opacity:0;transform:scale(1.045)}to{opacity:1;transform:none}}
+@keyframes rDune{from{opacity:0;transform:translateY(4%)}to{opacity:1;transform:none}}
+/* no end frame: each picture develops into its own state (full, or a soft proof when planned) */
+@keyframes rDev{from{opacity:0;filter:contrast(.35) brightness(1.6)}}
+@keyframes rMark{from{opacity:0;transform:scale(.4)}to{opacity:1;transform:none}}
+
+/* ---------- the page: one scroll container, edge to edge ---------- */
+.proto{position:fixed;inset:0;overflow-x:hidden;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:var(--ground)}
+/* v2.3 · the container holds the focus so that keys scroll it; it is not a control, so it shows no ring */
+.proto:focus,.proto:focus-visible{outline:none}
+.r{--gut:clamp(20px,4.4vw,72px);--max:1760px;--grain:.35;--g:clamp(16px,2vw,32px);
+  --m:max(var(--gut),env(safe-area-inset-left,0px));--m2:max(var(--gut),env(safe-area-inset-right,0px));color:var(--light)}
+.r-in{max-width:var(--max);margin:0 auto;padding-left:var(--m);padding-right:var(--m2)}
+.r-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));column-gap:var(--g)}
+
+/* ---------- hero: picture, then the masthead ---------- */
+.r-hero{position:relative;display:flex;flex-direction:column;height:var(--vh,100svh);min-height:600px}
+.r-pic{position:relative;flex:1 1 auto;min-height:300px;overflow:hidden;background:var(--sky)}
+.r-layer{position:absolute;inset:-3%;will-change:transform;transform-origin:50% 90%}
+.r-layer img{width:100%;height:100%;object-fit:cover;display:block;max-width:none}
+.r-sky img{object-position:50% 16%}
+.r-dune img{object-position:40% 100%}
+.r-pic::after{content:"";position:absolute;left:0;right:0;bottom:0;height:13%;background:linear-gradient(to bottom,rgba(22,22,22,0),rgba(22,22,22,.7) 60%,var(--ground));z-index:3;pointer-events:none}
+.r-grain{position:absolute;inset:0;z-index:4;pointer-events:none;background:url(img/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
+.r-top{position:absolute;z-index:5;top:0;left:0;right:0;padding-top:calc(clamp(18px,3.2vw,40px) + env(safe-area-inset-top,0px))}
+.r-glyph{display:inline-flex;text-decoration:none}
+.r-glyph svg{width:26px;height:26px}
+/* v2.3 · the mark sits on the light sky: its keyboard focus is drawn in ink, not in light */
+.r-glyph:focus-visible{outline:2px solid var(--ink);outline-offset:4px}
+
+/* masthead: the name sets the hierarchy; the deck stands inside its cap height (set in script) */
+.r-mast{position:relative;z-index:4;padding-block:clamp(6px,1vw,16px) clamp(30px,3.4vw,54px)}
+.r-mast .r-in{container-type:inline-size;width:100%}
+.r-mast .r-grid{align-items:start}
+.r-word{grid-column:1 / 9;margin:0 -.06em 0 -.04em;font-family:var(--font-sans);font-weight:300;font-size:calc((200cqw - var(--g)) / 18.297);line-height:.76;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;color:var(--light)}
+.r-word .w{display:inline-block;overflow:hidden;vertical-align:bottom;padding-top:.06em}
+.r-word .w > span{display:inline-block}
+.r-deck{grid-column:9 / -1;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:12px;min-width:0}
+.r-kick{margin:0;font:400 11px/1.4 var(--font-sans);letter-spacing:.3em;text-transform:uppercase;color:var(--mist)}
+.r-tag{margin:0;max-width:34ch;font:300 clamp(14px,1.1vw,16px)/1.62 var(--font-mono);color:var(--body);text-wrap:pretty}
+.r-base{display:inline-block;width:0;height:0;vertical-align:baseline}
+
+/* ---------- features: three columns hanging from one line ---------- */
+.r-sec{position:relative;padding-block:clamp(84px,9vw,140px) clamp(104px,11vw,168px)}
+.r-head{position:relative;display:flex;align-items:baseline;justify-content:space-between;gap:24px;padding-bottom:16px;margin:0 0 clamp(30px,3.2vw,48px)}
+.r-head::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--hairline);transform-origin:0 50%}
+.r-label{margin:0;font:400 12px/1.4 var(--font-sans);letter-spacing:.34em;text-transform:uppercase;color:var(--light)}
+.r-count{font:400 11px/1.4 var(--font-mono);letter-spacing:.16em;color:var(--mist);font-variant-numeric:tabular-nums}
+.r-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(5,auto);column-gap:var(--g)}
+.r-card{position:relative;grid-row:1 / span 5;display:grid;grid-template-rows:subgrid;row-gap:0;min-width:0;color:var(--light)}
+.r-card > *{min-width:0}
+.r-media{position:relative;aspect-ratio:4 / 5;max-width:100%}
+.r-feather{position:absolute;inset:0;overflow:hidden;filter:contrast(1) brightness(1);transition:opacity .8s var(--ease),filter 1s var(--ease);
+  -webkit-mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);-webkit-mask-composite:source-in;
+  mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);mask-composite:intersect}
+.r-grade{position:absolute;inset:0;transition:filter 1.2s var(--ease)}
+.r-media[data-media="ai"] .r-grade{filter:brightness(.78) contrast(.84)}
+.r-media[data-media="tech"] .r-grade{filter:brightness(1.5) contrast(.92)}
+.r-media[data-media="frames"] .r-grade{filter:brightness(.94) contrast(.9)}
+.r-par{position:absolute;inset:-3%;will-change:transform}
+.r-par img{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none;object-fit:cover;transition:transform 1.6s var(--ease-out)}
+.r-fx{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.r-fx.is-sheets{will-change:transform}
+.r-mgrain{position:absolute;inset:0;pointer-events:none;background:url(img/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
+.r-cm{position:absolute;width:0;height:0}
+.r-cm::before,.r-cm::after{content:"";position:absolute;background:var(--hairline);transition:background .6s var(--ease)}
+/* crop marks sized from the gutter, so the marks of two neighbouring pictures never meet */
+.r-media{--cl:calc(var(--g) * .3);--co:calc(var(--g) * .14)}
+.r-cm::before{width:var(--cl);height:1px}
+.r-cm::after{width:1px;height:var(--cl)}
+.r-cm.tl{left:0;top:0}.r-cm.tl::before{right:var(--co);top:0}.r-cm.tl::after{left:0;bottom:var(--co)}
+.r-cm.tr{right:0;top:0}.r-cm.tr::before{left:var(--co);top:0}.r-cm.tr::after{left:0;bottom:var(--co)}
+.r-cm.bl{left:0;bottom:0}.r-cm.bl::before{right:var(--co);top:0}.r-cm.bl::after{left:0;top:var(--co)}
+.r-cm.br{right:0;bottom:0}.r-cm.br::before{left:var(--co);top:0}.r-cm.br::after{left:0;top:var(--co)}
+/* text rhythm: picture · 32 · line · 22 · number · 18 · title · 22 · text · 32 · link */
+.r-n{position:relative;margin:32px 0 0;padding-top:22px;font:400 11px/1 var(--font-mono);letter-spacing:.16em;color:var(--mist);font-variant-numeric:tabular-nums}
+.r-n::before{content:"";position:absolute;left:0;top:0;width:24px;height:1px;background:var(--hairline);transition:width .9s var(--ease-out),background .6s var(--ease)}
+.r-title{margin:0;padding-top:18px;font:300 clamp(26px,2.25vw,36px)/1.08 var(--font-sans);letter-spacing:-.005em;color:var(--light);text-wrap:balance}
+.r-text{margin:0;padding-top:22px;max-width:40ch;font:300 14px/1.72 var(--font-mono);color:var(--text);text-wrap:pretty}
+.r-ft{display:flex;align-items:flex-end;padding-top:32px}
+.r-link{display:inline-flex;align-items:center;gap:12px;font:400 11px/1.4 var(--font-mono);letter-spacing:.16em;text-transform:uppercase;color:var(--light);text-decoration:none}
+.r-link i{display:block;width:22px;height:1px;background:currentColor;transition:width .6s var(--ease-out)}
+.r-link::after{content:"";position:absolute;inset:-10px;z-index:2}
+.r-card:has(.r-link){cursor:pointer}
+
+/* a column rule between features, over the text only, from the number's line down to the link */
+.r-card + .r-card::before{content:"";position:absolute;grid-row:2 / -1;grid-column:1;left:calc(var(--g) / -2);top:32px;bottom:0;width:1px;background:var(--hairline);transform-origin:50% 0;pointer-events:none}
+
+/* ---------- status: available, in development, in planning ----------
+   Exposure says it first: available is the full print, in development is coming up out of the dark,
+   in planning is a dark proof inside crop marks. A small label on the picture says it in words. */
+.r-badge{position:absolute;z-index:3;left:12px;top:12px;display:inline-flex;align-items:center;gap:7px;padding:6px 9px 6px 8px;border:1px solid rgba(233,233,230,.14);background:rgba(14,14,15,.42);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  font:400 10px/1 var(--font-mono);letter-spacing:.05em;color:rgba(233,233,230,.8);white-space:nowrap;pointer-events:none}
+.r-badge i{flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+.mm.motion .is-dev .r-badge i{animation:rPulse 2.6s var(--ease-io) infinite}
+.is-plan .r-badge{color:rgba(233,233,230,.56);border-color:rgba(233,233,230,.1)}
+.is-plan .r-badge i{background:none;box-shadow:inset 0 0 0 1px currentColor}
+.is-dev .r-feather{filter:contrast(.97) brightness(.86)}
+.r-wash{position:absolute;inset:0;pointer-events:none;background:var(--ground);opacity:.42;transition:opacity 1s var(--ease);
+  -webkit-mask-image:linear-gradient(to top,transparent var(--dv),#000 calc(var(--dv) + 28%));mask-image:linear-gradient(to top,transparent var(--dv),#000 calc(var(--dv) + 28%))}
+.mm.motion .r-wash{animation:rDv 7s var(--ease-io) infinite alternate}
+/* each picture is darkened by its own key, so every planned proof sits at the same low level */
+.r-media[data-media="ai"]{--pe:.32}.r-media[data-media="tech"]{--pe:.46;--on:1.9}.r-media[data-media="frames"]{--pe:.4}
+/* in planning = switched off. One number, --pw (0 off, 1 on), sets the picture and every line of text,
+   so the whole card is dark at rest and comes up to a dim standby when it gets the focus.
+   Contrast first, then exposure: lowering contrast after darkening would lift the blacks back up. */
+.is-plan{--pw:0;transition:--pw .9s var(--ease)}
+/* v2.3 · the standby level is a key per picture (--on): the dark picture needs a higher one, or standby is darker than off */
+.is-plan .r-feather{filter:contrast(calc(.82 + .1 * var(--pw))) brightness(calc(var(--pe,.4) + (var(--on,.74) - var(--pe,.4)) * var(--pw)))}
+.is-plan .r-n{color:#4a4a46;color:color-mix(in srgb,var(--mist) calc(var(--pw) * 100%),#4a4a46)}
+.is-plan .r-title{color:#5c5c57;color:color-mix(in srgb,var(--light) calc(var(--pw) * 100%),#5c5c57)}
+.is-plan .r-text{color:#575752;color:color-mix(in srgb,var(--text) calc(var(--pw) * 100%),#575752)}
+.is-plan .r-link{color:#4a4a46;color:color-mix(in srgb,var(--mist) calc(var(--pw) * 100%),#4a4a46)}
+.is-plan .r-badge{opacity:calc(.72 + .28 * var(--pw))}
+/* not yet available: the link stays, quieter */
+.r-link[aria-disabled="true"]{color:var(--mist)}
+.r-link[aria-disabled="true"] i{width:14px}
+
+/* focus: the card under the cursor, under the keyboard or, on touch screens, in the middle of the screen develops; the other pictures step back */
+.r-card.is-focus .r-grade,.r-card:focus-within .r-grade{filter:none}
+.r-card.is-focus .r-par img,.r-card:focus-within .r-par img{transform:scale(1.025)}
+.r-card.is-focus .r-n::before,.r-card:focus-within .r-n::before{width:100%;background:var(--mist)}
+.r-card.is-focus .r-link i,.r-card:focus-within .r-link i{width:40px}
+.r-card.is-focus .r-link[aria-disabled="true"] i,.r-card:focus-within .r-link[aria-disabled="true"] i{width:22px}
+.r-card.is-focus .r-wash,.r-card:focus-within .r-wash{opacity:0}
+.r-card.is-dev.is-focus .r-feather,.r-card.is-dev:focus-within .r-feather{filter:contrast(1) brightness(1)}
+.r-card.is-plan.is-focus,.r-card.is-plan:focus-within{--pw:.5}
+.mm.motion .r-card.is-plan.is-focus{animation:rPower .9s steps(1,end) both}
+.r-card.is-plan.is-focus .r-cm::before,.r-card.is-plan.is-focus .r-cm::after{background:var(--mist)}
+.r-row.has-focus .r-card:not(.is-focus) .r-feather,.r-row:has(.r-card:focus-within) .r-card:not(:focus-within) .r-feather{opacity:.55}
+@media (hover:hover){
+  .r-card:hover .r-grade{filter:none}
+  .r-card:hover .r-par img{transform:scale(1.025)}
+  .r-card:hover .r-n::before{width:100%;background:var(--mist)}
+  .r-card:hover .r-link i{width:40px}
+  .r-card:hover .r-link[aria-disabled="true"] i{width:22px}
+  .r-card:hover .r-wash{opacity:0}
+  .r-card.is-dev:hover .r-feather{filter:contrast(1) brightness(1)}
+  .r-card.is-plan:hover{--pw:.5}
+  .mm.motion .r-card.is-plan:hover{animation:rPower .9s steps(1,end) both}
+  .r-card.is-plan:hover .r-cm::before,.r-card.is-plan:hover .r-cm::after{background:var(--mist)}
+  .r-row:has(.r-card:hover) .r-card:not(:hover) .r-feather{opacity:.55}
+}
+@supports selector(:has(*)){
+  .r-link:focus-visible{outline:none}
+  .r-card:has(.r-link:focus-visible){outline:1px solid var(--mist);outline-offset:12px}
+}
+
+/* ---------- footer: the same grid, closing ---------- */
+.r-foot{position:relative;padding-bottom:calc(clamp(30px,3.6vw,52px) + env(safe-area-inset-bottom,0px))}
+.r-foot .r-grid{position:relative;align-items:center;row-gap:16px;padding-top:clamp(26px,3vw,40px)}
+.r-foot .r-grid::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--hairline);transform-origin:0 50%}
+.r-fbrand{grid-column:1 / 9;display:flex;align-items:center;gap:14px;margin:0;font:400 12px/1 var(--font-sans);letter-spacing:.34em;text-transform:uppercase}
+.r-fbrand svg{width:18px;height:18px;flex:none}
+.r-fmeta{grid-column:9 / -1;margin:0;font:300 12px/1.6 var(--font-mono);color:var(--mist)}
+.r-fmeta a{color:var(--body);text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:5px;text-decoration-color:var(--hairline)}
+.r-fmeta a:hover{text-decoration-color:currentColor}
+
+.toast{position:fixed;z-index:60;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);padding:9px 14px;border:1px solid rgba(233,233,230,.14);background:rgba(16,16,17,.92);color:var(--light);font:300 12px/1.5 var(--font-mono);opacity:0;pointer-events:none;transition:opacity .5s;max-width:calc(100vw - 32px);text-align:center}
+.toast.on{opacity:1}
+
+/* ---------- motion: quick, photographic ---------- */
+/* v2.3 · the picture opens when its two layers have arrived (.pic), so the opening is never spent on an empty sky */
+.mm.motion:not(.pic) .r-layer img{opacity:0}
+.mm.motion.in.pic .r-sky img{animation:rSky 2.4s var(--ease-out) both}
+.mm.motion.in.pic .r-dune img{animation:rDune 1.9s .15s var(--ease-out) both}
+.mm.motion.in .r-top{animation:fadeIn 1.2s 1.2s var(--ease) both}
+.mm.motion.in .r-word .w > span{animation:lineUp 1.25s var(--ease-out) both}
+.mm.motion.in .r-word .w1 > span{animation-delay:.45s}
+.mm.motion.in .r-word .w2 > span{animation-delay:.6s}
+.mm.motion.in .r-kick{animation:fadeIn 1s .95s var(--ease) both}
+.mm.motion.in .r-tag{animation:fadeUp 1s 1.05s var(--ease-out) both}
+.mm.motion .r-head[data-rv] > *{opacity:0}
+.mm.motion .r-head[data-rv]::after{transform:scaleX(0)}
+.mm.motion .r-head.is-in > *{animation:fadeIn .9s var(--ease) both}
+.mm.motion .r-head.is-in .r-count{animation-delay:.25s}
+.mm.motion .r-head.is-in::after{animation:growX 1.2s var(--ease-out) both}
+.mm.motion .r-row[data-rv]:not(.is-in) .r-feather,.mm.motion .r-row[data-rv] .r-cm,.mm.motion .r-row[data-rv] .r-n,.mm.motion .r-row[data-rv] .r-title,.mm.motion .r-row[data-rv] .r-text,.mm.motion .r-row[data-rv] .r-ft{opacity:0}
+.mm.motion .r-row.is-in .r-feather{animation:rDev 1.6s calc(var(--cd) + .05s) var(--ease-out) backwards}
+.mm.motion .r-row.is-in .r-cm{animation:rMark .7s calc(var(--cd) + .2s) var(--ease-out) both}
+.mm.motion .r-row[data-rv] .r-badge{opacity:0}
+.mm.motion .r-row.is-in .r-badge{animation:fadeIn .9s calc(var(--cd) + .75s) var(--ease) both}
+.mm.motion .r-row[data-rv] .r-card + .r-card::before{transform:scaleY(0)}
+.mm.motion .r-row.is-in .r-card + .r-card::before{animation:growY 1.3s calc(var(--cd) + .25s) var(--ease-out) both}
+.mm.motion .r-row.is-in .r-n{animation:fadeUp .8s calc(var(--cd) + .3s) var(--ease-out) both}
+.mm.motion .r-row.is-in .r-title{animation:fadeUp .9s calc(var(--cd) + .38s) var(--ease-out) both}
+.mm.motion .r-row.is-in .r-text{animation:fadeUp .9s calc(var(--cd) + .46s) var(--ease-out) both}
+/* opacity only: a transform here would trap the card-wide link inside this row */
+.mm.motion .r-row.is-in .r-ft{animation:fadeIn .9s calc(var(--cd) + .54s) var(--ease) both}
+.mm.motion .r-foot[data-rv] .r-grid > *{opacity:0}
+.mm.motion .r-foot[data-rv] .r-grid::before{transform:scaleX(0)}
+.mm.motion .r-foot.is-in .r-grid::before{animation:growX 1.2s var(--ease-out) both}
+.mm.motion .r-foot.is-in .r-grid > *{animation:fadeIn 1s .3s var(--ease) both}
+.mm.still .r-feather,.mm.still .r-n::before,.mm.still .r-grade,.mm.still .r-par img,.mm.still .is-plan{transition:none}
+
+@media (max-width:900px){
+  /* stacked: the hero takes the height of its content, and the name sits on the dark foot of the dunes */
+  .r-hero{height:auto;min-height:0}
+  .r-pic{flex:none;height:min(66svh,720px);min-height:360px}
+  .r-mast{margin-top:clamp(-64px,-7vw,-40px);padding-bottom:clamp(36px,6vw,52px)}
+  .r-word{grid-column:1 / -1;font-size:calc(100cqw / 6.099)}
+  .r-deck{grid-column:1 / -1;justify-content:flex-start;padding-top:clamp(18px,3vw,26px)}
+  .r-row{grid-template-columns:minmax(0,1fr);grid-template-rows:none;row-gap:clamp(64px,10vw,88px)}
+  .r-card{grid-row:auto;display:flex;flex-direction:column}
+  .r-card + .r-card::before{display:none}
+  .r-media{--cl:12px;--co:5px}
+  .r-fbrand,.r-fmeta{grid-column:1 / -1}
+}
+@media (max-width:760px){
+  .r-sky img{object-position:40% 10%}
+  .r-dune img{object-position:36% 100%}
+  .r-tag{font-size:14px}
+}
+</style>
+<style>
+/* =====================================================
+   Spaces · what the new versions share. Everything above this line is the v2.3 sheet, untouched.
+   New names are in English (space, status-line, stage, plate, index, slit, band, showcase, mosaic, tile); what came from v2.3 keeps its name.
+   ===================================================== */
+.space{position:relative;min-width:0;color:var(--light)}
+.space:has(.r-link){cursor:pointer}
+
+/* the pictures of round 4 share one light and one composition, so they share one grade: a little under at rest, as they are when in focus.
+   What v2.3 laid over a picture by status (veil, crop marks) is not used: the label alone says the status. */
+.spaces .r-wash,.spaces .r-cm{display:none}
+.spaces .r-media[data-media] .r-grade{filter:brightness(.86) contrast(.97)}
+.spaces .r-fx{mix-blend-mode:normal}
+
+/* status · said by the label alone: a dot and the words, the same on a picture (r-badge) and outside it (status-line).
+   Every space is set the same way whatever its status. One hue on the whole page, for the one status that is happening now: "Em desenvolvimento". */
+.mm{--st-dev:#E8B96A}
+.status-line{display:inline-flex;align-items:center;gap:8px;margin:0;font:400 11px/1 var(--font-mono);letter-spacing:.05em;color:var(--body);white-space:nowrap}
+.status-line i{flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+.spaces .r-badge{color:var(--body)}
+[data-status="plan"] :is(.r-badge,.status-line) i{background:none;box-shadow:inset 0 0 0 1px currentColor}
+[data-status="dev"] :is(.r-badge,.status-line){color:var(--st-dev)}
+.mm.motion [data-status="dev"] :is(.r-badge,.status-line) i{animation:rPulse 2.6s var(--ease-io) infinite}
+.spaces .r-link[aria-disabled="true"]{color:var(--light)}
+.spaces .r-link[aria-disabled="true"] i{width:22px}
+
+/* the first sentence of a text, for the places where the whole text does not fit */
+.space-lead{display:none;margin:0;max-width:40ch;font:300 13px/1.62 var(--font-mono);color:var(--text);text-wrap:pretty}
+
+/* crop · where a picture is held in its frame: x and y from 0 to 1, and a zoom from 1 up. The page brings a default per picture and per frame
+   (--dx, --dy, --dz; --mx, --my, --mz when stacked); "Ajustar fotos" writes --cx, --cy and --cz over it. */
+.r-media[data-crop]{--px:var(--cx,var(--dx,.5));--py:var(--cy,var(--dy,.5));--pz:var(--cz,var(--dz,1))}
+@media (max-width:900px){ .r-media[data-crop]{--px:var(--cx,var(--mx,var(--dx,.5)));--py:var(--cy,var(--my,var(--dy,.5)));--pz:var(--cz,var(--mz,var(--dz,1)))} }
+.r-media[data-crop] .r-par img{inset:auto;left:calc((1 - var(--pz)) * var(--px) * 100%);top:calc((1 - var(--pz)) * var(--py) * 100%);width:calc(var(--pz) * 100%);height:calc(var(--pz) * 100%);object-position:calc(var(--px) * 100%) calc(var(--py) * 100%)}
+/* Ajustar fotos: every picture can be dragged in its frame and zoomed with the wheel; links rest while it is on */
+.mm.adjusting .r-media[data-crop]{cursor:grab;touch-action:none;outline:1px dashed var(--mist);outline-offset:-1px}
+.mm.adjusting .r-media[data-crop].is-dragging{cursor:grabbing;outline-style:solid;outline-color:var(--light)}
+.mm.adjusting a,.mm.adjusting .showcase-copy,.mm.adjusting :is(.tile,.inset) > :not(.r-media){pointer-events:none}
+
+/* focus: one class, set for the cursor, the keyboard and the middle of the screen alike. It does the same to every space:
+   the picture takes its full light and wakes (the script brings it a little closer and starts its motion), the hairlines grow. */
+.spaces :is(.space,.space-part).is-focus .r-media[data-media] .r-grade{filter:none}
+.spaces :is(.space,.space-part) .r-par img{transform:none}
+.space.is-focus .r-n::before{width:100%;background:var(--mist)}
+.spaces :is(.space,.space-part).is-focus .r-link i{width:40px}
+@supports selector(:has(*)){
+  .space:has(.r-link:focus-visible){outline:1px solid var(--mist);outline-offset:12px}
+}
+
+/* stage · a frame that shows one picture at a time; each space has its plate in it and the plate of the space in focus is on show */
+.plates{position:relative;aspect-ratio:4 / 5}
+.plate{position:absolute;inset:0;opacity:0;visibility:hidden;transition:opacity .5s var(--ease),visibility 0s .5s}
+.plate.is-focus{opacity:1;visibility:visible;transition:opacity .5s var(--ease)}
+.plate .r-media{position:absolute;inset:0;aspect-ratio:auto}
+.mm.motion .is-in .plate.is-focus .r-feather{animation:rDev 1.1s var(--ease-out) backwards}
+.mm.still .plate{transition:none}
+/* stacked: the stage stays at the top of the screen while what names the spaces goes by under it; the one just below the picture has the focus */
+@media (max-width:900px){
+  .space-stage{position:sticky;top:env(safe-area-inset-top,0px);z-index:3;margin:0 calc(var(--m2) * -1) 0 calc(var(--m) * -1);padding:12px var(--m2) 14px var(--m);background:var(--ground)}
+  .space-stage::after{content:"";position:absolute;left:0;right:0;top:100%;height:28px;background:linear-gradient(to bottom,var(--ground),rgba(22,22,22,0));pointer-events:none}
+  .space-stage .plates{--ph:min(calc(var(--vh,100svh) * .5),calc((100vw - var(--m) - var(--m2)) * 1.25));height:var(--ph);width:calc(var(--ph) * .8);aspect-ratio:auto}
+  .mm.dense .space-stage .plates{--ph:min(calc(var(--vh,100svh) * .4),calc((100vw - var(--m) - var(--m2)) * 1.25))}
+}
+
+/* reveal on scroll, the v2.3 way: the picture develops, the texts come up, one space after the other (--cd) */
+.mm.motion .sp-rv:not(.is-in) :is(.r-feather,.r-badge,.r-cm,.rv-up,.rv-in){opacity:0}
+.mm.motion .sp-rv.is-in .r-feather{animation:rDev 1.6s calc(var(--cd,0s) + .05s) var(--ease-out) backwards}
+.mm.motion .sp-rv.is-in .r-cm{animation:rMark .7s calc(var(--cd,0s) + .2s) var(--ease-out) backwards}
+.mm.motion .sp-rv.is-in .r-badge{animation:fadeIn .9s calc(var(--cd,0s) + .75s) var(--ease) backwards}
+.mm.motion .sp-rv.is-in .rv-up{animation:fadeUp .9s calc(var(--cd,0s) + var(--d,.3s)) var(--ease-out) backwards}
+.mm.motion .sp-rv.is-in .rv-in{animation:fadeIn .9s calc(var(--cd,0s) + var(--d,.3s)) var(--ease) backwards}
+.r-n.rv-up{--d:.3s}.r-title.rv-up{--d:.38s}.r-text.rv-up{--d:.46s}.r-ft.rv-in{--d:.54s}
+
+/* density (Tweak): the same page with less air */
+.mm.dense .r-sec{padding-block:clamp(52px,5.6vw,88px) clamp(64px,6.8vw,104px)}
+.mm.dense .r-head{margin-bottom:clamp(20px,2.2vw,32px)}
+
+/* =====================================================
+   Frestas II · the same four openings, with nothing under them: everything about a space is written inside its picture.
+   At rest an opening is the whole picture (3:4), with the number, the status and the name over its top and the link over its foot.
+   In focus the opening widens, the picture comes closer and settles on its foot, so the figure rises and the dark dune is left free;
+   a hairline runs across the dune and the description comes up over it, set once at the width of the open picture.
+   Class names: insets (the row), inset (one opening), inset-top, inset-foot.
+   ===================================================== */
+.insets-wrap{container-type:inline-size}
+.insets{display:flex;gap:var(--g);--unit:calc((100cqw - 3 * var(--g)) / 4.9);--pad:clamp(14px,1.5vw,22px);
+  height:clamp(280px,calc((100cqw - 3 * var(--g)) / 3),calc(var(--vh,100svh) * .62))}
+.inset{flex:var(--open,1) 1 0;min-width:0;height:100%;overflow:hidden;isolation:isolate;transition:flex-grow .9s var(--ease)}
+.inset.is-focus{--open:1.9}
+.mm.still .inset{transition:none}
+.inset .r-media{position:absolute;inset:0;z-index:-2;aspect-ratio:auto}
+.spaces--insets.has-focus .inset:not(.is-focus) .r-feather{opacity:.6}
+/* two shades that belong to the picture: one under the name, always; one over the dune, only while the description is on it */
+.inset .r-media::before,.inset .r-media::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none}
+.inset .r-media::before{background:linear-gradient(to bottom,rgba(22,22,22,.62) 0,rgba(22,22,22,.3) 18%,rgba(22,22,22,0) 38%)}
+.inset .r-media::after{background:linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.66) 30%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease)}
+.inset.is-focus .r-media::after{opacity:1;transition:opacity .9s var(--ease) .15s}
+
+/* over the top: number and status on one line, the name under them. As wide as the narrowest an opening gets, so the name never breaks while the row moves. */
+.inset-top{position:absolute;z-index:1;left:var(--pad);top:var(--pad);width:calc(var(--unit) - 2 * var(--pad))}
+.inset-meta{display:flex;align-items:center;gap:14px;margin:0;white-space:nowrap}
+.inset-meta .r-n{margin:0;padding:0}
+.inset-meta .r-n::before{display:none}
+.inset .r-title{padding-top:12px;white-space:nowrap;text-wrap:nowrap;font-size:clamp(15px,calc((var(--unit) - 2 * var(--pad)) / 8.4),27px)}
+
+/* over the foot: the description and, always, the link. Set at the width of the open picture and held by its foot, so nothing breaks again or jumps. */
+.inset-foot{position:absolute;z-index:1;left:var(--pad);bottom:var(--pad);width:calc(var(--unit) * 1.9 - 2 * var(--pad))}
+.inset-foot::before{content:"";display:block;height:1px;width:24px;background:var(--mist);opacity:0;transition:width .5s var(--ease),opacity .4s var(--ease)}
+.inset-foot .r-text{padding-top:16px;max-width:none;color:var(--body);opacity:0;transform:translateY(8px);transition:opacity .4s var(--ease),transform .5s var(--ease)}
+.inset.is-focus .inset-foot::before{width:100%;opacity:.55;transition:width 1.1s var(--ease-out) .2s,opacity .5s var(--ease) .2s}
+.inset.is-focus .inset-foot .r-text{opacity:1;transform:none;transition:opacity .7s var(--ease) .38s,transform .9s var(--ease-out) .38s}
+.inset-foot .r-ft{padding-top:18px}
+.mm.still .inset-foot::before,.mm.still .inset-foot .r-text,.mm.still .inset .r-media::after{transition:none}
+.mm.still .inset-foot .r-text{transform:none}
+@supports selector(:has(*)){
+  .inset:has(.r-link:focus-visible){outline-offset:-1px}
+}
+.mm.motion .insets-wrap:not(.is-in) :is(.r-feather,.inset-top,.inset-foot){opacity:0}
+.mm.motion .insets-wrap.is-in .r-feather{animation:rDev 1.6s calc(var(--cd,0s) + .05s) var(--ease-out) backwards}
+.mm.motion .insets-wrap.is-in :is(.inset-top,.inset-foot){animation:fadeUp .9s calc(var(--cd,0s) + .4s) var(--ease-out) backwards}
+
+/* in a row this narrow the number and the status do not fit on one line of the narrowest opening: the status goes under the number */
+@container (max-width:1240px){
+  .inset-meta{flex-direction:column;align-items:flex-start;gap:9px}
+}
+/* a row this narrow has no room for the whole description on the dune: the first sentence goes there */
+@container (max-width:1120px){
+  .inset-foot .r-text{display:none}
+  .inset-foot .space-lead{display:block;padding-top:14px;max-width:none;color:var(--body);opacity:0;transform:translateY(8px);transition:opacity .4s var(--ease),transform .5s var(--ease)}
+  .inset.is-focus .inset-foot .space-lead{opacity:1;transform:none;transition:opacity .7s var(--ease) .38s,transform .9s var(--ease-out) .38s}
+  .mm.still .inset-foot .space-lead{transition:none;transform:none}
+}
+.mm.dense .insets{height:clamp(230px,calc((100cqw - 3 * var(--g)) / 3.6),calc(var(--vh,100svh) * .5))}
+.mm.dense .inset-foot .r-text{font-size:13px;line-height:1.62}
+
+/* stacked: the row stays a row. One opening is always open and a touch opens another. The closed ones keep the strip of the picture where the figure is,
+   with their number and the dot of their status; the open one has the name over its top and the first sentence over its foot. */
+@media (max-width:900px){
+  .insets{gap:8px;--unit:calc((100cqw - 24px) / 8);--pad:14px;height:clamp(280px,calc(var(--vh,100svh) * .5),440px)}
+  .inset.is-focus{--open:5}
+  .inset-top{width:calc(var(--unit) * 5 - 2 * var(--pad))}
+  .inset-meta{gap:10px}
+  .inset:not(.is-focus) .inset-top{left:0;width:var(--unit)}
+  .inset:not(.is-focus) .inset-meta{flex-direction:column;gap:9px}
+  .inset:not(.is-focus) .status-line > span{position:absolute;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+  .inset .r-title{white-space:normal;text-wrap:balance;font-size:clamp(21px,5.8vw,25px);transition:opacity .5s var(--ease) .3s}
+  .inset:not(.is-focus) :is(.r-title,.inset-foot){opacity:0;visibility:hidden;transition:none}
+  .inset-foot{width:calc(var(--unit) * 5 - 2 * var(--pad))}
+  .inset-foot .r-text{display:none}
+  .inset-foot .space-lead{display:block;padding-top:13px;max-width:none;color:var(--body);opacity:0;transform:translateY(8px);transition:opacity .4s var(--ease),transform .5s var(--ease)}
+  .inset.is-focus .inset-foot .space-lead{opacity:1;transform:none;transition:opacity .7s var(--ease) .38s,transform .9s var(--ease-out) .38s}
+  .mm.still .inset-foot .space-lead{transition:none;transform:none}
+  .inset-foot .r-ft{padding-top:14px}
+  .mm.dense .insets{height:clamp(220px,calc(var(--vh,100svh) * .36),320px)}
+}
+
+/* =====================================================
+   Type · the pairings of the "Fontes" Tweak and the face of the running text ("Texto").
+   Roles: display (name, titles), label (section labels, kicker), mono (numbers, links, status, and the text by default), prop (the text, when asked).
+   With the default pairing and the mono text nothing here applies: the page is set as in v2.3.
+   ===================================================== */
+html[data-font="atual"]{--font-prop:"IBM Plex Sans","Futura","Avenir Next",system-ui,sans-serif;--prop-w:300}
+html[data-font="hanken"]{--font-display:"Hanken Grotesk","Futura","Avenir Next",system-ui,sans-serif;--font-label:"Hanken Grotesk","Futura","Avenir Next",system-ui,sans-serif;--font-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;--display-w:300;--word-w:300;--label-w:400;--word-ls:0.0587;--word-k:6.099;--word-ml:0.0712}
+html[data-font="hanken"]{--font-prop:"Hanken Grotesk","Futura","Avenir Next",system-ui,sans-serif;--prop-w:300}
+html[data-font="manrope"]{--font-display:"Manrope","Futura","Avenir Next",system-ui,sans-serif;--font-label:"Manrope","Futura","Avenir Next",system-ui,sans-serif;--font-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;--display-w:300;--word-w:300;--label-w:400;--word-ls:0.0956;--word-k:6.3705;--word-ml:0.0556}
+html[data-font="manrope"]{--font-prop:"Manrope","Futura","Avenir Next",system-ui,sans-serif;--prop-w:300}
+html[data-font="geist"]{--font-display:"Geist","Futura","Avenir Next",system-ui,sans-serif;--font-label:"Geist","Futura","Avenir Next",system-ui,sans-serif;--font-mono:"Geist Mono",ui-monospace,Menlo,monospace;--display-w:300;--word-w:300;--label-w:400;--word-ls:0.0493;--word-k:6.2352;--word-ml:0.0712}
+html[data-font="geist"]{--font-prop:"Geist","Futura","Avenir Next",system-ui,sans-serif;--prop-w:300}
+html[data-font="space"]{--font-display:"Space Grotesk","Futura","Avenir Next",system-ui,sans-serif;--font-label:"Space Grotesk","Futura","Avenir Next",system-ui,sans-serif;--font-mono:"Space Mono",ui-monospace,Menlo,monospace;--display-w:300;--word-w:300;--label-w:400;--word-ls:0.0455;--word-k:6.099;--word-ml:0.0712}
+html[data-font="space"]{--font-prop:"Space Grotesk","Futura","Avenir Next",system-ui,sans-serif;--prop-w:300}
+html[data-font="instrument"]{--font-display:"Instrument Serif","Iowan Old Style","Palatino Linotype",Georgia,serif;--font-label:"Instrument Sans","Futura","Avenir Next",system-ui,sans-serif;--font-mono:"Geist Mono",ui-monospace,Menlo,monospace;--display-w:400;--word-w:400;--label-w:400;--word-ls:0.1965;--word-k:6.3705;--word-ml:-0.0069}
+html[data-font="instrument"]{--font-prop:"Instrument Sans","Futura","Avenir Next",system-ui,sans-serif;--prop-w:400}
+/* another family keeps the size the eye sees: the x-height of Jost for names and titles, the x-height of IBM Plex Mono for text */
+html[data-font]:not([data-font="atual"]) body{font-size-adjust:0.516}
+html[data-font]:not([data-font="atual"]) :is(.r-title,.showcase-name){font-family:var(--font-display);font-weight:var(--display-w);font-size-adjust:0.469}
+html[data-font]:not([data-font="atual"]) :is(.r-kick,.r-label,.r-fbrand){font-family:var(--font-label);font-weight:var(--label-w)}
+/* the name: its own letter-spacing and width factor per family, so it still takes its eight columns (the whole width when stacked) */
+html[data-font]:not([data-font="atual"]) .r-word{font-family:var(--font-display);font-weight:var(--word-w);font-size-adjust:none;letter-spacing:calc(var(--word-ls) * 1em);
+  margin:0 calc(var(--word-ls) * -1em) 0 calc(var(--word-ml) * -1em);font-size:calc((200cqw - var(--g)) / (3 * var(--word-k)))}
+html[data-font]:not([data-font="atual"]) .r-deck *{font-size-adjust:none}
+@media (max-width:900px){ html[data-font]:not([data-font="atual"]) .r-word{font-size:calc(100cqw / var(--word-k))} }
+/* the serif in the names asks for no tightening */
+html[data-font="instrument"] :is(.r-title,.showcase-name){letter-spacing:0}
+/* Texto · proportional: the running text leaves the mono; numbers, links and status stay in it */
+html[data-text="prop"] :is(.r-tag,.r-text,.space-lead,.r-fmeta,.toast){font-family:var(--font-prop,var(--font-mono));font-weight:var(--prop-w,300)}
+html[data-text="prop"] .r-text{font-size:15px;max-width:24em}
+html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
+</style>
+
+<main class="proto mm r" id="mm" aria-label="Minimal Me, home" tabindex="-1">
+<header class="r-hero" id="topo" data-hero>
+  <div class="r-pic">
+    <div class="r-layer r-sky" data-hp data-px="-6" data-py="-3" data-dx="-3"><img src="img/sky.webp" alt="" decoding="async" fetchpriority="high"></div>
+    <div class="r-layer r-dune" data-hp data-px="12" data-py="5" data-dx="5"><img src="img/dunes.webp" alt="Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste." decoding="async" fetchpriority="high"></div>
+    <div class="r-grain"></div>
+    <div class="r-top"><div class="r-in"><a class="r-glyph" href="#topo" aria-label="Minimal Me, início"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="none" stroke="#141414" stroke-width="1"></circle><circle cx="13" cy="13" r="4.5" fill="#141414"></circle></svg></a></div></div>
+  </div>
+  <div class="r-mast">
+    <div class="r-in r-grid">
+      <h1 class="r-word" aria-label="Minimal Me"><span class="w w1"><span>Minimal</span></span> <span class="w w2"><span>Me</span><i class="r-base" aria-hidden="true"></i></span></h1>
+      <div class="r-deck">
+        <p class="r-kick">hub pessoal e minimalista<i class="r-base" aria-hidden="true"></i></p>
+        <p class="r-tag">Uma dinâmica simples e moderna para consumir e gerar conteúdo.<i class="r-base" aria-hidden="true"></i></p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="r-sec spaces spaces--insets" id="sec" aria-labelledby="spaces-label">
+  <div class="r-in">
+    <header class="r-head" data-rv><h2 class="r-label" id="spaces-label">Spaces</h2><span class="r-count">01 — <span data-total>04</span></span></header>
+    <div class="insets-wrap" data-rv>
+      <div class="insets" data-spaces>
+        <article class="space inset" data-space="frames" data-pick="open" style="--cd:0.00s">
+          <div class="r-media" data-media="frames" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.36;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/frames.webp" alt="Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas." decoding="async" draggable="false"><canvas class="r-fx" data-fx="shutter" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="inset-top">
+            <p class="inset-meta"><span class="r-n" data-n>01</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em desenvolvimento</span></span></p>
+            <h3 class="r-title">Frames &amp; Songs</h3>
+          </div>
+          <div class="inset-foot">
+            <p class="r-text" data-t="text">Meus momentos, em fotos e vídeos. Posts em carrossel, cada um com a música que ficou daquele momento.</p>
+            <p class="space-lead" data-t="lead">Meus momentos, em fotos e vídeos.</p>
+            <div class="r-ft"><a class="r-link" href="#" data-link aria-disabled="true">Acessar<span class="sr"> Frames &amp; Songs</span><i aria-hidden="true"></i></a></div>
+          </div>
+        </article>
+        <article class="space inset" data-space="music" data-pick="open" style="--cd:0.12s">
+          <div class="r-media" data-media="music" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.49;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/music.webp" alt="Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce." decoding="async" draggable="false"><canvas class="r-fx" data-fx="waves" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="inset-top">
+            <p class="inset-meta"><span class="r-n" data-n>02</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
+            <h3 class="r-title">Music &amp; Feeling</h3>
+          </div>
+          <div class="inset-foot">
+            <p class="r-text" data-t="text">Eu tocando, de perto. Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir.</p>
+            <p class="space-lead" data-t="lead">Eu tocando, de perto.</p>
+            <div class="r-ft"><a class="r-link" href="#" data-link aria-disabled="true">Acessar<span class="sr"> Music &amp; Feeling</span><i aria-hidden="true"></i></a></div>
+          </div>
+        </article>
+        <article class="space inset" data-space="tech" data-pick="open" style="--cd:0.24s">
+          <div class="r-media" data-media="tech" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.55;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/tech.webp" alt="Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores." decoding="async" draggable="false"><canvas class="r-fx" data-fx="leds" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="inset-top">
+            <p class="inset-meta"><span class="r-n" data-n>03</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
+            <h3 class="r-title">Code &amp; Share</h3>
+          </div>
+          <div class="inset-foot">
+            <p class="r-text" data-t="text">O que eu ando construindo, sem atualizar nada à mão. Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento.</p>
+            <p class="space-lead" data-t="lead">O que eu ando construindo, sem atualizar nada à mão.</p>
+            <div class="r-ft"><a class="r-link" href="#" data-link aria-disabled="true">Acessar<span class="sr"> Code &amp; Share</span><i aria-hidden="true"></i></a></div>
+          </div>
+        </article>
+        <article class="space inset" data-space="ai" data-pick="open" style="--cd:0.36s">
+          <div class="r-media" data-media="ai" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.48;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/ai.webp" alt="Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor." decoding="async" draggable="false"><canvas class="r-fx" data-fx="float" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="inset-top">
+            <p class="inset-meta"><span class="r-n" data-n>04</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
+            <h3 class="r-title">Write &amp; Learn</h3>
+          </div>
+          <div class="inset-foot">
+            <p class="r-text" data-t="text">Um agente de IA que escreve por conta própria. Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos.</p>
+            <p class="space-lead" data-t="lead">Um agente de IA que escreve por conta própria.</p>
+            <div class="r-ft"><a class="r-link" href="#" data-link aria-disabled="true">Acessar<span class="sr"> Write &amp; Learn</span><i aria-hidden="true"></i></a></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="r-foot" data-rv>
+  <div class="r-in r-grid">
+    <p class="r-fbrand"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="none" stroke="#8E8E89"></circle><circle cx="13" cy="13" r="4.5" fill="#E9E9E6"></circle></svg><span>Minimal Me</span></p>
+    <p class="r-fmeta">© 2026 <span aria-hidden="true">·</span> <a href="#topo">voltar ao início ↑</a></p>
+  </div>
+</footer>
+</main>
+<div class="toast" role="status"></div>
+
+<script>
+(() => {
+'use strict';
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const RM = matchMedia('(prefers-reduced-motion: reduce)');
+const touchy = matchMedia('(hover: none)');
+const stacked = matchMedia('(max-width: 900px)');
+const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const seeded = (s) => () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+const mm = $('#mm');
+/* spaces · the version, the four spaces and what the comparison bar can change in this page (Tweaks) */
+const VERSION = {"id": "frestas-2", "auto": "none", "sticky": "stacked"};
+const SPACES = {"frames": {"name": "Frames & Songs", "text": {"first": "Meus momentos, em fotos e vídeos. Posts em carrossel, cada um com a música que ficou daquele momento."}, "lead": {"first": "Meus momentos, em fotos e vídeos."}, "more": {"first": "Posts em carrossel, cada um com a música que ficou daquele momento."}}, "music": {"name": "Music & Feeling", "text": {"first": "Eu tocando, de perto. Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir."}, "lead": {"first": "Eu tocando, de perto."}, "more": {"first": "Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir."}}, "tech": {"name": "Code & Share", "text": {"first": "O que eu ando construindo, sem atualizar nada à mão. Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento."}, "lead": {"first": "O que eu ando construindo, sem atualizar nada à mão."}, "more": {"first": "Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento."}}, "ai": {"name": "Write & Learn", "text": {"first": "Um agente de IA que escreve por conta própria. Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos."}, "lead": {"first": "Um agente de IA que escreve por conta própria."}, "more": {"first": "Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos."}}};
+const IDS = Object.keys(SPACES);
+const STATUS = { ok: 'Disponível', dev: 'Em desenvolvimento', plan: 'Em planejamento' };
+const TW = { status: { frames: 'dev', music: 'plan', tech: 'plan', ai: 'plan' }, order: 'list', density: 'airy', motion: 'subtle', voice: 'first', font: 'atual', text: 'mono', live: 'focus', crops: null, adjust: false, touch: false };
+const takeTweaks = (t) => { if (!t) return; for (const k in t) { if (k === 'status') Object.assign(TW.status, t.status); else if (k in TW) TW[k] = t[k]; } };
+const isTouch = () => TW.touch || touchy.matches;
+const wantsMotion = () => !RM.matches && TW.motion !== 'none';
+let moving = wantsMotion();
+let shown = true;
+
+/* =====================================================
+   Living pictures · each of the four pictures has a motion of its own, made from what is painted in it:
+   the loose sheets float (Write & Learn), the rack lights blink (Code & Share), the sound leaves the amplifier (Music & Feeling),
+   a shot is framed and taken (Frames & Songs). A picture wakes when its space takes the focus and goes back to rest when it leaves.
+   Everything is drawn on a canvas that lies exactly over the picture; at rest the canvas is empty and the picture is the file as it is.
+   ===================================================== */
+function coverMap(W, H, iw, ih, px, py, z) {
+  const s = Math.max(W / iw, H / ih) * (z || 1), w = iw * s, h = ih * s, x = (W - w) * px, y = (H - h) * py;
+  return { w, s: w / iw, at: (u, v) => [x + u * w, y + v * h] };
+}
+const PIC = { frames: [1086, 1448], music: [1086, 1448], tech: [1086, 1448], ai: [1086, 1448] };
+const FX = {"sheets":[[605,457,222,145,2,2,381,2],[400,628,106,63,2,149,381,149],[183,728,122,106,2,214,381,214],[746,762,148,121,2,322,381,322],[332,867,78,52,2,445,381,445],[709,877,377,303,2,499,381,499]],"leds":[[0.9158,0.4666,2.0,24],[0.908,0.469,2.5,24],[0.9004,0.4713,2.5,25],[0.8926,0.4736,2.5,26],[0.8851,0.476,2.5,26],[0.8775,0.4786,2.5,26],[0.9317,0.5116,2.5,24],[0.1822,0.5134,2.5,33],[0.9238,0.514,2.5,25],[0.1884,0.5155,2.0,33],[0.9162,0.5159,2.5,25],[0.1948,0.5175,2.0,34],[0.9087,0.5178,2.5,25],[0.2009,0.5195,2.5,35],[0.9011,0.52,2.5,26],[0.2067,0.5217,2.0,35],[0.2122,0.5231,2.0,35],[0.7052,0.5238,2.0,34],[0.6997,0.5258,2.0,36],[0.6942,0.5274,2.0,37],[0.6887,0.5293,2.0,38],[0.6832,0.5311,1.5,38],[0.9078,0.5506,2.5,27],[0.9002,0.5522,2.0,27],[0.8926,0.5541,2.0,29],[0.885,0.556,2.5,30],[0.8775,0.5577,2.5,31],[0.7123,0.5597,2.0,39],[0.7068,0.5612,2.0,41],[0.7013,0.5626,2.0,43],[0.6957,0.564,2.0,45],[0.6901,0.5656,2.5,47],[0.2398,0.566,2.0,34],[0.2455,0.5676,2.0,35],[0.6846,0.5672,2.0,48],[0.1887,0.5687,2.5,35],[0.2508,0.5692,2.0,35],[0.1948,0.5701,2.0,36],[0.2566,0.5706,2.0,37],[0.2011,0.5715,2.0,36],[0.2066,0.5731,2.5,36],[0.262,0.5722,1.0,38],[0.2122,0.5742,2.0,36],[0.2677,0.5737,1.0,39],[0.8082,0.5821,2.5,34],[0.8019,0.5835,2.5,35],[0.7961,0.5847,2.0,36],[0.7903,0.586,2.0,37],[0.784,0.5873,2.0,38],[0.7776,0.5887,2.0,39],[0.2401,0.5945,2.5,37],[0.2457,0.5958,2.0,40],[0.2505,0.597,2.0,41],[0.2552,0.5979,2.0,42],[0.26,0.599,2.0,43],[0.2646,0.6003,2.0,44],[0.2694,0.6012,2.0,45],[0.9314,0.6073,2.5,28],[0.9162,0.6101,2.5,30],[0.9235,0.6088,2.5,30],[0.9087,0.6113,2.5,30],[0.901,0.6126,3.0,31],[0.8924,0.6142,1.5,32],[0.7123,0.6218,2.0,51],[0.7013,0.6238,2.5,56],[0.7068,0.6227,2.0,53],[0.6959,0.6247,2.0,59],[0.6901,0.6259,2.0,60],[0.6845,0.6269,2.0,62],[0.9322,0.6582,2.5,29],[0.924,0.6592,2.0,30],[0.9084,0.6607,2.0,31],[0.916,0.6599,2.0,30],[0.9007,0.6615,2.5,31],[0.8924,0.6626,1.5,33],[0.8778,0.6642,1.0,34],[0.8849,0.6633,1.5,33]]};
+const INK = '233,233,230';
+/* the light every picture has behind its figure breathes a little while the picture is awake */
+const GLOW = { frames: [.677, .608, .2, .07, .8], music: [.686, .646, .2, .07, .7], ai: [.516, .622, .24, .06, .6], tech: [.487, .672, .17, .05, 1.1] };
+function glow(ctx, map, id, sec, k) {
+  const g = GLOW[id]; if (!g) return;
+  const p = map.at(g[0], g[1]), r = g[2] * map.w;
+  let a = g[3] * (.6 + .4 * Math.sin(sec * g[4]));
+  if (id === 'tech') a += .028 * (hash(Math.floor(sec * 6)) - .5); /* a screen does not breathe: it flickers as the lines go by */
+  const gr = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], r);
+  gr.addColorStop(0, `rgba(255,255,255,${(a * k).toFixed(4)})`); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = gr; ctx.fillRect(p[0] - r, p[1] - r, r * 2, r * 2);
+}
+const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+
+/* Write & Learn · the sheets that are painted in the picture are the ones that move: under each one the canvas lays a patch of clean ground,
+   and over it the sheet itself, cut from the picture, a little off its place and a little turned */
+const ATLAS = new Image(); let atlasReady = false;
+ATLAS.onload = () => { atlasReady = true; wake(); };
+ATLAS.src = 'img/ai-sheets.webp';
+const SHEETS = FX.sheets.map((s, i) => {
+  const r = seeded(40 + i), big = s[2] > 300;
+  return { s, big, amp: big ? 5 : 10 + r() * 9, turn: big ? .01 : .05 + r() * .06, f: .55 + r() * .4, p: [r() * 6.283, r() * 6.283, r() * 6.283, r() * 6.283] };
+});
+function drawFloat(ctx, map, sec, k) {
+  if (!atlasReady) return;
+  const s = map.s, o = map.at(0, 0);
+  for (const q of SHEETS) { const [x, y, w, h, px, py] = q.s; ctx.drawImage(ATLAS, px, py, w, h, o[0] + x * s, o[1] + y * s, w * s, h * s); }
+  for (const q of SHEETS) {
+    const [x, y, w, h, , , sx, sy] = q.s, f = q.f, p = q.p;
+    const dx = q.big ? 0 : k * q.amp * (Math.sin(sec * f * .55 + p[0]) + .35 * Math.sin(sec * f * 1.7 + p[1]));
+    const dy = k * q.amp * (.8 * Math.sin(sec * f * .42 + p[2]) + .3 * Math.sin(sec * f * 1.3 + p[3]));
+    const cx = q.big ? x + w : x + w / 2, cy = y + h / 2; /* the sheet that the edge of the picture cuts turns on that edge */
+    ctx.save();
+    ctx.translate(o[0] + (cx + dx) * s, o[1] + (cy + dy) * s); ctx.rotate(k * q.turn * Math.sin(sec * f * .5 + p[1]));
+    if (!q.big) ctx.scale(1, 1 + k * .06 * Math.sin(sec * f * 1.1 + p[3]));
+    ctx.drawImage(ATLAS, sx, sy, w, h, (x - cx) * s, (y - cy) * s, w * s, h * s);
+    ctx.restore();
+  }
+}
+
+/* Code & Share · the lights of the racks: some stay on, some breathe, and in some rows the light runs from one end to the other.
+   A light goes off under a dot of the colour of the rack around it, and comes back brighter than it was painted. */
+const LEDS = FX.leds.map(([u, v, r, bg], i) => {
+  const q = hash(i * 3.1 + 1), row = Math.round(v * 1448 / 14);
+  return { u, v, r, bg, mode: q < .26 ? 0 : q < .56 ? 1 : 2, ph: hash(row * 7.7) * 6.283, f: .5 + hash(i + 9) * 1.3, run: 1.6 + hash(row + 2) * 2.2, dir: hash(row * 1.3) > .5 ? 1 : -1 };
+});
+function drawLeds(ctx, map, sec, k) {
+  const s = map.s;
+  for (const L of LEDS) {
+    if (!L.mode) continue;
+    const a = L.mode === 1 ? .5 + .5 * Math.sin(sec * L.f + L.ph + L.u * 30) : (Math.sin(sec * L.run - L.dir * L.u * 1086 / 8.4 * .9 + L.ph) > .1 ? 1 : .06);
+    const p = map.at(L.u, L.v);
+    if (a < .97) { ctx.globalAlpha = k * (1 - a) * .94; ctx.fillStyle = `rgb(${L.bg},${L.bg},${L.bg})`; ctx.beginPath(); ctx.arc(p[0], p[1], (L.r + 1.7) * s, 0, 6.2832); ctx.fill(); }
+    if (a > .8) {
+      const R = (L.r * 2.6 + 1.5) * s, g = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], R);
+      g.addColorStop(0, `rgba(255,255,255,${(k * (a - .8) * 3).toFixed(3)})`); g.addColorStop(.32, `rgba(255,255,255,${(k * (a - .8) * .7).toFixed(3)})`); g.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.fillRect(p[0] - R, p[1] - R, R * 2, R * 2);
+    }
+  }
+  ctx.globalAlpha = 1;
+}
+
+/* Music & Feeling · the sound, drawn the way the pictures draw everything else: hairlines. Arcs leave the amplifier, open up and to the left,
+   away from the player, grow and fade in the air above the dune. */
+function drawWaves(ctx, map, sec, k) {
+  const c = map.at(.4254, .6796), W = map.w, N = 4, P = 6.4, A0 = Math.PI * 1.03, A1 = Math.PI * 1.6, SEG = 22;
+  ctx.lineWidth = Math.max(1, 1.5 * map.s); ctx.lineCap = 'butt';
+  for (let i = 0; i < N; i++) {
+    const p = ((sec / P + i / N) % 1 + 1) % 1, r = W * (.035 + .46 * Math.pow(p, .85));
+    const a = k * .5 * Math.pow(1 - p, 1.5) * Math.min(1, p / .07);
+    if (a < .006) continue;
+    for (let j = 0; j < SEG; j++) { /* each arc fades towards its two ends */
+      const u = (j + .5) / SEG, w = Math.pow(Math.sin(Math.PI * u), 1.3);
+      ctx.strokeStyle = `rgba(${INK},${(a * w).toFixed(3)})`;
+      ctx.beginPath(); ctx.arc(c[0], c[1], r, A0 + (A1 - A0) * j / SEG, A0 + (A1 - A0) * (j + 1.08) / SEG); ctx.stroke();
+    }
+  }
+}
+
+/* Frames & Songs · a shot: the corners of a frame settle over the horizon, the shutter blinks, and the frame that was taken stays for a moment.
+   Three framings, one after the other. */
+const SHOTS = [[.635, .6, .18], [.555, .618, .15], [.65, .59, .2]];
+const easeOut = (x) => 1 - Math.pow(1 - clamp(x), 3);
+function drawShutter(ctx, map, sec, k) {
+  const T = 6.2, n = Math.floor(sec / T), p = sec / T - n, shot = SHOTS[((n % 3) + 3) % 3];
+  if (p > .92) return;
+  const c = map.at(shot[0], shot[1]);
+  let scale = 1, a = 1, whole = 0, flash = 0, dy = 0;
+  if (p < .16) { const e = easeOut(p / .16); scale = 1.14 - .14 * e; a = e; }
+  else if (p < .54) { scale = 1 + .016 * Math.cos((p - .16) * 46) * Math.exp(-(p - .16) * 12); }
+  else if (p < .6) { flash = 1 - (p - .54) / .06; scale = .985; whole = 1; }
+  else { const e = (p - .6) / .32; whole = 1; a = 1 - easeOut(e); scale = .985 - .02 * e; dy = 8 * map.s * e; }
+  const w = shot[2] * map.w * scale, h = w * 2 / 3, x = c[0] - w / 2, y = c[1] - h / 2 + dy, L = w * .16;
+  if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${(k * .2 * flash).toFixed(3)})`; ctx.fillRect(x, y, w, h); }
+  ctx.strokeStyle = `rgba(${INK},${(k * .85 * a).toFixed(3)})`; ctx.lineWidth = Math.max(1, 1.5 * map.s); ctx.lineCap = 'butt';
+  ctx.beginPath();
+  if (whole) ctx.rect(x, y, w, h);
+  else for (const [ax, ay, sx, sy] of [[x, y, 1, 1], [x + w, y, -1, 1], [x, y + h, 1, -1], [x + w, y + h, -1, -1]]) { ctx.moveTo(ax + sx * L, ay); ctx.lineTo(ax, ay); ctx.lineTo(ax, ay + sy * L); }
+  ctx.stroke();
+  if (!whole) { /* the mark in the middle, while the shot is being framed */
+    ctx.globalAlpha = .7; ctx.beginPath(); ctx.moveTo(c[0] - L * .22, c[1]); ctx.lineTo(c[0] + L * .22, c[1]); ctx.moveTo(c[0], c[1] - L * .22); ctx.lineTo(c[0], c[1] + L * .22); ctx.stroke(); ctx.globalAlpha = 1;
+  }
+}
+
+/* spaces · where a picture is held in its frame (x, y from 0 to 1, and a zoom), read from the sheet so that page and canvas agree */
+const cropOf = (md) => { const cs = getComputedStyle(md.m); const n = (k, d) => { const v = parseFloat(cs.getPropertyValue(k)); return isFinite(v) ? v : d; }; return [n('--px', .5), n('--py', .5), n('--pz', 1)]; };
+function makeFx(cv, md) {
+  const fx = { cv, md, kind: cv.dataset.fx, ctx: cv.getContext('2d'), W: 0, H: 0, dpr: 1, map: null };
+  fx.size = () => {
+    const w = cv.clientWidth, h = cv.clientHeight;
+    if (!w || !h) { fx.W = 0; return; }
+    fx.dpr = Math.min(devicePixelRatio || 1, 2); fx.W = w; fx.H = h;
+    cv.width = Math.round(w * fx.dpr); cv.height = Math.round(h * fx.dpr);
+    { const c = cropOf(md), pic = PIC[md.id] || PIC.ai; fx.map = coverMap(w, h, pic[0], pic[1], c[0], c[1], c[2]); }
+    if (md.live > 0) drawFx(fx, performance.now(), md.live);
+  };
+  return fx;
+}
+/* k is how awake the picture is, from 0 (at rest: nothing is drawn) to 1 */
+function drawFx(fx, t, k) {
+  if (!fx.W) return;
+  const c = fx.ctx, sec = t / 1000;
+  c.setTransform(fx.dpr, 0, 0, fx.dpr, 0, 0); c.clearRect(0, 0, fx.W, fx.H);
+  if (!(k > 0) || !fx.map) return;
+  if (fx.kind === 'float') drawFloat(c, fx.map, sec, k);
+  else if (fx.kind === 'leds') drawLeds(c, fx.map, sec, k);
+  else if (fx.kind === 'waves') drawWaves(c, fx.map, sec, k);
+  else if (fx.kind === 'shutter') drawShutter(c, fx.map, sec, k);
+  glow(c, fx.map, fx.md.id, sec, k);
+}
+
+/* =====================================================
+   One loop for the page: hero depth, picture depth, living pictures, focus on touch screens
+   ===================================================== */
+const E = { raf: 0, ptr: { x: 0, y: 0 }, cur: { x: 0, y: 0 }, medias: [], hp: [], hero: $('[data-hero]') };
+addEventListener('pointermove', (e) => { E.ptr.x = e.clientX / innerWidth * 2 - 1; E.ptr.y = e.clientY / innerHeight * 2 - 1; wake(); }, { passive: true });
+mm.addEventListener('scroll', wake, { passive: true });
+E.hp = $$('[data-hp]').map((el) => ({ el, px: +el.dataset.px, py: +el.dataset.py, dx: +el.dataset.dx }));
+const ro = new ResizeObserver((es) => { for (const en of es) if (en.target._fx) en.target._fx.size(); });
+E.medias = $$('[data-media]').map((m) => {
+  const md = { m, id: m.dataset.media, gate: m.closest('[data-gate]'), host: m.closest('.space, [data-for]'), par: $('[data-par]', m), fx: [], pk: +(m.dataset.pk || 24), pp: +(m.dataset.pp || 6), live: 0 };
+  $$('canvas[data-fx]', m).forEach((cv) => { const fx = makeFx(cv, md); md.fx.push(fx); cv._fx = fx; ro.observe(cv); });
+  return md;
+});
+function frame(t) {
+  E.raf = 0;
+  let busy = false; /* v2.3 · asks for another frame only while something on screen moves */
+  const c = E.cur, p = E.ptr, vh = mm.clientHeight || innerHeight, vw = innerWidth;
+  const dt = E.t0 ? Math.min(.12, Math.max(0, (t - E.t0) / 1000)) : .016; E.t0 = t;
+  c.x += (p.x - c.x) * .045; c.y += (p.y - c.y) * .045;
+  if (Math.abs(p.x - c.x) > .0005 || Math.abs(p.y - c.y) > .0005) busy = true;
+  const hr = E.hero.getBoundingClientRect();
+  if (hr.bottom > 0 && hr.top < vh) {
+    busy = true;
+    const drift = Math.sin(t / 7000) * .35;
+    for (const h of E.hp) h.el.style.transform = `translate3d(${(c.x * h.px + drift * h.dx).toFixed(2)}px,${(c.y * h.py).toFixed(2)}px,0) scale(1.02)`;
+  }
+  for (const md of E.medias) {
+    if (md.gate && !md.gate.classList.contains('is-focus')) { if (md.live) { md.live = 0; for (const fx of md.fx) drawFx(fx, t, 0); } continue; } /* spaces · a picture that is not on show does not move */
+    const r = md.m.getBoundingClientRect();
+    if (!r.width || r.bottom < -60 || r.top > vh + 60 || r.right < 0 || r.left > vw) continue;
+    const k = clamp((vh - r.top) / (vh + r.height)) - .5;
+    /* spaces · how awake the picture is follows the focus of its space, easing in and out; the picture comes a little closer as it wakes */
+    const want = md.fx.length && (TW.live === 'always' || (md.host && md.host.classList.contains('is-focus'))) ? 1 : 0;
+    if (md.live !== want) { md.live += (want - md.live) * (1 - Math.exp(-dt * (want ? 2.8 : 4.4))); if (Math.abs(want - md.live) < .004) md.live = want; busy = true; }
+    if (md.par) md.par.style.transform = `translate3d(${(-c.x * md.pp).toFixed(2)}px,${(k * -md.pk - c.y * md.pp * .66).toFixed(2)}px,0) scale(${(1 + .03 * md.live).toFixed(4)})`;
+    if (md.live > 0) { busy = true; for (const fx of md.fx) drawFx(fx, t, md.live); md.drawn = true; }
+    else if (md.drawn) { for (const fx of md.fx) drawFx(fx, t, 0); md.drawn = false; }
+  }
+  autoFocus(vh);
+  if (busy && shown) E.raf = requestAnimationFrame(frame); else E.t0 = 0;
+}
+function wake() { if (moving && shown && !E.raf) E.raf = requestAnimationFrame(frame); }
+function still() {
+  for (const h of E.hp) h.el.style.transform = '';
+  for (const md of E.medias) {
+    if (md.par) md.par.style.transform = '';
+    md.live = 0; md.drawn = false;
+    for (const fx of md.fx) drawFx(fx, 0, 0);
+  }
+}
+function restart() {
+  cancelAnimationFrame(E.raf); E.raf = 0;
+  if (!moving) still(); else if (shown) E.raf = requestAnimationFrame(frame);
+}
+
+/* =====================================================
+   Spaces: status, order, texts and type (the Tweaks), then the focus
+   ===================================================== */
+const section = $('.spaces');
+let spaces = $$('.space');
+const idOf = (el) => (el && el.dataset && (el.dataset.space || el.dataset.for)) || '';
+const partsOf = (id) => $$(`[data-space="${id}"],[data-for="${id}"]`);
+const two = (n) => String(n).padStart(2, '0');
+
+/* every space, and every part that stands for it elsewhere on the page, takes its status, its place in the order and its text.
+   The status is said by the label alone: nothing else about a space changes with it. */
+function applySpaces(first) {
+  const root = document.documentElement;
+  root.dataset.font = TW.font; root.dataset.text = TW.text;
+  mm.classList.toggle('dense', TW.density === 'compact');
+  mm.classList.toggle('touch', isTouch());
+  IDS.forEach((id) => {
+    const st = STATUS[TW.status[id]] ? TW.status[id] : 'plan';
+    TW.status[id] = st;
+    partsOf(id).forEach((el) => {
+      el.dataset.status = st;
+      $$('[data-status-word]', el).forEach((n) => { n.textContent = STATUS[st]; });
+      $$('a[data-link]', el).forEach((a) => { if (st === 'ok') a.removeAttribute('aria-disabled'); else a.setAttribute('aria-disabled', 'true'); });
+      $$('[data-t]', el).forEach((n) => { const t = SPACES[id][n.dataset.t]; if (t) n.textContent = t[TW.voice] || t.home; });
+    });
+  });
+  const rank = { ok: 0, dev: 1, plan: 2 };
+  const ids = TW.order === 'status' ? [...IDS].sort((a, b) => (rank[TW.status[a]] - rank[TW.status[b]]) || (IDS.indexOf(a) - IDS.indexOf(b))) : [...IDS];
+  $$('[data-spaces]').forEach((box) => {
+    const kids = [...box.children].filter((c) => idOf(c));
+    if (kids.map(idOf).join() === ids.join()) return; /* already in this order: nothing moves */
+    ids.forEach((id) => { const el = kids.find((c) => idOf(c) === id); if (el) box.appendChild(el); });
+  });
+  ids.forEach((id, i) => partsOf(id).forEach((el) => {
+    el.style.setProperty('--cd', (i * .12).toFixed(2) + 's');
+    $$('[data-n]', el).forEach((n) => { n.textContent = two(i + 1); });
+  }));
+  $$('[data-total]').forEach((n) => { n.textContent = two(ids.length); });
+  spaces = $$('.space');
+  if (!first) E.medias.forEach((md) => md.fx.forEach((fx) => fx.size()));
+}
+
+/* focus: the space under the cursor, under the keyboard or, on touch screens, the one that crosses the middle of the screen
+   (or, where a space is chosen by a touch, the one that was touched). It is kept by the id of the space, so every part of it follows:
+   the picture on a stage, the caption under a row. */
+let keyId = '', hoverId = '', autoId = '', lastId = '', focusId = null;
+const stickyNow = () => VERSION.sticky === true || (VERSION.sticky === 'stacked' && stacked.matches);
+function refreshFocus() {
+  let id = keyId || hoverId || autoId;
+  if (!id && stickyNow()) id = lastId || idOf(spaces[0]);
+  if (id === focusId) return;
+  focusId = id; if (id) lastId = id;
+  $$('[data-space],[data-for]').forEach((n) => {
+    const on = !!id && idOf(n) === id;
+    n.classList.toggle('is-focus', on);
+    if (n.hasAttribute('data-gate')) n.setAttribute('aria-hidden', String(!on));
+    if (n.hasAttribute('aria-pressed')) n.setAttribute('aria-pressed', String(on));
+  });
+  if (section) section.classList.toggle('has-focus', !!id);
+  wake();
+}
+/* a space answers to the cursor and to the keyboard on the space itself and on the parts of it that are marked as live */
+$$('.space,[data-for][data-live]').forEach((el) => {
+  const id = () => idOf(el);
+  el.addEventListener('pointerenter', (e) => { if (isTouch() || e.pointerType === 'touch') return; hoverId = id(); refreshFocus(); });
+  el.addEventListener('pointerleave', () => { if (hoverId === id()) { hoverId = ''; refreshFocus(); } });
+  el.addEventListener('focusin', (e) => { let key = true; try { key = e.target.matches(':focus-visible'); } catch (x) {} if (key) { keyId = id(); refreshFocus(); } });
+  el.addEventListener('focusout', () => { if (keyId === id()) { keyId = ''; refreshFocus(); } });
+});
+/* the cursor can leave the page without leaving the space first (out of the window, or out of the frame the page is shown in) */
+document.documentElement.addEventListener('pointerleave', () => { if (hoverId) { hoverId = ''; refreshFocus(); } });
+/* a space that is chosen by a click or a touch (the openings of Frestas):
+   "select" only chooses; "open" chooses on a first touch and, once in focus, answers as its link would */
+$$('[data-pick]').forEach((el) => el.addEventListener('click', (e) => {
+  /* while the pictures are being placed a click only chooses, so the picture of every space can be reached */
+  const id = idOf(el), choose = adjusting || el.dataset.pick === 'select' || (isTouch() && focusId !== id);
+  const own = e.target.closest && e.target.closest('a[data-link]'); /* the link of the space may lie inside it and cover it whole */
+  if (choose) { if (own) { e.preventDefault(); e.stopPropagation(); } lastId = id; hoverId = ''; keyId = ''; if (!stickyNow()) autoId = id; refreshFocus(); return; }
+  if (own) return; /* the link answers for itself */
+  const a = $(`[data-space="${id}"] a[data-link],[data-for="${id}"] a[data-link]`); if (a) a.click();
+}));
+
+/* a row of spaces that are chosen (the openings): the arrows go from one to the next */
+mm.addEventListener('keydown', (e) => {
+  if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+  const el = e.target.closest && e.target.closest('[data-pick="select"]'); if (!el) return;
+  const all = $$('[data-pick="select"]', el.parentElement), to = all[(all.indexOf(el) + (e.key === 'ArrowRight' ? 1 : -1) + all.length) % all.length];
+  e.preventDefault(); e.stopPropagation(); to.focus(); lastId = idOf(to); keyId = lastId; refreshFocus();
+});
+
+const boxOf = (c) => (VERSION.box && $(VERSION.box, c)) || $('.r-media', c) || c;
+const distOf = (c, vh) => { const r = boxOf(c).getBoundingClientRect(); return (r.bottom < 0 || r.top > vh) ? Infinity : Math.abs(r.top + r.height / 2 - vh * .5); };
+function pickAuto(vh) {
+  if (VERSION.auto === 'none') return autoId; /* chosen by touch: the scroll does not change it */
+  if (VERSION.auto === 'line') {
+    /* a list beside (or under) a stage: the line nearest to a mark. Stacked, the mark sits just under the picture that stays on screen. */
+    const sr = section.getBoundingClientRect();
+    if (sr.bottom < 0 || sr.top > vh) return autoId;
+    let line = vh * .5;
+    if (stacked.matches) { const st = $('.space-stage').getBoundingClientRect(), top = clamp(st.bottom, 0, vh); line = top + (vh - top) * .36; }
+    let best = null, bd = Infinity;
+    spaces.forEach((c) => { const r = c.getBoundingClientRect(), d = Math.abs(r.top + r.height / 2 - line); if (d < bd) { bd = d; best = c; } });
+    return idOf(best);
+  }
+  /* as in v2.3: the picture nearest to the middle, with a little hold so the focus does not flicker between two */
+  let best = null, bd = Infinity;
+  spaces.forEach((c) => { const d = distOf(c, vh); if (d < bd) { bd = d; best = c; } });
+  if (bd > vh * .34) return '';
+  const now = autoId && spaces.find((c) => idOf(c) === autoId);
+  if (now && best !== now && !(bd < distOf(now, vh) - 40)) return autoId;
+  return idOf(best);
+}
+function autoFocus(vh) {
+  const id = isTouch() ? pickAuto(vh) : '';
+  if (id !== autoId) { autoId = id; refreshFocus(); }
+}
+/* without motion the loop does not run: the focus still follows the scroll */
+mm.addEventListener('scroll', () => { if (!moving) autoFocus(mm.clientHeight || innerHeight); }, { passive: true });
+
+/* =====================================================
+   Ajustar fotos: where each picture is held in its frame can be changed by hand.
+   The comparison bar turns it on; here a picture is dragged to move it and the wheel zooms it. Each change goes back to the bar, which keeps it.
+   A crop belongs to a space, to the kind of frame (the picture's slot) and to the layout (wide or stacked).
+   ===================================================== */
+let adjusting = false;
+const CROPS = { d: {}, m: {} };
+const takeCrops = (c) => { CROPS.d = (c && c.d) || {}; CROPS.m = (c && c.m) || {}; };
+takeCrops(TW.crops);
+const layoutKey = () => (stacked.matches ? 'm' : 'd');
+const cropKey = (md) => md.id + ':' + (md.m.dataset.crop || 'main');
+function applyCrops() {
+  const set = CROPS[layoutKey()];
+  E.medias.forEach((md) => {
+    const c = set[cropKey(md)];
+    ['--cx', '--cy', '--cz'].forEach((k, i) => { if (c) md.m.style.setProperty(k, c[i]); else md.m.style.removeProperty(k); });
+    md.fx.forEach((fx) => fx.size());
+  });
+}
+function setAdjust(on) { adjusting = !!on; mm.classList.toggle('adjusting', adjusting); }
+function setCrop(md, c) {
+  c = [clamp(c[0]), clamp(c[1]), clamp(c[2], 1, 4)].map((v) => Math.round(v * 1000) / 1000);
+  CROPS[layoutKey()][cropKey(md)] = c;
+  ['--cx', '--cy', '--cz'].forEach((k, i) => md.m.style.setProperty(k, c[i]));
+  md.fx.forEach((fx) => fx.size());
+  try { parent.postMessage({ mm: 'crop', version: VERSION.id, layout: layoutKey(), key: cropKey(md), crop: c }, '*'); } catch (e) {}
+}
+/* how far the picture runs past its frame on each side, in px, at a zoom */
+function overflowOf(md, z) {
+  const box = (md.par || md.m).getBoundingClientRect(), pic = PIC[md.id] || PIC.ai, s = Math.max(box.width / pic[0], box.height / pic[1]) * z;
+  return [pic[0] * s - box.width, pic[1] * s - box.height];
+}
+const mediaOf = (t) => { const m = t && t.closest && t.closest('.r-media[data-crop]'); return m ? E.medias.find((md) => md.m === m) : null; };
+let drag = null, dragged = false;
+mm.addEventListener('pointerdown', (e) => {
+  if (!adjusting || e.button > 0) return;
+  const md = mediaOf(e.target); if (!md) return;
+  e.preventDefault();
+  drag = { md, x: e.clientX, y: e.clientY, c: cropOf(md), id: e.pointerId }; dragged = false;
+  md.m.classList.add('is-dragging');
+  try { md.m.setPointerCapture(e.pointerId); } catch (x) {}
+});
+mm.addEventListener('pointermove', (e) => {
+  if (!drag || e.pointerId !== drag.id) return;
+  if (Math.abs(e.clientX - drag.x) + Math.abs(e.clientY - drag.y) > 4) dragged = true;
+  if (!dragged) return;
+  const [ox, oy] = overflowOf(drag.md, drag.c[2]);
+  setCrop(drag.md, [ox > 1 ? drag.c[0] - (e.clientX - drag.x) / ox : drag.c[0], oy > 1 ? drag.c[1] - (e.clientY - drag.y) / oy : drag.c[1], drag.c[2]]);
+});
+const endDrag = (e) => { if (!drag || (e && e.pointerId !== drag.id)) return; drag.md.m.classList.remove('is-dragging'); drag = null; };
+mm.addEventListener('pointerup', endDrag); mm.addEventListener('pointercancel', endDrag);
+mm.addEventListener('wheel', (e) => {
+  if (!adjusting) return;
+  const md = mediaOf(e.target); if (!md) return;
+  e.preventDefault();
+  const c = cropOf(md); setCrop(md, [c[0], c[1], c[2] * Math.exp(-e.deltaY * .0016)]);
+}, { passive: false });
+/* while the pictures are being placed, a click opens nothing; it can still choose a space (a tab, an opening), unless it is the end of a drag */
+document.addEventListener('click', (e) => {
+  if (!adjusting) return;
+  e.preventDefault();
+  if (dragged || !(e.target.closest && e.target.closest('[data-pick]'))) e.stopPropagation();
+  dragged = false;
+}, true);
+stacked.addEventListener('change', applyCrops);
+
+/* =====================================================
+   Masthead: the deck stands inside the cap height of the name.
+   The label's capitals start where the name's start; the last line of the sentence rests on the name's baseline.
+   ===================================================== */
+const mast = { grid: $('.r-mast .r-grid'), word: $('.r-word'), deck: $('.r-deck'), kick: $('.r-kick'), tag: $('.r-tag') };
+const capCtx = document.createElement('canvas').getContext('2d');
+const cap = (el, ch) => { const cs = getComputedStyle(el); capCtx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`; return capCtx.measureText(ch).actualBoundingBoxAscent; };
+const base = (el) => $('.r-base', el).getBoundingClientRect().bottom;
+function alignDeck() {
+  const d = mast.deck;
+  d.style.alignSelf = ''; d.style.marginTop = ''; d.style.height = '';
+  if (stacked.matches) return;
+  const rowTop = mast.grid.getBoundingClientRect().top;
+  const wb = base(mast.word), wTop = wb - cap(mast.word, 'I');
+  const k = mast.kick.getBoundingClientRect(), kOff = (base(mast.kick) - cap(mast.kick, 'H')) - k.top;
+  const t = mast.tag.getBoundingClientRect(), tOff = t.bottom - base(mast.tag);
+  const h = (wb - wTop) + kOff + tOff;
+  d.style.alignSelf = 'start';
+  if (k.height + t.height + 12 <= h) { d.style.marginTop = (wTop - kOff - rowTop).toFixed(2) + 'px'; d.style.height = h.toFixed(2) + 'px'; }
+  else { const nat = d.getBoundingClientRect().height; d.style.marginTop = (wb + tOff - nat - rowTop).toFixed(2) + 'px'; }
+}
+const mro = new ResizeObserver(() => alignDeck());
+mro.observe(mast.word); mro.observe(mast.grid);
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(alignDeck);
+
+/* =====================================================
+   Reveal on scroll: blocks trace in once, a little before they enter
+   ===================================================== */
+let io = null;
+function observe() {
+  if (io) io.disconnect();
+  const blocks = $$('[data-rv]').filter((b) => !b.classList.contains('is-in'));
+  if (!moving || !('IntersectionObserver' in window)) { blocks.forEach((b) => b.classList.add('is-in')); return; }
+  io = new IntersectionObserver((es) => { for (const en of es) if (en.isIntersecting) { io.unobserve(en.target); en.target.classList.add('is-in'); } }, { root: mm, threshold: .12, rootMargin: '0px 0px -6% 0px' });
+  blocks.forEach((b) => io.observe(b));
+}
+
+/* links: a space that is not available yet says so; no space opens a page in this round */
+const toast = $('.toast');
+function say(msg) { toast.textContent = msg; toast.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(() => toast.classList.remove('on'), 2600); }
+document.addEventListener('click', (e) => {
+  const a = e.target.closest && e.target.closest('a'); if (!a) return;
+  const h = a.getAttribute('href') || '';
+  if (h === '#') {
+    e.preventDefault();
+    const id = idOf(a.closest('[data-space],[data-for]')), st = id && TW.status[id];
+    if (st === 'dev' || st === 'plan') say(`${STATUS[st]} · ${SPACES[id].name} ainda não está disponível.`);
+    else if (st === 'ok') say(`Protótipo · a página de ${SPACES[id].name} ainda não faz parte desta rodada.`);
+    else say('Protótipo: os links ainda não têm destino.');
+  }
+  else if (h === '#topo') { e.preventDefault(); mm.scrollTo({ top: 0, behavior: moving ? 'smooth' : 'auto' }); }
+});
+
+
+function setVh() { mm.style.setProperty('--vh', (mm.clientHeight || innerHeight) + 'px'); }
+function applyMotion() {
+  mm.classList.toggle('motion', moving);
+  mm.classList.toggle('still', !moving);
+  observe(); restart();
+}
+let rz = 0;
+addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { setVh(); alignDeck(); if (!moving) still(); else wake(); }, 160); });
+RM.addEventListener('change', () => { moving = wantsMotion(); applyMotion(); });
+
+setVh();
+alignDeck();
+mm.classList.add('in');
+applySpaces(true);
+applyCrops();
+setAdjust(TW.adjust);
+applyMotion();
+refreshFocus();
+
+/* v2.3 · the picture of the hero opens when its two layers have arrived; only then are the pictures of the cards asked for */
+const arrived = (img) => new Promise((done) => {
+  if (img.complete && img.naturalWidth) done(); else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+});
+Promise.race([Promise.all($$('.r-layer img').map(arrived)), new Promise((done) => setTimeout(done, 5000))]).then(() => {
+  mm.classList.add('pic');
+  $$('img[data-src]').forEach((i) => { i.src = i.dataset.src; i.removeAttribute('data-src'); });
+});
+/* v2.3 · keys scroll the page from the start, and again whenever the window gets the focus back */
+/* spaces · the comparison bar sends the Tweaks; the page takes them without reloading */
+addEventListener('message', (e) => {
+  const d = e.data; if (!d) return;
+  if (d.mm === 'show') { shown = !!d.on; restart(); return; }
+  if (d.mm === 'adjust') { setAdjust(d.on); return; }
+  if (d.mm === 'crops') { takeCrops(d.crops); applyCrops(); return; }
+  if (d.mm === 'zoom') { /* the bar's − and + for a picture, for screens without a wheel */
+    const md = E.medias.find((m) => cropKey(m) === d.key && (!m.gate || m.gate.classList.contains('is-focus'))) || E.medias.find((m) => cropKey(m) === d.key);
+    if (md) { const c = cropOf(md); setCrop(md, [c[0], c[1], c[2] * d.by]); }
+    return;
+  }
+  if (d.mm !== 'tweaks') return;
+  takeTweaks(d.state);
+  takeCrops(TW.crops); setAdjust(TW.adjust);
+  applySpaces(false); applyCrops();
+  hoverId = ''; if (VERSION.auto !== 'none') autoId = '';
+  const want = wantsMotion();
+  if (want !== moving) { moving = want; applyMotion(); } else restart();
+  refreshFocus();
+  autoFocus(mm.clientHeight || innerHeight);
+});
+mm.focus({ preventScroll: true });
+addEventListener('focus', () => { if (document.activeElement === document.body) mm.focus({ preventScroll: true }); });
+})();
+</script>
+
+</body></html>

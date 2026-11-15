@@ -6,5 +6,5 @@ O card que apresenta uma frente do hub: uma ilustração em 4:5 e, abaixo dela, 
 - "Em planejamento" traz marcas de corte nos quatro cantos da imagem. Os outros estados não.
 - O card inteiro é o alvo do link. Enquanto a frente não abre, o link fica em `mist`, com traço de 14px, e responde com o `Toast`.
 - Com foco (cursor, teclado ou, em tela de toque, o card no meio da tela), a imagem vai à exposição plena, o traço do número cresce até a largura do card e os outros cards recuam para 55%.
-- No protótipo, cada imagem tem um efeito vivo em canvas: poeira na luz (Frames & Fables), luzes dos racks (Code & Share) e folhas soltas (Write & Learn). A prévia aqui é estática.
+- No protótipo, cada imagem tem um efeito vivo em canvas: poeira na luz (Frames & Songs), luzes dos racks (Code & Share) e folhas soltas (Write & Learn). A prévia aqui é estática.
 - Mantenha o ritmo vertical do card com `rhythm-32`, `rhythm-22` e `rhythm-18`, e os quatro textos alinhados entre os cards.

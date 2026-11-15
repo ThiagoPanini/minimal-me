@@ -7,19 +7,19 @@ Hub pessoal do Autor, público, organizado em quatro spaces. Este glossário fix
 ### Produto
 
 **Space**:
-Um lugar do hub dedicado a um tema, com nome, ilustração e Status do space próprios. Hoje são quatro: Frames & Fables, Music & Feeling, Code & Share e Write & Learn. Na prosa, "o space" e "os spaces"; na Home, o rótulo da seção é "Spaces".
+Um lugar do hub dedicado a um tema, com nome, ilustração e Status do space próprios. Hoje são quatro: Frames & Songs, Music & Feeling, Code & Share e Write & Learn. Na prosa, "o space" e "os spaces"; na Home, o rótulo da seção é "Spaces".
 _Em código_: `Space`
 _Avoid_: frente, espaço, funcionalidade (para o space inteiro), seção, módulo
 
 **Funcionalidade**:
-Uma capacidade dentro de um space, como curtidas, comentários ou música em Frames & Fables.
+Uma capacidade dentro de um space, como curtidas ou comentários.
 _Em código_: `Feature`
 _Avoid_: recurso, space
 
-**Frames & Fables**:
-O space de fotografia: fotos do Autor publicadas uma a uma, como num feed, com pouco texto.
-_Em código_: `FramesAndFables`
-_Avoid_: álbum, galeria, F&F
+**Frames & Songs**:
+O space de fotos e vídeos: o Autor posta num carrossel, como no Instagram, e cada post leva uma música pessoal que representa o momento. Só esse conceito está confirmado; o resto será especificado em grilling futuro. Antes de 2026-11-15, o space se chamava Frames & Fables.
+_Em código_: `FramesAndSongs`
+_Avoid_: álbum, galeria, F&S
 
 **Music & Feeling**:
 O space de música: em sua maioria, vídeos do Autor tocando pequenos trechos de músicas no violão e na guitarra.
@@ -46,28 +46,6 @@ O estágio em que um space se apresenta na Home: Disponível, Em desenvolvimento
 _Em código_: `SpaceStatus`, com os valores `available`, `in-development` e `planned`
 _Avoid_: estado, fase, em breve
 
-### Frames & Fables
-
-**Publicação**:
-O que o Autor publica em Frames & Fables: uma foto ou uma Série, com data e, no máximo, um título curto ou uma legenda de uma linha.
-_Em código_: `Publication`
-_Avoid_: post, entrada, álbum
-
-**Série**:
-Uma Publicação com mais de uma foto, vistas em sequência na foto aberta.
-_Em código_: `Series`
-_Avoid_: carrossel, galeria, conto
-
-**Enquadramento**:
-A posição e a aproximação que o Autor escolhe para uma foto no quadro quadrado da grade. Aberta, a foto aparece inteira.
-_Em código_: `Framing`
-_Avoid_: corte, crop
-
-**Rascunho**:
-Uma Publicação que ainda não está publicada e que só o Autor vê. Fechar uma Publicação não terminada guarda um Rascunho; despublicar devolve a Publicação a Rascunho.
-_Em código_: `Draft`
-_Avoid_: pendente, oculta
-
 ### Pessoas
 
 **Autor**:
@@ -88,9 +66,9 @@ _Em código_: `Milestone 1`
 _Avoid_: fase 1, v0
 
 **Marco 2**:
-Frames & Fables no ar para o Visitante e para o Autor: a página e o publicador. Estreia sem nenhuma Publicação; o Status do space vira Disponível depois da primeira Publicação do Autor.
+Frames & Songs no ar. Vem depois do MVP, e o que ele inclui sai do grilling de Frames & Songs.
 _Em código_: `Milestone 2`
 _Avoid_: fase 2, v1
 
 **MVP**:
-O Marco 1 e o Marco 2 juntos.
+O Marco 1: a Home no ar.

@@ -5,7 +5,9 @@ date: 2026-11-14
 
 # Entrada do Autor por chave de acesso, com better-auth na web
 
-Só o Autor entra no Minimal Me, para publicar em Frames & Fables; o Visitante não tem conta. Decidimos que o Autor entra com chave de acesso (passkey), sem senha, e que um link enviado por e-mail registra a chave num aparelho novo. Há uma conta só, configurada no servidor, sem cadastro, e o primeiro aparelho também nasce pelo link. A entrada roda na aplicação web, com o better-auth e os plugins de passkey e de magic link (com `disableSignUp`), e a API interna em Python confia num token curto que a web emite a cada chamada do Autor, como o JWT interno do life-under-control. O endereço da tela de entrar não tem link em nenhuma página pública, leva `noindex` e tem limite de tentativas. O e-mail do link sai pelo Resend.
+> **A rever no grilling de Frames & Songs** (2026-11-15): decidido quando o space era Frames & Fables, uma grade de fotos, e fora do MVP desde então.
+
+Só o Autor entra no Minimal Me, para publicar em Frames & Songs; o Visitante não tem conta. Decidimos que o Autor entra com chave de acesso (passkey), sem senha, e que um link enviado por e-mail registra a chave num aparelho novo. Há uma conta só, configurada no servidor, sem cadastro, e o primeiro aparelho também nasce pelo link. A entrada roda na aplicação web, com o better-auth e os plugins de passkey e de magic link (com `disableSignUp`), e a API interna em Python confia num token curto que a web emite a cada chamada do Autor, como o JWT interno do life-under-control. O endereço da tela de entrar não tem link em nenhuma página pública, leva `noindex` e tem limite de tentativas. O e-mail do link sai pelo Resend.
 
 ## Considered Options
 

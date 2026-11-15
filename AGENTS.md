@@ -25,4 +25,4 @@ Name everything that is code in English; write all prose in Brazilian Portuguese
 - **English**: every identifier (components, design tokens, variables, functions, types, CSS classes, test names) and the files and directories that hold code or design-system assets.
 - **Portuguese**: documentation, issues, PR bodies, commit messages, interface copy, and the usage notes that describe a token or a component.
 - **Domain terms**: `GLOSSARY.md` gives each term's English form under "Em código". Use that form in identifiers and the Portuguese term in prose.
-- **Exception**: "space" (plural "spaces") is the domain term in prose, and "Spaces" is the section label in the interface. Both stay in English, like the spaces' own names (Frames & Fables, Music & Feeling, Code & Share, Write & Learn). Everything else in prose and interface copy stays in Portuguese.
+- **Exception**: "space" (plural "spaces") is the domain term in prose, and "Spaces" is the section label in the interface. Both stay in English, like the spaces' own names (Frames & Songs, Music & Feeling, Code & Share, Write & Learn). Everything else in prose and interface copy stays in Portuguese.

@@ -1,8 +1,8 @@
-Minimal Me é um hub pessoal com três frentes: Frames & Fables, Code & Share e Write & Learn. A identidade é um mundo monocromático com grão: uma ilustração conduz cada tela, a interface quase some e o nome lidera.
+Minimal Me é um hub pessoal com três frentes: Frames & Songs, Code & Share e Write & Learn. A identidade é um mundo monocromático com grão: uma ilustração conduz cada tela, a interface quase some e o nome lidera.
 
 ## Estado do sistema
 
-Esta é a versão 1, extraída da Home v2.3 em 2026-11-09. O sistema é vivo: o protótipo das telas de Frames & Fables pode acrescentar componentes e mudar regras daqui. Quando isso acontecer, mude este sistema primeiro e só depois as telas.
+Esta é a versão 1, extraída da Home v2.3 em 2026-11-09. O sistema é vivo: o protótipo do MVP pode acrescentar componentes e mudar regras daqui. Quando isso acontecer, mude este sistema primeiro e só depois as telas.
 
 ## Princípios
 
@@ -16,12 +16,12 @@ Esta é a versão 1, extraída da Home v2.3 em 2026-11-09. O sistema é vivo: o 
 
 ## Conteúdo
 
-- Escreva em português do Brasil. Os nomes das frentes ficam em inglês, com "&": Frames & Fables, Code & Share, Write & Learn.
+- Escreva em português do Brasil. Os nomes das frentes ficam em inglês, com "&": Frames & Songs, Code & Share, Write & Learn.
 - Use frases curtas e concretas. Exemplo real: "Histórias contadas por fotografias. Cada série reúne imagens em sequência, com legendas curtas, e se lê como um conto, do primeiro quadro ao último."
 - Escreva rótulos e links em maiúsculas espaçadas (`label`, `kicker`, `link`); títulos e textos em caixa normal.
 - Numere com dois algarismos (01, 02, 03) e mostre a contagem como "01 — 03", em `number`.
 - Diga o status com estas palavras: "Disponível", "Em desenvolvimento", "Em planejamento".
-- Quando algo ainda não abre, diga o que é e em que pé está: "Em desenvolvimento · Frames & Fables ainda não está disponível."
+- Quando algo ainda não abre, diga o que é e em que pé está: "Em desenvolvimento · Frames & Songs ainda não está disponível."
 - Comece o texto alternativo de uma ilustração por "Ilustração:" e descreva a cena. A camada do céu, que é fundo, leva texto alternativo vazio.
 - Não use emoji nem ícones decorativos.
 - Os textos da Home v2.3 valem como estão e podem ser ajustados a qualquer momento; a voz (primeira pessoa ou "você") ainda não foi fixada.
