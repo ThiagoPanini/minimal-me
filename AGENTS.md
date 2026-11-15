@@ -26,3 +26,7 @@ Name everything that is code in English; write all prose in Brazilian Portuguese
 - **Portuguese**: documentation, issues, PR bodies, commit messages, interface copy, and the usage notes that describe a token or a component.
 - **Domain terms**: `GLOSSARY.md` gives each term's English form under "Em código". Use that form in identifiers and the Portuguese term in prose.
 - **Exception**: "space" (plural "spaces") is the domain term in prose, and "Spaces" is the section label in the interface. Both stay in English, like the spaces' own names (Frames & Songs, Music & Feeling, Code & Share, Write & Learn). Everything else in prose and interface copy stays in Portuguese.
+
+### Infrastructure facts
+
+Before stating a Cloudflare or Coolify fact in a resolution or an ADR, check it in the docs through the MCP (`docs` for Cloudflare, `search_docs` for Coolify). Both are deferred tools: load them with ToolSearch first.
