@@ -462,7 +462,7 @@ Fluxo proposto:
 4. O enquadramento `[x, y, z]` é relativo, então vale igual para o original e para as duas cópias, desde que a cópia mantenha a proporção e a orientação do original. As duas condições o pipeline garante.
 5. Para uma HEIC no Chrome ou no Firefox, enquadrar espera o envio e a conversão, alguns segundos. O protótipo já admite essa espera, porque só mostra as ferramentas com a foto pronta.
 
-Alternativa descartada: converter a HEIC no aparelho com um decodificador em WebAssembly. Ela pesaria no peso da página e na bateria do celular, de onde se publica, para resolver um caso que a cópia do servidor já resolve.
+Alternativa descartada: converter a HEIC no aparelho com um decodificador em WebAssembly. Ela aumentaria o peso da página e o gasto de bateria do celular, de onde se publica, para resolver um caso que a cópia do servidor já resolve.
 
 **Inferência a conferir no aparelho**: o seletor de fotos do iOS pode entregar um JPEG em vez da HEIC ao formulário. Se entregar, o caso HEIC fica para quem envia do computador ou do Android.
 
