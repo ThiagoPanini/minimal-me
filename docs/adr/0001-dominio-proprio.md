@@ -23,3 +23,7 @@ Os projetos da frota vivem em subdomínios de `panlabs.tech` por facilidade de d
 ## Nota de 2026-11-09
 
 O produto foi redefinido como um hub de três frentes, e o chat aberto a Visitantes, citado acima, deixou de existir. A decisão se mantém: um produto público continua precisando de certificado nativo em qualquer hostname de primeiro nível (API e previews por PR) e das cotas inteiras de proteção do plano Free.
+
+## Nota de 2026-11-15
+
+O domínio é `minimalme.dev`, registrado no Cloudflare Registrar, com a zona em Full (strict) e a origem ainda por fazer em Hospedagem e orçamento mensal. O `minimal.me` tem dono e está à venda; o `minmal.me`, registrado por engano, não renova. O TLD `.dev` força HTTPS no navegador (HSTS preload), o que reforça a decisão de HSTS em etapas só depois do deploy. A web fica no apex (`minimalme.dev`); o `api.minimalme.dev` do ADR 0002 segue sem uso no Marco 1.
