@@ -1,4 +1,4 @@
-<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Minimal Me - Protótipo do MVP</title><link rel="preload" as="image" href="img/sky.webp" fetchpriority="high"><link rel="preload" as="image" href="img/dunes.webp" fetchpriority="high"></head><body>
+<!doctype html><html lang="pt-BR"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><title>Minimal Me - Protótipo do MVP</title><link rel="preload" as="image" href="../../system/assets/Illustrations/sky.webp" fetchpriority="high"><link rel="preload" as="image" href="../../system/assets/Illustrations/dunes.webp" fetchpriority="high"></head><body>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
 /* Jost and IBM Plex Mono come from system/fonts */
@@ -59,7 +59,7 @@ a{color:inherit}
 .r-sky img{object-position:50% 16%}
 .r-dune img{object-position:40% 100%}
 .r-pic::after{content:"";position:absolute;left:0;right:0;bottom:0;height:13%;background:linear-gradient(to bottom,rgba(22,22,22,0),rgba(22,22,22,.7) 60%,var(--ground));z-index:3;pointer-events:none}
-.r-grain{position:absolute;inset:0;z-index:4;pointer-events:none;background:url(img/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
+.r-grain{position:absolute;inset:0;z-index:4;pointer-events:none;background:url(../../system/assets/Texture/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
 .r-top{position:absolute;z-index:5;top:0;left:0;right:0;padding-top:calc(clamp(18px,3.2vw,40px) + env(safe-area-inset-top,0px))}
 .r-glyph{display:inline-flex;text-decoration:none}
 .r-glyph svg{width:26px;height:26px}
@@ -99,7 +99,7 @@ a{color:inherit}
 .r-par img{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none;object-fit:cover;transition:transform 1.6s var(--ease-out)}
 .r-fx{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
 .r-fx.is-sheets{will-change:transform}
-.r-mgrain{position:absolute;inset:0;pointer-events:none;background:url(img/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
+.r-mgrain{position:absolute;inset:0;pointer-events:none;background:url(../../system/assets/Texture/grain.png) 0 0/160px 160px;opacity:var(--grain);mix-blend-mode:multiply}
 .r-cm{position:absolute;width:0;height:0}
 .r-cm::before,.r-cm::after{content:"";position:absolute;background:var(--hairline);transition:background .6s var(--ease)}
 /* crop marks sized from the gutter, so the marks of two neighbouring pictures never meet */
@@ -342,10 +342,12 @@ a{color:inherit}
 .mm.still .inset{transition:none}
 .inset .r-media{position:absolute;inset:0;z-index:-2;aspect-ratio:auto}
 .spaces--insets.has-focus .inset:not(.is-focus) .r-feather{opacity:.6}
-/* two shades that belong to the picture: one under the name, always; one over the dune, only while the description is on it */
+/* two shades that belong to the picture: one under the name, always; one over the dune, only while the description is on it.
+   The second also darkens the top a little more, because the focus takes the grade off the picture and the arc gets brighter behind the number and the name:
+   with both, every text over the picture holds 4.5:1 at its worst point (measured at 1440, 1280, 1100 and 390). */
 .inset .r-media::before,.inset .r-media::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none}
 .inset .r-media::before{background:linear-gradient(to bottom,rgba(22,22,22,.62) 0,rgba(22,22,22,.3) 18%,rgba(22,22,22,0) 38%)}
-.inset .r-media::after{background:linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.66) 30%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease)}
+.inset .r-media::after{background:linear-gradient(to bottom,rgba(22,22,22,.49) 0,rgba(22,22,22,.8) 8.5%,rgba(22,22,22,.52) 21.5%,rgba(22,22,22,0) 30.5%),linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.76) 23%,rgba(22,22,22,.67) 39%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease)}
 .inset.is-focus .r-media::after{opacity:1;transition:opacity .9s var(--ease) .15s}
 
 /* over the top: number and status on one line, the name under them. As wide as the narrowest an opening gets, so the name never breaks while the row moves. */
@@ -442,8 +444,8 @@ html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
 <main class="proto mm r" id="mm" aria-label="Minimal Me, home" tabindex="-1">
 <header class="r-hero" id="topo" data-hero>
   <div class="r-pic">
-    <div class="r-layer r-sky" data-hp data-px="-6" data-py="-3" data-dx="-3"><img src="img/sky.webp" alt="" decoding="async" fetchpriority="high"></div>
-    <div class="r-layer r-dune" data-hp data-px="12" data-py="5" data-dx="5"><img src="img/dunes.webp" alt="Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste." decoding="async" fetchpriority="high"></div>
+    <div class="r-layer r-sky" data-hp data-px="-6" data-py="-3" data-dx="-3"><img src="../../system/assets/Illustrations/sky.webp" alt="" decoding="async" fetchpriority="high"></div>
+    <div class="r-layer r-dune" data-hp data-px="12" data-py="5" data-dx="5"><img src="../../system/assets/Illustrations/dunes.webp" alt="Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste." decoding="async" fetchpriority="high"></div>
     <div class="r-grain"></div>
     <div class="r-top"><div class="r-in"><a class="r-glyph" href="#topo" aria-label="Minimal Me, início"><svg viewBox="0 0 26 26" aria-hidden="true"><circle cx="13" cy="13" r="12" fill="none" stroke="#141414" stroke-width="1"></circle><circle cx="13" cy="13" r="4.5" fill="#141414"></circle></svg></a></div></div>
   </div>
@@ -464,7 +466,7 @@ html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
     <div class="insets-wrap" data-rv>
       <div class="insets" data-spaces>
         <article class="space inset" data-space="frames" data-pick="open" style="--cd:0.00s">
-          <div class="r-media" data-media="frames" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.36;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/frames.webp" alt="Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas." decoding="async" draggable="false"><canvas class="r-fx" data-fx="shutter" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="r-media" data-media="frames" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.36;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="../../system/assets/Illustrations/frames.webp" alt="Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas." decoding="async" draggable="false"><canvas class="r-fx" data-fx="shutter" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
           <div class="inset-top">
             <p class="inset-meta"><span class="r-n" data-n>01</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em desenvolvimento</span></span></p>
             <h3 class="r-title">Frames &amp; Songs</h3>
@@ -476,7 +478,7 @@ html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
           </div>
         </article>
         <article class="space inset" data-space="music" data-pick="open" style="--cd:0.12s">
-          <div class="r-media" data-media="music" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.49;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/music.webp" alt="Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce." decoding="async" draggable="false"><canvas class="r-fx" data-fx="waves" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="r-media" data-media="music" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.49;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="../../system/assets/Illustrations/music.webp" alt="Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce." decoding="async" draggable="false"><canvas class="r-fx" data-fx="waves" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
           <div class="inset-top">
             <p class="inset-meta"><span class="r-n" data-n>02</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
             <h3 class="r-title">Music &amp; Feeling</h3>
@@ -488,7 +490,7 @@ html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
           </div>
         </article>
         <article class="space inset" data-space="tech" data-pick="open" style="--cd:0.24s">
-          <div class="r-media" data-media="tech" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.55;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/tech.webp" alt="Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores." decoding="async" draggable="false"><canvas class="r-fx" data-fx="leds" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="r-media" data-media="tech" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.55;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="../../system/assets/Illustrations/tech.webp" alt="Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores." decoding="async" draggable="false"><canvas class="r-fx" data-fx="leds" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
           <div class="inset-top">
             <p class="inset-meta"><span class="r-n" data-n>03</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
             <h3 class="r-title">Code &amp; Share</h3>
@@ -500,7 +502,7 @@ html[data-text="prop"] .space-lead{font-size:14px;max-width:24em}
           </div>
         </article>
         <article class="space inset" data-space="ai" data-pick="open" style="--cd:0.36s">
-          <div class="r-media" data-media="ai" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.48;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="img/ai.webp" alt="Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor." decoding="async" draggable="false"><canvas class="r-fx" data-fx="float" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
+          <div class="r-media" data-media="ai" data-crop="inset" style="--dx:0.5;--dy:1;--dz:1;--mx:0.48;--my:1;--mz:1" data-pk="14" data-pp="3"><div class="r-feather"><div class="r-grade"><div class="r-par" data-par><img src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" data-src="../../system/assets/Illustrations/ai.webp" alt="Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor." decoding="async" draggable="false"><canvas class="r-fx" data-fx="float" aria-hidden="true"></canvas></div></div><div class="r-mgrain"></div></div></div>
           <div class="inset-top">
             <p class="inset-meta"><span class="r-n" data-n>04</span><span class="status-line"><i aria-hidden="true"></i><span data-status-word>Em planejamento</span></span></p>
             <h3 class="r-title">Write &amp; Learn</h3>
@@ -578,7 +580,7 @@ const hash = (n) => { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return
    and over it the sheet itself, cut from the picture, a little off its place and a little turned */
 const ATLAS = new Image(); let atlasReady = false;
 ATLAS.onload = () => { atlasReady = true; wake(); };
-ATLAS.src = 'img/ai-sheets.webp';
+ATLAS.src = '../../system/assets/Illustrations/ai-sheets.webp';
 const SHEETS = FX.sheets.map((s, i) => {
   const r = seeded(40 + i), big = s[2] > 300;
   return { s, big, amp: big ? 5 : 10 + r() * 9, turn: big ? .01 : .05 + r() * .06, f: .55 + r() * .4, p: [r() * 6.283, r() * 6.283, r() * 6.283, r() * 6.283] };

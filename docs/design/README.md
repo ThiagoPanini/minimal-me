@@ -6,21 +6,21 @@ A identidade visual do Minimal Me nasce da Home v2.3, prototipada pelo Autor no 
 
 | Caminho | O que é |
 |---|---|
-| `system/README.md` | O guia do sistema, versão 1, escrito para a Home v2.3: princípios, conteúdo, cor, tipografia, grade, imagem, estados de uma frente, movimento e acessibilidade. Comece por ele, sabendo o que a versão 2 muda (abaixo). |
+| `system/README.md` | O guia do sistema, versão 2, escrito para a Home em Frestas II: princípios, conteúdo, cor, tipografia, grade, imagem, status de um space, movimento e acessibilidade. Comece por ele. |
 | `system/tokens.json` | Cores, estilos de texto, espaços, raios e curvas, com o uso de cada um. |
-| `system/components/` | Sete componentes da Home v2.3, cada um com guia (`README.md`) e prévia (`preview.html`), mais a capa do sistema (`Cover`). |
+| `system/components/` | Sete componentes da Home, cada um com guia (`README.md`) e prévia (`preview.html`), mais a capa do sistema (`Cover`). Os dos spaces são `SpaceSlit` (a fresta) e `StatusLine` (o status). |
 | `system/fonts/` | Jost e IBM Plex Mono, pesos 300 e 400, em woff2: a combinação "Atual", que a Home em Frestas II mantém. As duas famílias usam a licença SIL OFL. |
-| `system/assets/` | A marca em SVG e as notas de uso de cada grupo de imagens. |
-| `prototype/mvp/` | O protótipo do MVP: a Home em Frestas II, só ela, com os Tweaks congelados no valor em vigor. `index.html` abre num navegador e lê as fontes de `system/fonts/`; `img/` tem as oito imagens que a página usa. |
-| `o-que-muda-no-sistema-da-home.md` | O que a Home em Frestas II pede do sistema, item a item, com motivo e lugar. É a fonte do ticket [Sistema de design v2: a Home com spaces](https://github.com/ThiagoPanini/minimal-me/issues/40). |
+| `system/assets/` | A marca em SVG, as ilustrações da abertura e dos spaces, o grão e as notas de uso de cada grupo. `Illustrations/illustrations.json` traz o texto alternativo, o recorte e os dados das fotos vivas de cada ilustração de space. |
+| `prototype/mvp/` | O protótipo do MVP: a Home em Frestas II, só ela, com os Tweaks congelados no valor em vigor. `index.html` abre num navegador e lê as fontes e as imagens de `system/`. |
+| `o-que-muda-no-sistema-da-home.md` | O que a Home em Frestas II pediu do sistema, item a item, com motivo e lugar. Foi a fonte do ticket [Sistema de design v2: a Home com spaces](https://github.com/ThiagoPanini/minimal-me/issues/40), aplicado na versão 2 em 2026-11-20; fica como registro do porquê. |
 
 ## Sistema vivo
 
-Esta é a versão 1 do sistema, escrita para a Home v2.3. O protótipo do MVP pede a versão 2, que entra num ticket só: [Sistema de design v2: a Home com spaces](https://github.com/ThiagoPanini/minimal-me/issues/40), que bloqueia a implementação da Home. O que ele leva está em `o-que-muda-no-sistema-da-home.md`, por seção: `#comum`, `#v-frestas-2` e `#fotos`; `#voz` não toca o sistema. Quando mudar, altere `system/` primeiro, republique o Design System e só então ajuste as telas.
+Esta é a versão 2 do sistema, de 2026-11-20, escrita para a Home em Frestas II no ticket [Sistema de design v2: a Home com spaces](https://github.com/ThiagoPanini/minimal-me/issues/40). A versão 1, da Home v2.3, está no histórico do git. Quando mudar, altere `system/` primeiro, republique o Design System e só então ajuste as telas.
 
 ## O que vale como referência
 
-- A Home em Frestas II (`prototype/mvp/`) é a referência da Home, a única tela do MVP. A abertura e o rodapé são os da v2.3, idênticos; muda da seção de spaces para baixo. O status aparece só no rótulo, e só "Em desenvolvimento" tem cor, o âmbar `#E8B96A`. O estado apagado da v2.3 deixa de existir.
+- A Home em Frestas II (`prototype/mvp/`) é a referência da Home, a única tela do MVP. A abertura e o rodapé são os da v2.3, idênticos; muda da seção de spaces para baixo. O status aparece só no rótulo, e só "Em desenvolvimento" tem cor, o âmbar `status-in-development`.
 - Os Tweaks da comparação foram congelados. O valor em vigor de cada um:
 
   | Tweak | Valor | Origem |
@@ -45,7 +45,7 @@ Os dois artefatos são privados e abrem com a conta do Autor.
 
 Para republicar o Design System depois de mudar `system/`:
 
-1. Monte uma pasta temporária com os arquivos alterados em `project/<mesmo caminho de system/>`. As imagens e os SVG de `assets/` não entram: são uploads do próprio artefato.
+1. Monte uma pasta temporária com os arquivos alterados em `project/<mesmo caminho de system/>`. As imagens e os SVG de `assets/` não entram: são uploads do próprio artefato. Os textos de `assets/` (os `README.md` e o `illustrations.json`) entram como arquivos.
 2. Leia `project/design-system.json` do artefato na hora, mude só o que o seu trabalho tocou (`lastChange`, um grupo ou um registro de asset) e envie-o por último.
 3. Publique tudo numa chamada só. Cada caminho removido ou renomeado vai com `null`; sem isso, o arquivo antigo continua no artefato.
 4. Para uma imagem nova, suba como asset do artefato, registre no índice e use na prévia o `/_blob/<id>` devolvido.
@@ -60,6 +60,7 @@ Para republicar o Design System depois de mudar `system/`:
 - **Frames & Fables** (a página em Grade e a camada do Autor, rodadas 6 e 7, mais a primeira rodada das telas, descartada em 2026-11-10) saiu do MVP em 2026-11-15, e o space passou a se chamar **Frames & Songs**: fotos e vídeos num carrossel, cada post com uma música pessoal que representa o momento. O conceito será especificado e prototipado em grilling futuro ([mapa #34](https://github.com/ThiagoPanini/minimal-me/issues/34)). O material antigo é insumo a revalidar, não ponto de partida.
 - **Artefatos apagados do claude.ai em 2026-11-15:** o Comparativo, "Minimal Me · Frames & Fables, protótipo das telas", Home v2.1 e a revisão crítica dela, Direções Visuais, Home 01', 02 Matéria Digital, 04′ Know it all, "[OLD] Minimal Me · Initial Draft" e quatro telas em branco sem título.
 - **Como `prototype/mvp/index.html` nasceu:** é a Frestas II extraída do Comparativo, com Frames & Fables renomeado para Frames & Songs (nome, texto, rótulos de acessibilidade e comentários), os identificadores em inglês pela tabela "Nomes", as fontes lidas de `system/fonts/` e os Tweaks no valor em vigor. Sem a barra da comparação.
+- **Sistema v2 (2026-11-20).** Frente virou space em todo o sistema; `FrontCard` e `StatusBadge` saíram, e entraram `SpaceSlit` e `StatusLine`; saíram os tokens `off-*`, `badge-bg`, `badge-text`, `rhythm-*` e `badge-inset`, e `badge-border` virou `toast-border`; entrou a cor `status-in-development`. As oito imagens saíram de `prototype/mvp/img/` para `system/assets/`, e o protótipo passou a lê-las de lá. A versão 1 está no commit `c0ed7d7`.
 
 ## Nomes
 
@@ -80,8 +81,19 @@ O protótipo do MVP já segue essa regra. Os protótipos antigos, recuperáveis 
 | `--sans`, `--mono` | `--font-sans`, `--font-mono` |
 | `img/ceu.webp`, `img/dunas.webp` | `sky.webp`, `dunes.webp` |
 
+No protótipo do MVP, as classes têm nomes curtos da comparação. A correspondência com os componentes:
+
+| No protótipo do MVP | No sistema |
+|---|---|
+| `.inset`, `.inset-top`, `.inset-foot` (dentro de `.insets`) | `SpaceSlit` |
+| `.status-line` | `StatusLine` |
+| `.r-head` | `SectionHeader` |
+| `.toast` | `Toast` |
+| `--st-dev` | `status-in-development` |
+| `data-status="dev"`, `"plan"`, `"ok"` | `SpaceStatus`: `in-development`, `planned`, `available` |
+
 ## Pendências para a implementação
 
-- Os efeitos vivos em canvas (as folhas de Write & Learn, as luzes de Code & Share, os arcos de som de Music & Feeling, o enquadramento e o disparo de Frames & Songs) e o alinhamento do bloco de texto pela altura das maiúsculas existem só no script do protótipo. Cada efeito depende dos dados da sua ilustração: trocar uma ilustração obriga a refazê-los.
+- Os efeitos vivos em canvas (as folhas de Write & Learn, as luzes de Code & Share, os arcos de som de Music & Feeling, o enquadramento e o disparo de Frames & Songs) e o alinhamento do bloco de texto pela altura das maiúsculas existem só no script do protótipo. Os dados de cada efeito estão em `system/assets/Illustrations/illustrations.json`; o desenho, no script. Trocar uma ilustração obriga a refazer os dados dela.
 - Como servir as fontes em produção é decisão de [Base técnica do Marco 1](https://github.com/ThiagoPanini/minimal-me/issues/17). No protótipo, `index.html` lê os woff2 de `system/fonts/`.
 - No protótipo, a página rola dentro de um `main` fixo; a spec do Marco 1 diz como ela rola em produção.

@@ -1,0 +1,115 @@
+<!-- @dsCard group="Spaces" width=1440 height=1000 subtitle="A fileira em repouso (passe o cursor) e com foco em 02" -->
+<style>
+  body{margin:0;background:var(--ground,#161616);color:var(--light,#E9E9E6)}
+  .in{--g:clamp(16px,2vw,32px);padding:28px 48px 44px}
+  .cap{margin:0 0 14px;font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;color:var(--mist,#8E8E89)}
+  .cap + .wrap{margin-bottom:40px}
+  .wrap{container-type:inline-size}
+
+  /* the row: four openings that share it, at the height of a 3:4 picture; it does not change when one opens */
+  .row{display:flex;gap:var(--g);--unit:calc((100cqw - 3 * var(--g)) / 4.9);--pad:clamp(var(--slit-inset-min,14px),1.5vw,var(--slit-inset-max,22px));
+    height:clamp(280px,calc((100cqw - 3 * var(--g)) / 3),560px)}
+  .slit{position:relative;flex:var(--open,1) 1 0;min-width:0;height:100%;overflow:hidden;isolation:isolate;color:var(--light,#E9E9E6);transition:flex-grow .9s var(--ease,ease)}
+
+  /* the picture: feathered 2% on every edge, one grade for the four, under the grain; held by its foot */
+  .media{position:absolute;inset:0;z-index:-2}
+  .feather{position:absolute;inset:0;overflow:hidden;transition:opacity .8s var(--ease,ease);
+    -webkit-mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);-webkit-mask-composite:source-in;
+    mask-image:linear-gradient(to right,transparent,#000 2%,#000 98%,transparent),linear-gradient(to bottom,transparent,#000 2%,#000 98%,transparent);mask-composite:intersect}
+  .grade{position:absolute;inset:0;filter:brightness(.86) contrast(.97);transition:filter 1.2s var(--ease,ease)}
+  .par{position:absolute;inset:-3%;transition:transform 1s var(--ease,ease)}
+  .par img{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none;object-fit:cover;object-position:calc(var(--x,.5) * 100%) calc(var(--y,1) * 100%)}
+  .grain{position:absolute;inset:0;pointer-events:none;background:url(/_blob/c2007a56233c7752ec6375195a5e8ff3) 0 0/160px 160px;opacity:.35;mix-blend-mode:multiply}
+
+  /* two shades that belong to the picture: under the name, always; with the focus, over the dune and a little more over the top */
+  .media::before,.media::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none}
+  .media::before{background:linear-gradient(to bottom,rgba(22,22,22,.62) 0,rgba(22,22,22,.3) 18%,rgba(22,22,22,0) 38%)}
+  .media::after{background:linear-gradient(to bottom,rgba(22,22,22,.49) 0,rgba(22,22,22,.8) 8.5%,rgba(22,22,22,.52) 21.5%,rgba(22,22,22,0) 30.5%),linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.76) 23%,rgba(22,22,22,.67) 39%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease,ease)}
+
+  /* over the top: number and status on one line, the name under them, as wide as the narrowest opening */
+  .top{position:absolute;z-index:1;left:var(--pad);top:var(--pad);width:calc(var(--unit) - 2 * var(--pad))}
+  .meta{display:flex;align-items:center;gap:14px;margin:0;white-space:nowrap}
+  .n{font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;color:var(--mist,#8E8E89);font-variant-numeric:tabular-nums}
+  .status{display:inline-flex;align-items:center;gap:8px;font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.05em;color:var(--body,#C9C9C4);white-space:nowrap}
+  .status i{flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+  [data-status="planned"] .status i{background:none;box-shadow:inset 0 0 0 1px currentColor}
+  [data-status="in-development"] .status{color:var(--status-in-development,#E8B96A)}
+  [data-status="in-development"] .status i{animation:pulse 2.6s var(--ease-io,ease-in-out) infinite}
+  .title{margin:0;padding-top:12px;font:300 clamp(15px,calc((var(--unit) - 2 * var(--pad)) / 8.4),27px)/1.08 var(--font-sans,"Jost",sans-serif);letter-spacing:-.005em;white-space:nowrap}
+
+  /* over the foot: the description and, always, the link, set at the width of the open picture and held by its foot */
+  .foot{position:absolute;z-index:1;left:var(--pad);bottom:var(--pad);width:calc(var(--unit) * 1.9 - 2 * var(--pad))}
+  .foot::before{content:"";display:block;height:1px;width:24px;background:var(--mist,#8E8E89);opacity:0;transition:width .5s var(--ease,ease),opacity .4s var(--ease,ease)}
+  .text,.lead{margin:0;color:var(--body,#C9C9C4);opacity:0;transform:translateY(8px);transition:opacity .4s var(--ease,ease),transform .5s var(--ease,ease);text-wrap:pretty}
+  .text{padding-top:16px;font:300 14px/1.72 var(--font-mono,"IBM Plex Mono",monospace)}
+  .lead{display:none;padding-top:14px;font:300 13px/1.62 var(--font-mono,"IBM Plex Mono",monospace)}
+  .ft{padding-top:18px}
+  .link{display:inline-flex;align-items:center;gap:12px;font:400 11px/1.4 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.16em;text-transform:uppercase;color:var(--light,#E9E9E6)}
+  .link i{display:block;width:22px;height:1px;background:currentColor;transition:width .6s var(--ease-out,ease-out)}
+
+  /* focus: the same for every space, whatever its status. Here the second row holds 02 in focus; the first answers to the cursor */
+  .slit.is-focus,.row.live .slit:hover{--open:1.9}
+  :is(.slit.is-focus,.row.live .slit:hover) .grade{filter:none}
+  :is(.slit.is-focus,.row.live .slit:hover) .par{transform:scale(1.03)}
+  :is(.slit.is-focus,.row.live .slit:hover) .media::after{opacity:1;transition:opacity .9s var(--ease,ease) .15s}
+  :is(.slit.is-focus,.row.live .slit:hover) .foot::before{width:100%;opacity:.55;transition:width 1.1s var(--ease-out,ease-out) .2s,opacity .5s var(--ease,ease) .2s}
+  :is(.slit.is-focus,.row.live .slit:hover) :is(.text,.lead){opacity:1;transform:none;transition:opacity .7s var(--ease,ease) .38s,transform .9s var(--ease-out,ease-out) .38s}
+  :is(.slit.is-focus,.row.live .slit:hover) .link i{width:40px}
+  .row.has-focus .slit:not(.is-focus) .feather,.row.live:has(.slit:hover) .slit:not(:hover) .feather{opacity:.6}
+
+  /* narrower rows: the status goes under the number (under 1240px), and only the first sentence fits on the dune (under 1120px) */
+  @container (max-width:1240px){ .meta{flex-direction:column;align-items:flex-start;gap:9px} }
+  @container (max-width:1120px){ .text{display:none} .lead{display:block} }
+
+  @keyframes pulse{0%,100%{opacity:.28}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} .par{transform:none!important} }
+</style>
+<div class="in">
+  <p class="cap" aria-hidden="true">repouso · passe o cursor</p>
+  <div class="wrap"><div class="row live">
+    <article class="slit" data-status="in-development">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/929a0016c2932a47c509bca9aef60ec7" alt="Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas."></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">01</span><span class="status"><i></i>Em desenvolvimento</span></p><h3 class="title">Frames &amp; Songs</h3></div>
+      <div class="foot"><p class="text">Meus momentos, em fotos e vídeos. Posts em carrossel, cada um com a música que ficou daquele momento.</p><p class="lead">Meus momentos, em fotos e vídeos.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/c6c2f6d4b713759710344cc3545c39a8" alt="Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce."></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">02</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Music &amp; Feeling</h3></div>
+      <div class="foot"><p class="text">Eu tocando, de perto. Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir.</p><p class="lead">Eu tocando, de perto.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/33a0712f6d1b4118a9bdc03c735e7dbb" alt="Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores."></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">03</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Code &amp; Share</h3></div>
+      <div class="foot"><p class="text">O que eu ando construindo, sem atualizar nada à mão. Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento.</p><p class="lead">O que eu ando construindo, sem atualizar nada à mão.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/587fea7dad452de96d5789021f21b426" alt="Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor."></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">04</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Write &amp; Learn</h3></div>
+      <div class="foot"><p class="text">Um agente de IA que escreve por conta própria. Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos.</p><p class="lead">Um agente de IA que escreve por conta própria.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+  </div></div>
+
+  <p class="cap" aria-hidden="true">foco em 02</p>
+  <div class="wrap"><div class="row has-focus">
+    <article class="slit" data-status="in-development">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/929a0016c2932a47c509bca9aef60ec7" alt=""></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">01</span><span class="status"><i></i>Em desenvolvimento</span></p><h3 class="title">Frames &amp; Songs</h3></div>
+      <div class="foot"><p class="text">Meus momentos, em fotos e vídeos. Posts em carrossel, cada um com a música que ficou daquele momento.</p><p class="lead">Meus momentos, em fotos e vídeos.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit is-focus" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/c6c2f6d4b713759710344cc3545c39a8" alt=""></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">02</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Music &amp; Feeling</h3></div>
+      <div class="foot"><p class="text">Eu tocando, de perto. Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir.</p><p class="lead">Eu tocando, de perto.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/33a0712f6d1b4118a9bdc03c735e7dbb" alt=""></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">03</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Code &amp; Share</h3></div>
+      <div class="foot"><p class="text">O que eu ando construindo, sem atualizar nada à mão. Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento.</p><p class="lead">O que eu ando construindo, sem atualizar nada à mão.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+    <article class="slit" data-status="planned">
+      <div class="media" style="--x:.5;--y:1"><div class="feather"><div class="grade"><div class="par"><img src="/_blob/587fea7dad452de96d5789021f21b426" alt=""></div></div><div class="grain"></div></div></div>
+      <div class="top"><p class="meta"><span class="n">04</span><span class="status"><i></i>Em planejamento</span></p><h3 class="title">Write &amp; Learn</h3></div>
+      <div class="foot"><p class="text">Um agente de IA que escreve por conta própria. Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos.</p><p class="lead">Um agente de IA que escreve por conta própria.</p><div class="ft"><span class="link">Acessar<i></i></span></div></div>
+    </article>
+  </div></div>
+</div>

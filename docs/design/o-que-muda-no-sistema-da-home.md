@@ -2,6 +2,8 @@
 
 Extraído em 2026-11-15 da página "O que muda no sistema" do protótipo do MVP de 2026-11-13 (seções `#comum`, `#v-frestas-2`, `#fotos` e `#voz`), para o ticket [Sistema de design v2: a Home com spaces (#40)](https://github.com/ThiagoPanini/minimal-me/issues/40) ler sem depender de um artefato que deixou de existir. A página inteira, com as seções de Frames & Fables, da Grade e do Autor, está em `docs/design/prototype/mvp-2026-11-13/index.html` no commit `1551e5b` (ver a Linhagem em `docs/design/README.md`).
 
+**Aplicado na versão 2 do sistema em 2026-11-20.** Três pontos mudaram na aplicação: `FrontCard` virou `SpaceSlit`, e não `SpaceCard` (item 01), porque a Home escolhida é Frestas II, sem card; a tabela de recortes (item 10) e os dados das fotos vivas (item 08) ficaram em `system/assets/Illustrations/illustrations.json`, e não em `tokens.json`, porque os tokens só guardam valores soltos; e a `StatusLine` substituiu também o selo sobre a foto (`StatusBadge`), porque em Frestas II o status já fica fora de caixa (itens 05 e 11).
+
 Três ajustes em relação ao original:
 
 - Frames & Fables passou a se chamar Frames & Songs. Onde o texto nomeia o space, o nome é o novo; as ilustrações, os movimentos e o Status não mudaram.

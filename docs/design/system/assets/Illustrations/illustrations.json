@@ -1,0 +1,197 @@
+{
+  "about": "Dados das ilustrações dos spaces, lidos da Home em Frestas II (docs/design/prototype/mvp/index.html). u e v vão de 0 a 1 sobre o arquivo inteiro; x, y, w e h são px do arquivo. glow é a luz atrás da figura, que respira com a foto acordada: radius em fração da largura, alpha no pico, rate em radianos por segundo. O recorte (crop) diz onde a imagem fica presa no quadro, de 0 a 1, e o zoom a partir de 1. Trocar uma ilustração obriga a refazer os dados dela.",
+  "grade": {
+    "rest": "brightness(.86) contrast(.97)",
+    "focus": "none"
+  },
+  "grain": {
+    "file": "../Texture/grain.png",
+    "tile": "160px",
+    "opacity": 0.35,
+    "blend": "multiply"
+  },
+  "wake": {
+    "scale": 1.03,
+    "rateIn": 2.8,
+    "rateOut": 4.4,
+    "note": "Quanto a foto está acordada vai de 0 a 1 e segue o foco do space: k += (alvo - k) * (1 - exp(-dt * rate)), com dt em segundos. A foto chega 3% mais perto quando k = 1. Com movimento reduzido, k fica em 0."
+  },
+  "depth": {
+    "scroll": 14,
+    "pointer": 3,
+    "note": "Em px: até 14 com a rolagem e até 3 com o ponteiro."
+  },
+  "illustrations": {
+    "frames": {
+      "space": "Frames & Songs",
+      "file": "frames.webp",
+      "size": [1086, 1448],
+      "alt": "Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas.",
+      "crop": {
+        "slit": {
+          "wide": { "x": 0.5, "y": 1.0, "zoom": 1.0 },
+          "stacked": { "x": 0.36, "y": 1.0, "zoom": 1.0 }
+        }
+      },
+      "glow": { "u": 0.677, "v": 0.608, "radius": 0.2, "alpha": 0.07, "rate": 0.8 },
+      "motion": {
+        "kind": "shutter",
+        "period": 6.2,
+        "shots": [
+          { "u": 0.635, "v": 0.6, "width": 0.18 },
+          { "u": 0.555, "v": 0.618, "width": 0.15 },
+          { "u": 0.65, "v": 0.59, "width": 0.2 }
+        ],
+        "note": "Três enquadramentos em 3:2, um depois do outro. width é fração da largura do arquivo."
+      }
+    },
+    "music": {
+      "space": "Music & Feeling",
+      "file": "music.webp",
+      "size": [1086, 1448],
+      "alt": "Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce.",
+      "crop": {
+        "slit": {
+          "wide": { "x": 0.5, "y": 1.0, "zoom": 1.0 },
+          "stacked": { "x": 0.49, "y": 1.0, "zoom": 1.0 }
+        }
+      },
+      "glow": { "u": 0.686, "v": 0.646, "radius": 0.2, "alpha": 0.07, "rate": 0.7 },
+      "motion": {
+        "kind": "waves",
+        "source": {
+          "u": 0.4254,
+          "v": 0.6796
+        },
+        "arcs": 4,
+        "period": 6.4,
+        "from": 1.03,
+        "to": 1.6,
+        "note": "Arcos de fio saindo do amplificador. from e to são ângulos em múltiplos de π; o raio vai de 3,5% a 49,5% da largura."
+      }
+    },
+    "tech": {
+      "space": "Code & Share",
+      "file": "tech.webp",
+      "size": [1086, 1448],
+      "alt": "Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores.",
+      "crop": {
+        "slit": {
+          "wide": { "x": 0.5, "y": 1.0, "zoom": 1.0 },
+          "stacked": { "x": 0.55, "y": 1.0, "zoom": 1.0 }
+        }
+      },
+      "glow": { "u": 0.487, "v": 0.672, "radius": 0.17, "alpha": 0.05, "rate": 1.1 },
+      "motion": {
+        "kind": "leds",
+        "lights": [
+          { "u": 0.9158, "v": 0.4666, "r": 2.0, "rack": 24 },
+          { "u": 0.908, "v": 0.469, "r": 2.5, "rack": 24 },
+          { "u": 0.9004, "v": 0.4713, "r": 2.5, "rack": 25 },
+          { "u": 0.8926, "v": 0.4736, "r": 2.5, "rack": 26 },
+          { "u": 0.8851, "v": 0.476, "r": 2.5, "rack": 26 },
+          { "u": 0.8775, "v": 0.4786, "r": 2.5, "rack": 26 },
+          { "u": 0.9317, "v": 0.5116, "r": 2.5, "rack": 24 },
+          { "u": 0.1822, "v": 0.5134, "r": 2.5, "rack": 33 },
+          { "u": 0.9238, "v": 0.514, "r": 2.5, "rack": 25 },
+          { "u": 0.1884, "v": 0.5155, "r": 2.0, "rack": 33 },
+          { "u": 0.9162, "v": 0.5159, "r": 2.5, "rack": 25 },
+          { "u": 0.1948, "v": 0.5175, "r": 2.0, "rack": 34 },
+          { "u": 0.9087, "v": 0.5178, "r": 2.5, "rack": 25 },
+          { "u": 0.2009, "v": 0.5195, "r": 2.5, "rack": 35 },
+          { "u": 0.9011, "v": 0.52, "r": 2.5, "rack": 26 },
+          { "u": 0.2067, "v": 0.5217, "r": 2.0, "rack": 35 },
+          { "u": 0.2122, "v": 0.5231, "r": 2.0, "rack": 35 },
+          { "u": 0.7052, "v": 0.5238, "r": 2.0, "rack": 34 },
+          { "u": 0.6997, "v": 0.5258, "r": 2.0, "rack": 36 },
+          { "u": 0.6942, "v": 0.5274, "r": 2.0, "rack": 37 },
+          { "u": 0.6887, "v": 0.5293, "r": 2.0, "rack": 38 },
+          { "u": 0.6832, "v": 0.5311, "r": 1.5, "rack": 38 },
+          { "u": 0.9078, "v": 0.5506, "r": 2.5, "rack": 27 },
+          { "u": 0.9002, "v": 0.5522, "r": 2.0, "rack": 27 },
+          { "u": 0.8926, "v": 0.5541, "r": 2.0, "rack": 29 },
+          { "u": 0.885, "v": 0.556, "r": 2.5, "rack": 30 },
+          { "u": 0.8775, "v": 0.5577, "r": 2.5, "rack": 31 },
+          { "u": 0.7123, "v": 0.5597, "r": 2.0, "rack": 39 },
+          { "u": 0.7068, "v": 0.5612, "r": 2.0, "rack": 41 },
+          { "u": 0.7013, "v": 0.5626, "r": 2.0, "rack": 43 },
+          { "u": 0.6957, "v": 0.564, "r": 2.0, "rack": 45 },
+          { "u": 0.6901, "v": 0.5656, "r": 2.5, "rack": 47 },
+          { "u": 0.2398, "v": 0.566, "r": 2.0, "rack": 34 },
+          { "u": 0.2455, "v": 0.5676, "r": 2.0, "rack": 35 },
+          { "u": 0.6846, "v": 0.5672, "r": 2.0, "rack": 48 },
+          { "u": 0.1887, "v": 0.5687, "r": 2.5, "rack": 35 },
+          { "u": 0.2508, "v": 0.5692, "r": 2.0, "rack": 35 },
+          { "u": 0.1948, "v": 0.5701, "r": 2.0, "rack": 36 },
+          { "u": 0.2566, "v": 0.5706, "r": 2.0, "rack": 37 },
+          { "u": 0.2011, "v": 0.5715, "r": 2.0, "rack": 36 },
+          { "u": 0.2066, "v": 0.5731, "r": 2.5, "rack": 36 },
+          { "u": 0.262, "v": 0.5722, "r": 1.0, "rack": 38 },
+          { "u": 0.2122, "v": 0.5742, "r": 2.0, "rack": 36 },
+          { "u": 0.2677, "v": 0.5737, "r": 1.0, "rack": 39 },
+          { "u": 0.8082, "v": 0.5821, "r": 2.5, "rack": 34 },
+          { "u": 0.8019, "v": 0.5835, "r": 2.5, "rack": 35 },
+          { "u": 0.7961, "v": 0.5847, "r": 2.0, "rack": 36 },
+          { "u": 0.7903, "v": 0.586, "r": 2.0, "rack": 37 },
+          { "u": 0.784, "v": 0.5873, "r": 2.0, "rack": 38 },
+          { "u": 0.7776, "v": 0.5887, "r": 2.0, "rack": 39 },
+          { "u": 0.2401, "v": 0.5945, "r": 2.5, "rack": 37 },
+          { "u": 0.2457, "v": 0.5958, "r": 2.0, "rack": 40 },
+          { "u": 0.2505, "v": 0.597, "r": 2.0, "rack": 41 },
+          { "u": 0.2552, "v": 0.5979, "r": 2.0, "rack": 42 },
+          { "u": 0.26, "v": 0.599, "r": 2.0, "rack": 43 },
+          { "u": 0.2646, "v": 0.6003, "r": 2.0, "rack": 44 },
+          { "u": 0.2694, "v": 0.6012, "r": 2.0, "rack": 45 },
+          { "u": 0.9314, "v": 0.6073, "r": 2.5, "rack": 28 },
+          { "u": 0.9162, "v": 0.6101, "r": 2.5, "rack": 30 },
+          { "u": 0.9235, "v": 0.6088, "r": 2.5, "rack": 30 },
+          { "u": 0.9087, "v": 0.6113, "r": 2.5, "rack": 30 },
+          { "u": 0.901, "v": 0.6126, "r": 3.0, "rack": 31 },
+          { "u": 0.8924, "v": 0.6142, "r": 1.5, "rack": 32 },
+          { "u": 0.7123, "v": 0.6218, "r": 2.0, "rack": 51 },
+          { "u": 0.7013, "v": 0.6238, "r": 2.5, "rack": 56 },
+          { "u": 0.7068, "v": 0.6227, "r": 2.0, "rack": 53 },
+          { "u": 0.6959, "v": 0.6247, "r": 2.0, "rack": 59 },
+          { "u": 0.6901, "v": 0.6259, "r": 2.0, "rack": 60 },
+          { "u": 0.6845, "v": 0.6269, "r": 2.0, "rack": 62 },
+          { "u": 0.9322, "v": 0.6582, "r": 2.5, "rack": 29 },
+          { "u": 0.924, "v": 0.6592, "r": 2.0, "rack": 30 },
+          { "u": 0.9084, "v": 0.6607, "r": 2.0, "rack": 31 },
+          { "u": 0.916, "v": 0.6599, "r": 2.0, "rack": 30 },
+          { "u": 0.9007, "v": 0.6615, "r": 2.5, "rack": 31 },
+          { "u": 0.8924, "v": 0.6626, "r": 1.5, "rack": 33 },
+          { "u": 0.8778, "v": 0.6642, "r": 1.0, "rack": 34 },
+          { "u": 0.8849, "v": 0.6633, "r": 1.5, "rack": 33 }
+        ],
+        "note": "As 77 luzes dos servidores. r é o raio em px do arquivo; rack é o cinza (0 a 255) do rack em volta, usado para apagar a luz."
+      }
+    },
+    "ai": {
+      "space": "Write & Learn",
+      "file": "ai.webp",
+      "size": [1086, 1448],
+      "alt": "Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor.",
+      "crop": {
+        "slit": {
+          "wide": { "x": 0.5, "y": 1.0, "zoom": 1.0 },
+          "stacked": { "x": 0.48, "y": 1.0, "zoom": 1.0 }
+        }
+      },
+      "glow": { "u": 0.516, "v": 0.622, "radius": 0.24, "alpha": 0.06, "rate": 0.6 },
+      "motion": {
+        "kind": "sheets",
+        "atlas": "ai-sheets.webp",
+        "atlasSize": [760, 804],
+        "sheets": [
+          { "x": 605, "y": 457, "w": 222, "h": 145, "patch": [2, 2], "sheet": [381, 2] },
+          { "x": 400, "y": 628, "w": 106, "h": 63, "patch": [2, 149], "sheet": [381, 149] },
+          { "x": 183, "y": 728, "w": 122, "h": 106, "patch": [2, 214], "sheet": [381, 214] },
+          { "x": 746, "y": 762, "w": 148, "h": 121, "patch": [2, 322], "sheet": [381, 322] },
+          { "x": 332, "y": 867, "w": 78, "h": 52, "patch": [2, 445], "sheet": [381, 445] },
+          { "x": 709, "y": 877, "w": 377, "h": 303, "patch": [2, 499], "sheet": [381, 499] }
+        ],
+        "note": "As seis folhas pintadas. x, y, w e h são a caixa da folha no arquivo, em px; patch é onde fica, no atlas, o fundo limpo que cobre o lugar da folha; sheet é onde fica a folha recortada. A maior (w > 300) é cortada pela borda e só balança."
+      }
+    }
+  }
+}
