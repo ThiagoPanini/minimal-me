@@ -1,0 +1,27 @@
+<!-- @dsCard group="Spaces" height=150 subtitle="Ponto cheio: disponível. Pulsando, em âmbar: em desenvolvimento. Vazado: em planejamento." -->
+<style>
+  body{margin:0;background:var(--ground,#161616)}
+  .rows{display:grid;grid-template-rows:75px 75px}
+  .row{position:relative;display:flex;align-items:center;justify-content:center;gap:36px;overflow:hidden}
+  .row.on-picture::before{content:"";position:absolute;inset:0;background:url(/_blob/929a0016c2932a47c509bca9aef60ec7) 50% 22%/cover;filter:brightness(.86) contrast(.97)}
+  .row.on-picture::after{content:"";position:absolute;inset:0;background:rgba(22,22,22,.45)}
+  .status{position:relative;z-index:1;display:inline-flex;align-items:center;gap:8px;margin:0;font:400 11px/1 var(--font-mono,"IBM Plex Mono",monospace);letter-spacing:.05em;color:var(--body,#C9C9C4);white-space:nowrap}
+  .status i{flex:none;width:5px;height:5px;border-radius:50%;background:currentColor}
+  .status.in-development{color:var(--status-in-development,#E8B96A)}
+  .status.in-development i{animation:pulse 2.6s var(--ease-io,ease-in-out) infinite}
+  .status.planned i{background:none;box-shadow:inset 0 0 0 1px currentColor}
+  @keyframes pulse{0%,100%{opacity:.28}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){.status.in-development i{animation:none}}
+</style>
+<div class="rows">
+  <div class="row">
+    <p class="status available"><i></i>Disponível</p>
+    <p class="status in-development"><i></i>Em desenvolvimento</p>
+    <p class="status planned"><i></i>Em planejamento</p>
+  </div>
+  <div class="row on-picture">
+    <p class="status available"><i></i>Disponível</p>
+    <p class="status in-development"><i></i>Em desenvolvimento</p>
+    <p class="status planned"><i></i>Em planejamento</p>
+  </div>
+</div>
