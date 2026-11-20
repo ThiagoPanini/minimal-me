@@ -1,0 +1,44 @@
+@import "tailwindcss";
+
+/*
+ * Os valores vêm do sistema de design: `design-system/tokens.ts` declara em `:root`
+ * as variáveis com os nomes do sistema (`--ground`, `--font-sans`, `--square`...).
+ * Aqui o Tailwind ganha utilitários com esses nomes, e só com eles, nas cores,
+ * nas famílias, nos pesos e nos raios: `bg-ground`, `text-mist`, `font-sans`,
+ * `font-light`, `rounded-square`. Um utilitário que a Home usa e cujo token sumiu
+ * deixa uma `var()` sem declaração, e o build quebra (design-system/check-css-variables.ts).
+ */
+@theme inline {
+  --color-*: initial;
+  --color-ground: var(--ground);
+  --color-sky: var(--sky);
+  --color-ink: var(--ink);
+  --color-light: var(--light);
+  --color-body: var(--body);
+  --color-text: var(--text);
+  --color-mist: var(--mist);
+  --color-hairline: var(--hairline);
+  --color-status-in-development: var(--status-in-development);
+  --color-toast-border: var(--toast-border);
+  --color-toast-bg: var(--toast-bg);
+
+  --font-*: initial;
+  --font-weight-light: 300;
+  --font-weight-normal: 400;
+
+  --radius-*: initial;
+  --radius-square: var(--square);
+  --radius-circle: var(--circle);
+
+  --ease-*: initial;
+}
+
+/* As famílias têm no sistema o mesmo nome que teriam no tema do Tailwind
+   (`--font-sans`); por isso os dois utilitários são declarados à mão. */
+@utility font-sans {
+  font-family: var(--font-sans);
+}
+
+@utility font-mono {
+  font-family: var(--font-mono);
+}
