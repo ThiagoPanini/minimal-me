@@ -4,10 +4,10 @@ Pesquisa do ticket [#54](https://github.com/ThiagoPanini/minimal-me/issues/54), 
 
 ## Retomada
 
-- **Estado**: em andamento.
-- **Coberto**: ponto de partida (seção 0), onde roda (seção 1) e identidade e assinatura (seção 2).
-- **Falta**: custo (3), ambiente (4), limites (5), exageros (6), a recomendação, a preparação única e as perguntas ao Autor.
-- **Próximos passos**: fechar as estimativas de custo com os preços da API e escrever a recomendação aplicando o duplo cheque de travas.
+- **Estado**: completo em 2026-11-20.
+- **Coberto**: ponto de partida (0), onde roda (1), identidade e assinatura (2), custo (3), ambiente (4), limites e o duplo cheque das travas (5), exageros (6), o que está confirmado, medido, em hipótese e pendente, a recomendação, a preparação única e as perguntas ao Autor.
+- **Falta**: nada nesta pesquisa. As hipóteses listadas antes da recomendação se validam na implementação.
+- **Próximo passo**: a decisão de adotar o agente agendado, com as perguntas do fim, no mapa [#1](https://github.com/ThiagoPanini/minimal-me/issues/1) ("Not yet specified").
 
 Convenções: cada afirmação traz a fonte (URL ou caminho). O que não vem de fonte está marcado como **inferência** ou **hipótese**; decisão que só o Autor toma está marcada como **pendente**. As páginas foram lidas em 2026-11-20, salvo indicação.
 
@@ -50,7 +50,7 @@ Fonte principal: https://code.claude.com/docs/en/routines (a página se chama "A
 - **Cada execução** é "a full Claude Code cloud session", que roda comandos de shell, usa skills do repositório clonado e chama os conectores incluídos. Todos os conectores da conta entram por padrão; a página manda remover os que a tarefa não usa.
 - **Identidade**: a tarefa pertence à conta claude.ai do Autor; "Anything a scheduled task does through your connected GitHub identity or connectors appears as you."
 - **Permissões durante a execução**: a sessão começa em auto mode, em que um classificador decide as ações que pediriam aprovação. O prompt salvo é a tarefa, mas "The fired prompt is therefore not live user input and can't act as approval or consent for actions during the run." Depois de bloqueios repetidos, "a permission prompt appears in the run's session and waits until someone answers it" (seção 2.5).
-- **Limites de frequência**: 100 execuções agendadas por hora por conta, 30 por hora por tarefa para "Run now" e API; "None of these hourly limits has overage." Não há mais cota diária de execuções na página atual.
+- **Limites de frequência**: 100 execuções agendadas por hora por conta, 30 por hora por tarefa para "Run now" e API; "None of these hourly limits has overage." A página não fixa cota diária de execuções.
 - **Consumo**: "Scheduled tasks draw down subscription usage the same way interactive sessions do." Sem créditos de uso ligados, "additional runs are rejected until your usage window resets".
 - **Conexão com o GitHub**: se a conexão estiver ausente ou expirada, a tarefa pula execuções por até 72 horas e depois "turns off", e precisa ser religada à mão.
 - **Duração**: a página das rotinas não fixa duração máxima de sessão. O ambiente fixa o tempo por comando: 2 minutos por padrão, até 10 a pedido, e mais 30 minutos em segundo plano (https://code.claude.com/docs/en/cloud-environments, "Time limits"). Uma sessão "stop[s] after a period of inactivity" (https://code.claude.com/docs/en/claude-code-on-the-web).
@@ -73,7 +73,7 @@ Fontes: https://code.claude.com/docs/en/github-actions e o repositório `anthrop
 - **Autenticação no GitHub**: por padrão, o Claude GitHub App oficial, por OIDC (`id-token: write`). Ou um **GitHub App próprio**, cujo token entra no input `github_token` (`docs/setup.md`, "Using a Custom GitHub App"; permissões mínimas: Contents, Issues e Pull requests com escrita). Instalar o app oficial aceita o conjunto inteiro de permissões: "GitHub doesn't let you accept a subset."
 - **Quem pode disparar**: "Events that no user authors, such as a `schedule` trigger, skip this check."
 - **Permissões do Claude no job**: auto mode por padrão; o `docs/security.md` recomenda `--permission-mode acceptEdits` ou `default` "For a strict list of what Claude may run".
-- **GitHub CLI e GraphQL**: funcionam no runner; nada no caminho as recusa.
+- **GitHub CLI e GraphQL**: funcionam no runner, que não tem o proxy da nuvem no caminho (**inferência**); `gh pr merge --auto` usa GraphQL.
 
 ### 1.3 Outras opções
 
@@ -119,7 +119,7 @@ Os commits do Dependabot já chegam assinados: numa amostra lida pela API em 202
 |---|---|---|---|
 | Autor dos commits | `claude` (medido) | o bot do app do Autor | `claude[bot]` (`bot_name` padrão em `action.yml`) |
 | Quem empurra e abre o PR | a conta do Autor, pelo proxy ("appears as you") | o app do Autor | o app oficial |
-| Quem mescla | a conta do Autor, só pela REST (2.5) | o app do Autor | o app oficial |
+| Quem mescla | o app do Autor, num workflow que liga o auto-merge, porque o modelo não deve nem consegue (2.5) | o app do Autor, num passo determinístico (2.5) | o app oficial |
 | O merge dispara a entrega? | sim: não é evento do `GITHUB_TOKEN` | sim | sim |
 
 A regra que decide a última linha: "events triggered by the `GITHUB_TOKEN` will not create a new workflow run"; um PR criado ou atualizado com o `GITHUB_TOKEN` gera execuções "in an **approval-required** state", que esperam alguém clicar "Approve workflows to run"; "a GitHub App installation access token or a personal access token" evita as duas coisas (https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/trigger-a-workflow). Então o agente nunca usa o `GITHUB_TOKEN` para empurrar, abrir PR ou mesclar: seria trava humana em todo PR dele.
@@ -183,7 +183,7 @@ O que decide o custo mensal é **chamar o modelo só quando há trabalho**. No w
 |---|---|---|
 | Calmo: tudo verde ou resolvido pelos robôs | 0 | US$ 0 |
 | Típico (**hipótese**: um conserto) | 1 | ≈ US$ 0,27 |
-| Pesado (**hipótese**: dois consertos de quatro vezes o perfil, como uma major do Next que muda API) | 2 | ≈ US$ 2,20; o limite de US$ 2 corta o segundo e a ronda relata (seção 5) |
+| Pesado (**hipótese**: dois consertos de quatro vezes o perfil, como uma major do Next que muda API) | 2 | ≈ US$ 2,20; o limite de US$ 2 corta o segundo conserto no meio, e a ronda relata (seção 5) |
 
 Com o Opus 5.5, os números dobram; com o Haiku 5.5, caem a um vigésimo, mas é o modelo mais fraco para entender uma quebra de major (**inferência**). Sem a triagem, cada semana pagaria ao menos uma sessão curta de leitura.
 
@@ -224,10 +224,10 @@ Com o Opus 5.5, os números dobram; com o Haiku 5.5, caem a um vigésimo, mas é
 1. **Triagem, sem modelo** (passo em shell, com o token do app):
    - PRs abertos do Dependabot com o `gate` vermelho depois das três tentativas da nova tentativa diária (decisão 8 de #52). O critério de "defeito real" vem daí: o que falhou três vezes não é instabilidade passageira.
    - A última rodada da `main` vermelha depois das três tentativas.
-   - Alertas abertos do Dependabot (inclusive malware) sem PR que os corrija, e alertas abertos do CodeQL.
+   - Alertas abertos do Dependabot (inclusive malware) sem PR que os corrija, alertas abertos do CodeQL e alertas abertos do secret scanning.
    - Issues abertas pela própria ronda que ainda não fecharam.
    - Lista vazia: o job termina verde, sem modelo, sem issue e sem comentário.
-2. **Conserto, um problema por vez**, cada um num branch próprio: o agente lê a falha, corrige, roda o `pnpm verify`, empurra com commit assinado e abre um PR próprio (seção 2.6). Um passo determinístico liga o auto-merge com o token do app; o `gate` decide.
+2. **Conserto, um problema por vez**, cada um num branch próprio: o agente lê a falha, corrige, roda o `pnpm verify`, empurra com commit assinado e abre um PR próprio (seção 2.6). Um passo determinístico liga o auto-merge com o token do app; o `gate` decide. O Claude roda com lista fixa de ferramentas (`--permission-mode acceptEdits` e `--allowedTools` com `pnpm`, `docker`, `git` e leituras do `gh api`), sem auto mode: o que fica fora da lista é negado, porque "a workflow has no one to approve it" (`docs/security.md` da action). A action recomenda o auto mode onde ele existe; aqui a lista fixa evita um bloqueio sem ninguém para destravar e o custo do classificador na API (seções 2.5 e 3.1). O texto dos PRs do Dependabot traz notas de versão de terceiros e entra como dado, nunca como instrução.
 3. **Teto por ronda**: `timeout-minutes` no job, `--max-turns` no Claude e no máximo duas tentativas de conserto por problema; o que sobra vira relato. (Os valores saem da implementação.)
 
 ### 5.2 O que mescla sozinho (pelo `gate`, sem ninguém)
@@ -290,3 +290,85 @@ Para um site pessoal, estático e não crítico, com um mantenedor:
 - **Assinar commits com a chave SSH do Autor num segredo** (`ssh_signing_key`): um segredo de longa duração com a identidade dele no job que roda código de terceiros, quando a API do GitHub assina como o app sem segredo nenhum.
 - **Memória própria entre execuções** (banco, artefatos de grupo de automação): as issues abertas e os PRs já guardam o estado.
 - **Automações do Copilot**: não existem para repositório público (seção 1.3).
+
+## Confirmado, hipótese e pendente
+
+**Confirmado em fonte primária** (com a citação nas seções acima):
+
+- O squash pode ser barrado por commit sem assinatura no branch do PR, mesmo que o GitHub assine o commit final (2.1).
+- Commit criado pela API com o token de um GitHub App sai verificado; a action expõe isso em `use_commit_signing` (2.2).
+- Evento causado pelo `GITHUB_TOKEN` não dispara workflow, e PR criado com ele espera aprovação manual das execuções (2.3).
+- O auto mode bloqueia por padrão o merge de PR sem aprovação humana, e o prompt de uma rotina não vale como consentimento (2.5).
+- Empurrar no branch do Dependabot faz o robô parar de rebasear (2.6).
+- A rotina recusa GraphQL, consome a assinatura e desliga sozinha com a conexão do GitHub vencida por 72 horas (1.1).
+- Os créditos inclusos do Max e do Ultra não pagam o Claude Code (3.1).
+- Automações do Copilot não existem para repositório público (1.3).
+
+**Medido** (API do GitHub, 2026-11-20): commits de sessão do Claude Code na nuvem saem assinados e verificados como o usuário `claude`; commits do Dependabot saem assinados pelo GitHub (2.1, 2.2).
+
+**Hipóteses a validar na implementação**:
+
+1. `use_commit_signing` com o token do app do Autor gera commits verificados no branch passado em `CLAUDE_BRANCH`.
+2. A federação (WIF) aceita a execução `schedule`, cujo `sub` é `repo:ThiagoPanini/minimal-me:ref:refs/heads/main`.
+3. O commit de `PUT .../pulls/{n}/update-branch` sai assinado pelo GitHub.
+4. Os merges semanais do Dependabot contam como atividade e evitam a desativação do agendamento em 60 dias.
+5. Um conserto típico custa perto de US$ 0,27 com o Sonnet 5.5.
+6. O e-mail de falha do agendamento chega ao Autor: a regra manda para quem criou o workflow, e o primeiro commit do arquivo sai de um PR mesclado na conta dele.
+7. O Dependabot fecha o próprio PR depois que o PR do agente leva a versão à `main`.
+8. Só se a rotina for escolhida: o `pnpm verify` roda na VM da nuvem, e a conexão pelo Claude GitHub App não lê os alertas do CodeQL.
+
+**Pendente, decisão do Autor**: as perguntas do fim.
+
+## Recomendação
+
+**Workflow agendado do GitHub Actions com a `anthropics/claude-code-action`, autenticado no GitHub pelo GitHub App do Autor (o mesmo do merge automático do Dependabot) e na Anthropic por federação de identidade (WIF), com triagem em shell antes do modelo, Sonnet 5.5, uma vez por semana, e o merge feito pela esteira, nunca pelo modelo.**
+
+Por quê:
+
+- **Falha visível e com leitor.** Um job vermelho manda e-mail a quem criou o workflow e abre uma issue para a próxima sessão. Na rotina, a execução recusada por limite de uso, pulada por conexão vencida ou travada por falha no serviço de assinatura só aparece no histórico em claude.ai.
+- **Nada preso à conta pessoal no dia a dia.** A identidade é um app instalado só neste repositório; a credencial da Anthropic é federada, sem segredo para girar. A rotina depende da sessão, dos limites e da conexão do GitHub da conta do Autor, e está em research preview.
+- **Assinatura documentada.** A API do GitHub assina os commits do app. A rotina assina por um serviço não documentado, que já falhou duas vezes em 2026.
+- **Custo zero em semana calma.** A triagem em shell só chama o modelo quando há algo vermelho depois das três tentativas automáticas; o limite de gasto do workspace corta em US$ 2.
+- **Mesmo ambiente da CI.** O `pnpm verify` roda no mesmo runner do `e2e`.
+- **Tudo versionado.** Prompt, ferramentas permitidas, cadência e permissões ficam no repositório e mudam por PR, como o resto da esteira.
+
+O preço é um item pago novo (crédito da API, alguns centavos por mês no típico) e um app com mais permissões que o de #52. Se o Autor não quiser item pago novo, o mesmo workflow roda com o token da assinatura, ao custo de uma renovação por ano feita por ele (pergunta 2).
+
+| Dimensão | Workflow agendado (recomendado) | Rotina do Claude Code na nuvem |
+|---|---|---|
+| Onde roda e como agenda | runner do GitHub, cron no arquivo do workflow; pode atrasar sob carga | VM da Anthropic, agenda em claude.ai; research preview |
+| Identidade | app do Autor: commits, PR e merge | commits como `claude`; push, PR e merge na conta do Autor |
+| Assinatura | API do GitHub, documentada | serviço da sessão, não documentado; já falhou |
+| Merge | passo determinístico com o token do app | workflow do repositório liga o auto-merge, porque o proxy recusa GraphQL e o auto mode bloqueia o merge |
+| Custo incremental | ≈ US$ 0 a 0,30 por mês, teto de US$ 2 (API) ou US$ 0 (token da assinatura) | US$ 0, nos limites da assinatura |
+| Ambiente e `pnpm verify` | mesmo runner da CI: roda | Docker sim, Node 24 por script; não provado |
+| Falha e aviso | job vermelho, e-mail e issue | só no histórico da tarefa em claude.ai |
+| Dependência do Autor depois da preparação | nenhuma com WIF; uma renovação por ano com o token da assinatura | religar a conexão do GitHub quando vencer; limites de uso dele |
+
+## Preparação única
+
+Roteiro do que só o Autor faz, uma vez; o agente prepara o resto e pode transformá-lo num assistente guiado na implementação (skill `wizard`).
+
+1. **GitHub App** (o mesmo de #52, decisão 14):
+   1. O agente gera o formulário de manifesto já preenchido: nome do app, webhook desligado, instalação só na conta do Autor, e estas permissões de repositório: Contents, Pull requests, Issues e Workflows com escrita; Code scanning alerts com escrita (para dispensar alerta médio ou baixo); Actions, Checks, Dependabot alerts e Secret scanning alerts com leitura; Metadata com leitura. A permissão Workflows é a que deixa o app gravar em `.github/workflows/` (https://docs.github.com/en/rest/authentication/permissions-required-for-github-apps, "Workflows").
+   2. O Autor abre o formulário, clica em criar e instala o app **só** em `minimal-me`. O fluxo de manifesto "creates the GitHub App registration and generates the app's webhook secret, private key (PEM file), client secret, and GitHub App ID", e os três passos precisam terminar em uma hora (https://docs.github.com/en/apps/sharing-github-apps/registering-a-github-app-from-a-manifest).
+   3. O agente troca o código pelo `pem` (`POST /app-manifests/{code}/conversions`) e grava o ID e a chave como segredos de Actions e do Dependabot com `gh secret set`. O Autor não manuseia a chave.
+2. **Anthropic, caminho recomendado (API com WIF)**:
+   1. No Claude Console, criar o workspace `minimal-me`.
+   2. Em Spend limits, Workspace limits, pôr o limite mensal do workspace em US$ 2.
+   3. Em Billing, comprar o menor crédito oferecido e ligar a recarga automática com limiar e valor baixos, para que o vencimento anual dos créditos não pare o agente.
+   4. Em Workload identity, "Connect workload", GitHub Actions: o assistente registra o emissor `https://token.actions.githubusercontent.com`, cria a conta de serviço no workspace `minimal-me` e a regra com `subject_prefix` `repo:ThiagoPanini/minimal-me:ref:refs/heads/main` (https://platform.claude.com/docs/en/manage-claude/wif-providers/github-actions). Exige o papel de admin na organização (https://platform.claude.com/docs/en/manage-claude/workload-identity-federation).
+   5. Passar ao agente os identificadores (`fdrl_...`, organização, `svac_...`, `wrkspc_...`). "These values are identifiers, not credentials" (`docs/setup.md` da action); o agente os grava como variáveis do repositório, fora das issues.
+
+   **Caminho alternativo (token da assinatura)**: o Autor roda `claude setup-token` no terminal e cola o token num `gh secret set CLAUDE_CODE_OAUTH_TOKEN` que o agente deixa pronto; o agente abre uma issue `ready-for-human` datada para onze meses depois, com o mesmo comando.
+3. **Nada mais**: o workflow, o prompt da ronda, a lista de ferramentas, o `ignore` da major do Node no `dependabot.yml`, os rótulos e a regra no `AGENTS.md` entram por PR do agente.
+
+## Perguntas para o Autor
+
+1. **Onde roda a ronda: workflow agendado do GitHub Actions ou rotina do Claude Code na nuvem?** *Recomendo o workflow.* Impacto: as falhas viram e-mail e issue, a assinatura dos commits é a documentada do GitHub e nada depende da sessão, dos limites ou da conexão do GitHub da conta do Autor. A rotina custa zero e não pede segredo, mas falha em silêncio por motivos que só ele resolve.
+2. **Que credencial da Anthropic o workflow usa: API por federação (WIF), com limite de US$ 2 por mês e recarga automática, ou o token da assinatura?** *Recomendo a API por WIF.* Impacto: é item pago novo, de centavos por mês no típico e nunca acima de US$ 2, sem segredo para girar e sem nenhuma ação recorrente dele; não consome os limites da assinatura. O token da assinatura não custa nada a mais, mas vence em um ano, só ele gera outro, e as rondas disputam os limites com as sessões dele.
+3. **Um único GitHub App para o merge do Dependabot e para o agente, com as permissões ampliadas?** *Recomendo sim.* Impacto: uma preparação só, um app instalado só neste repositório; o app ganha escrita em Issues, Workflows e alertas do CodeQL, além do que #52 previa. Dois apps dobrariam o roteiro sem reduzir o que cada um alcança de fato.
+4. **Que modelo o agente usa?** *Recomendo o Sonnet 5.5.* Impacto: cerca de US$ 0,27 por conserto típico, folga para uns sete consertos por mês dentro de US$ 2. O Opus 5.5 custa o dobro e esgota o teto num mês com uma major difícil; o Haiku 5.5 é vinte vezes mais barato e o mais fraco para entender uma quebra.
+5. **A ronda é semanal, com disparo manual disponível?** *Recomendo semanal, num minuto fora da hora cheia, mais `workflow_dispatch`.* Impacto: o que a nova tentativa diária não resolve espera no máximo uma semana, o que a Home estática aguenta; rodar mais vezes gasta mais e disputa os PRs com a nova tentativa.
+6. **O agente pode dispensar alerta do CodeQL que julgar falso positivo?** *Recomendo sim para severidade média e baixa, com a justificativa no próprio alerta; alto e crítico viram issue.* Impacto: a aba de segurança não acumula alerta parado, e só o caso grave espera uma sessão com decisão.
+7. **A issue `ready-for-human` menciona o Autor?** Ela só nasce para segredo vazado, malware que chegou ao build e credencial vencida. *Recomendo sim.* Impacto: é o único caso em que ele recebe notificação; sem a menção, ele só vê quando abrir o repositório.
