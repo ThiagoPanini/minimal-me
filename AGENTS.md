@@ -2,7 +2,7 @@
 
 ### Issue tracker
 
-Issues and specs live in GitHub Issues at `ThiagoPanini/minimal-me` (via `gh`). See `docs/agents/issue-tracker.md`.
+Issues and specs live in GitHub Issues at `ThiagoPanini/minimal-me` (via `gh`), and tickets are sliced for `/implement-spec`. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 

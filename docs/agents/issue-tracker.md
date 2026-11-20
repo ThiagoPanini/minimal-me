@@ -6,6 +6,7 @@ Issues and specs for this repo live as GitHub issues. Use the `gh` CLI for all o
 
 - **Create an issue**: `gh issue create --title "..." --body "..."`. Use a heredoc for multi-line bodies.
 - **Read an issue**: `gh issue view <number> --json number,title,body,labels,comments`.
+- **Read one section of an issue**: `gh issue view <number> --json body --jq .body | awk -v h='<heading line>' '$0==h{p=1;print;next} p&&/^#{1,3} /{exit} p'`, where `<heading line>` is the section heading as written (`### Imagem e nginx`). Use it when a ticket points to a section of its spec.
 - **List issues**: `gh issue list --state open --json number,title,body,labels,comments --jq '[.[] | {number, title, body, labels: [.labels[].name], comments: [.comments[].body]}]'` with appropriate `--label` and `--state` filters.
 - **Make an issue a sub-issue of a parent**: `gh issue create --parent <parent> ...`, or `gh issue edit <parent> --add-sub-issue <child>` afterwards (`gh` 2.94+). Older `gh`: `gh api --method POST repos/<owner>/<repo>/issues/<parent>/sub_issues -F sub_issue_id=<child-db-id>` (database id, as in **Blocking** below). Without sub-issues, put `Part of #<parent>` at the top of the child body.
 - **Blocking**: GitHub's **native issue dependencies**, the canonical, UI-visible representation. Add an edge with `gh issue create --blocked-by <n>,<n> ...` or `gh issue edit <child> --add-blocked-by <blocker>` (`gh` 2.94+). Older `gh`: `gh api --method POST repos/<owner>/<repo>/issues/<child>/dependencies/blocked_by -F issue_id=<blocker-db-id>`, where `<blocker-db-id>` is the blocker's numeric **database id** (`gh api repos/<owner>/<repo>/issues/<n> --jq .id`, _not_ the `#number` or `node_id`). Where dependencies aren't available, fall back to a `Blocked by: #<n>, #<n>` line at the top of the child body. A ticket is unblocked when every blocker is closed.
@@ -38,6 +39,15 @@ Create a GitHub issue.
 ## When a skill says "fetch the relevant ticket"
 
 Read it as in **Read an issue** above.
+
+## Slicing tickets for `/implement-spec`
+
+Specs here are built by `/implement-spec`: every ticket lands on one integration branch from its own worktree, through `tdd`, and reaches `main` only when that branch's PR merges. Slice for that run:
+
+- **Operation tickets**: work that needs `main`, live infrastructure or the Author goes in tickets titled `Operação: ...` whose body opens with "Fora do `/implement-spec`", blocked by the code they operate.
+- **Shared files**: tickets that edit the same file get a blocking edge; every other edge is a real dependency.
+- **Seams**: each ticket names its test seam.
+- **Leaves**: a ticket that may stop for the Author's decision blocks nothing.
 
 ## Wayfinding operations
 
