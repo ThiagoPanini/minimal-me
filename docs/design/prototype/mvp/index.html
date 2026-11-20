@@ -342,10 +342,12 @@ a{color:inherit}
 .mm.still .inset{transition:none}
 .inset .r-media{position:absolute;inset:0;z-index:-2;aspect-ratio:auto}
 .spaces--insets.has-focus .inset:not(.is-focus) .r-feather{opacity:.6}
-/* two shades that belong to the picture: one under the name, always; one over the dune, only while the description is on it */
+/* two shades that belong to the picture: one under the name, always; one over the dune, only while the description is on it.
+   The second also darkens the top a little more, because the focus takes the grade off the picture and the arc gets brighter behind the number and the name:
+   with both, every text over the picture holds 4.5:1 at its worst point (measured at 1440, 1280, 1100 and 390). */
 .inset .r-media::before,.inset .r-media::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none}
 .inset .r-media::before{background:linear-gradient(to bottom,rgba(22,22,22,.62) 0,rgba(22,22,22,.3) 18%,rgba(22,22,22,0) 38%)}
-.inset .r-media::after{background:linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.66) 30%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease)}
+.inset .r-media::after{background:linear-gradient(to bottom,rgba(22,22,22,.49) 0,rgba(22,22,22,.8) 8.5%,rgba(22,22,22,.52) 21.5%,rgba(22,22,22,0) 30.5%),linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.76) 23%,rgba(22,22,22,.67) 39%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease)}
 .inset.is-focus .r-media::after{opacity:1;transition:opacity .9s var(--ease) .15s}
 
 /* over the top: number and status on one line, the name under them. As wide as the narrowest an opening gets, so the name never breaks while the row moves. */

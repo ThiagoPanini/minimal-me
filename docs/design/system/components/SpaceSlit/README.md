@@ -21,7 +21,8 @@ A fresta de um space na Home: uma abertura na fileira dos quatro, com a ilustra�
 - O link "Acessar" (`link`, `light`, traço de 22px) fica sempre à vista, preso ao pé.
 - Com o foco, um fio em `mist` a 55% atravessa a duna da esquerda para a direita (1,1s) e a descrição (`paragraph`, `body`) sobe sobre ela 0,38s depois de a fresta começar a abrir.
 - O bloco tem a largura da fresta aberta e fica preso pelo pé: o texto não quebra de novo e o link não pula.
-- Um segundo véu escurece a duna só enquanto a descrição está sobre ela: `ground` de 90% no pé a 66% em 30% da altura, até sumir em 60%.
+- Um segundo véu entra só com o foco, junto com a descrição. Ele escurece a duna, com `ground` de 90% no pé, 76% em 23% da altura e 67% em 39%, até sumir em 60%. Também reforça o topo, onde a foto clareia ao perder a chave de repouso: `ground` de 49% na borda, 80% em 8,5%, 52% em 21,5%, até sumir em 30,5%. Os dois são um só pseudoelemento, que acende e apaga junto.
+- Com os dois véus, todo texto sobre a foto fica em 4,5:1 ou mais no pior ponto. Medido em 2026-11-20 com movimento reduzido, a 1440, 1280, 1100 e 390 de largura: o mínimo foi 4,72:1. A margem cobre a luz da foto viva e a aproximação de 3%, que não foram medidas.
 - Em fileiras com menos de 1120px, a descrição inteira não cabe sobre a duna sem encostar na figura: entra só a primeira frase (`lead`).
 
 ## Foco

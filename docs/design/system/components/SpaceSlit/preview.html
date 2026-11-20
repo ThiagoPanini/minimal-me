@@ -21,10 +21,10 @@
   .par img{position:absolute;inset:0;width:100%;height:100%;display:block;max-width:none;object-fit:cover;object-position:calc(var(--x,.5) * 100%) calc(var(--y,1) * 100%)}
   .grain{position:absolute;inset:0;pointer-events:none;background:url(/_blob/c2007a56233c7752ec6375195a5e8ff3) 0 0/160px 160px;opacity:.35;mix-blend-mode:multiply}
 
-  /* two shades that belong to the picture: under the name, always; over the dune, only while the description is on it */
+  /* two shades that belong to the picture: under the name, always; with the focus, over the dune and a little more over the top */
   .media::before,.media::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none}
   .media::before{background:linear-gradient(to bottom,rgba(22,22,22,.62) 0,rgba(22,22,22,.3) 18%,rgba(22,22,22,0) 38%)}
-  .media::after{background:linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.66) 30%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease,ease)}
+  .media::after{background:linear-gradient(to bottom,rgba(22,22,22,.49) 0,rgba(22,22,22,.8) 8.5%,rgba(22,22,22,.52) 21.5%,rgba(22,22,22,0) 30.5%),linear-gradient(to top,rgba(22,22,22,.9) 0,rgba(22,22,22,.76) 23%,rgba(22,22,22,.67) 39%,rgba(22,22,22,0) 60%);opacity:0;transition:opacity .7s var(--ease,ease)}
 
   /* over the top: number and status on one line, the name under them, as wide as the narrowest opening */
   .top{position:absolute;z-index:1;left:var(--pad);top:var(--pad);width:calc(var(--unit) - 2 * var(--pad))}

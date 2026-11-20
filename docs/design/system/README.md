@@ -93,7 +93,7 @@ Esta é a versão 2, de 2026-11-20, escrita para a Home em Frestas II (`docs/des
 - Foco visível em todo controle: contorno de 1,5px na cor do texto, afastado 3px. A marca sobre `sky` recebe contorno de 2px em `ink`.
 - O link de um space é o alvo; o foco de teclado aparece como um contorno de 1px em `mist`, por dentro da borda da fresta.
 - Texto sobre `ground` fica em 4,5:1 ou mais (`mist` é o piso, com 5,5:1).
-- Texto sobre uma ilustração fica em 4,5:1 ou mais, ou 3:1 para texto grande (24px ou mais), medido no pior ponto da imagem atrás dele, no estado em que ele aparece (em repouso ou com foco). Onde a imagem não deixa, um véu de `ground` escurece aquela faixa: o do topo, sempre, e o da duna, enquanto a descrição está sobre ela.
+- Texto sobre uma ilustração fica em 4,5:1 ou mais, ou 3:1 para texto grande (24px ou mais), medido no pior ponto da imagem atrás dele, no estado em que ele aparece (em repouso ou com foco). Onde a imagem não deixa, um véu de `ground` escurece aquela faixa: o do topo, sempre, e outro com o foco, sobre a duna e reforçando o topo, porque a foto com foco perde a chave de repouso e clareia. Os valores estão na `SpaceSlit`. Ao trocar uma ilustração, um recorte ou um tamanho de texto, meça de novo nas larguras de 1440, 1280, 1100 e 390.
 - O status é dito em palavras, não só pela cor ou pelo ponto. Onde só o ponto fica à vista (fresta fechada no celular), a palavra continua para leitores de tela.
 
 ## Iconografia
