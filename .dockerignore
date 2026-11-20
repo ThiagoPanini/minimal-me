@@ -1,0 +1,16 @@
+# A imagem da Home só recebe o que o build dela lê.
+*
+!package.json
+!pnpm-lock.yaml
+!pnpm-workspace.yaml
+!apps/web/
+!docs/design/system/
+
+**/node_modules/
+apps/web/.next/
+apps/web/out/
+apps/web/e2e/
+apps/web/test-results/
+apps/web/playwright-report/
+apps/web/next-env.d.ts
+apps/web/*.tsbuildinfo

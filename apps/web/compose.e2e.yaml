@@ -1,0 +1,31 @@
+# Costura 1: a imagem da Home de pé e o Playwright no contêiner oficial, na mesma rede.
+# Quem sobe é `pnpm test:e2e` (scripts/test-e2e.ts), com um projeto do Compose por
+# worktree e sem porta no host, para vários worktrees rodarem ao mesmo tempo.
+services:
+  web:
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile
+      args:
+        COMMIT: ${COMMIT:?}
+
+  playwright:
+    # A etiqueta sai da versão instalada de @playwright/test.
+    image: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION:?}-noble
+    depends_on:
+      web:
+        condition: service_healthy
+    # O usuário da máquina, para os resultados no worktree não ficarem com dono root.
+    user: ${HOST_UID:?}:${HOST_GID:?}
+    init: true
+    ipc: host
+    # O repositório montado no mesmo caminho da máquina, com o node_modules dela.
+    volumes:
+      - ${REPO_ROOT:?}:${REPO_ROOT:?}
+    working_dir: ${REPO_ROOT:?}/apps/web
+    environment:
+      BASE_URL: http://web:8080
+      EXPECTED_COMMIT: ${COMMIT:?}
+      CI: ${CI:-}
+      HOME: /tmp
+    entrypoint: [node, node_modules/@playwright/test/cli.js, test]
