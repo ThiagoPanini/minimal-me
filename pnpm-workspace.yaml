@@ -1,0 +1,5 @@
+packages:
+  - apps/*
+
+# Os padrões do pnpm 12 já valem: um dia de maturidade, strictDepBuilds e blockExoticSubdeps.
+trustPolicy: no-downgrade

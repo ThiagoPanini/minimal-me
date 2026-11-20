@@ -4,3 +4,12 @@
 # estado local do Claude Code (permissoes e worktrees de subagentes)
 .claude/settings.local.json
 .claude/worktrees/
+
+# dependências, build do Next e resultados do Playwright
+node_modules/
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+test-results/
+playwright-report/
