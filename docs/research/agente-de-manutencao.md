@@ -150,3 +150,143 @@ O que acontece quando o agente empurra um conserto no branch de um PR do Dependa
 - **Depois do merge de um PR próprio**: "Dependabot will close pull requests for dependency updates, once it detects these updates have been committed to the default branch. However, in rare circumstances, the pull request may remain open" (https://docs.github.com/en/code-security/reference/supply-chain-security/troubleshoot-dependabot/dependabot-errors).
 
 Recomendação desta pesquisa: **PR próprio**, criado a partir do branch do Dependabot (os commits assinados dele mais o conserto do agente), com título em Conventional Commits e o corpo citando o PR original. O PR do Dependabot fica intacto e se fecha sozinho quando a versão chega à `main`; se continuar aberto, a próxima ronda o fecha. O agente não precisa de rebase do Dependabot nem de segredo duplicado.
+
+## 3. Custo
+
+### 3.1 Preços e regras que entram na conta
+
+- **API da Anthropic, por milhão de tokens** (https://platform.claude.com/docs/en/about-claude/pricing): Opus 5.5 a US$ 4 de entrada e US$ 20 de saída, escrita no cache de 5 minutos a US$ 5 e leitura do cache a US$ 0,20; Sonnet 5.5 a US$ 2, US$ 10, US$ 2,50 e US$ 0,10; Haiku 5.5 (até 100 mil tokens de prompt) a US$ 0,10, US$ 0,50, US$ 0,125 e US$ 0,01.
+- **Créditos da API**: comprados antes do uso, "Credits expire one year from the purchase date", "All credit purchases are non-refundable", e a recarga automática "purchases additional credits automatically when your balance falls below a threshold you set" (https://support.claude.com/en/articles/8977456-how-do-i-pay-for-my-claude-api-usage). A página não diz o valor mínimo de compra. Um limite de gasto mensal por organização ou por workspace corta as requisições com HTTP 400 quando atingido (https://platform.claude.com/docs/en/api/rate-limits, "Setting your own spend limit"; https://platform.claude.com/docs/en/manage-claude/workspaces, "Setting workspace limits").
+- **Créditos inclusos nos planos Max e Ultra** (US$ 100 e US$ 200 por mês) **não cobrem o Claude Code**: a tabela de cobertura diz "Claude Code: No", e uma sessão do Claude Code numa organização só com esses créditos recebe "Credit balance too low" (https://platform.claude.com/docs/en/about-claude/api-credits-for-subscribers). A `claude-code-action` roda o Claude Code, então pagaria com crédito comprado (**inferência**).
+- **Token da assinatura** (`claude setup-token`): "a one-year OAuth token", que "authenticates with your Claude subscription and requires a Pro, Max, Ultra, Team, or Enterprise plan" (https://code.claude.com/docs/en/authentication, "Generate a long-lived token"). Com ele, "runs use your Claude subscription instead of API billing" (https://code.claude.com/docs/en/github-actions, "Manage costs").
+- **O que os termos permitem**: o OAuth "is intended exclusively for purchasers of Claude Free, Pro, Max, Ultra, Team, and Enterprise subscription plans and is designed to support ordinary use of Claude Code and other native Anthropic applications", e "Advertised usage limits for Pro, Max, and Ultra plans assume ordinary, individual usage of Claude Code and the Agent SDK" (https://code.claude.com/docs/en/legal-and-compliance). A própria documentação da action manda usar o token da assinatura num segredo do repositório. A ronda semanal do próprio repositório do Autor, com o binário oficial, cabe nesse uso (**inferência**); o que os termos vedam é terceiro intermediar ou revender o acesso.
+- **Rotina na nuvem**: consome a assinatura "the same way interactive sessions do", "there's no separate charge for the cloud VM" (https://code.claude.com/docs/en/routines; https://code.claude.com/docs/en/claude-code-on-the-web).
+- **Minutos do GitHub Actions**: os runners padrão em repositório público são gratuitos e não consomem a cota (https://docs.github.com/en/billing/concepts/product-billing/github-actions).
+- **Classificador do auto mode**: as chamadas dele "count on accounts that use the Claude API" (https://code.claude.com/docs/en/permission-modes, "Cost and latency"). Uma lista fixa de ferramentas, sem auto mode, evita esse custo.
+- **Planos** (https://claude.com/pricing, 2026-11-20): Pro a US$ 20 por mês (US$ 17 no anual), Max a US$ 100, Ultra a US$ 200. O Autor já roda sessões do Claude Code na nuvem pela própria conta (seção 2.2), recurso que exige pelo menos o Pro (https://code.claude.com/docs/en/feature-availability), então a assinatura já existe (**inferência**); qual plano é, esta pesquisa não leu.
+
+### 3.2 Quanto custa uma ronda
+
+Não há medição de uma ronda desta esteira; ela não existe. A estimativa usa o perfil de sessão que a documentação mostra como exemplo do `/cost` (1,2 mil tokens de entrada, 5,3 mil de saída, 940 mil de leitura de cache e 50 mil de escrita de cache, https://code.claude.com/docs/en/costs), repreçado com a tabela atual. **Hipótese**: um conserto típico (um PR de robô que quebrou um teste ou um tipo) cabe nesse perfil.
+
+| Modelo | Uma sessão no perfil do exemplo |
+|---|---|
+| Haiku 5.5 | ≈ US$ 0,02 |
+| Sonnet 5.5 | ≈ US$ 0,27 |
+| Opus 5.5 | ≈ US$ 0,55 |
+
+A conta do Sonnet 5.5: 0,0012 × 2 + 0,0053 × 10 + 0,94 × 0,10 + 0,05 × 2,50 = US$ 0,27.
+
+O que decide o custo mensal é **chamar o modelo só quando há trabalho**. No workflow, um passo de triagem em shell (`gh api` sobre PRs, rodadas e alertas) decide se há algo vermelho; sem nada, o job termina sem chamar o modelo. Cenários, com o Sonnet 5.5 e a triagem:
+
+| Mês | Sessões do modelo | Custo na API |
+|---|---|---|
+| Calmo: tudo verde ou resolvido pelos robôs | 0 | US$ 0 |
+| Típico (**hipótese**: um conserto) | 1 | ≈ US$ 0,27 |
+| Pesado (**hipótese**: dois consertos de quatro vezes o perfil, como uma major do Next que muda API) | 2 | ≈ US$ 2,20; o limite de US$ 2 corta o segundo e a ronda relata (seção 5) |
+
+Com o Opus 5.5, os números dobram; com o Haiku 5.5, caem a um vigésimo, mas é o modelo mais fraco para entender uma quebra de major (**inferência**). Sem a triagem, cada semana pagaria ao menos uma sessão curta de leitura.
+
+### 3.3 Custo por opção, diante do teto de US$ 2
+
+| Opção | Custo incremental | Observação |
+|---|---|---|
+| Rotina na nuvem | US$ 0 | consome os limites da assinatura do Autor, os mesmos das sessões dele; sem triagem determinística, toda semana abre uma sessão |
+| Workflow com token da assinatura | US$ 0 | mesmo consumo da assinatura; o token vence em um ano e só o Autor gera outro |
+| Workflow com a API (chave ou WIF) | ≈ US$ 0 a 0,30 por mês no típico, cortado em US$ 2 pelo limite | item pago novo: compra de créditos, decisão do Autor; os créditos vencem em um ano, e a recarga automática repõe |
+| Minutos de Actions | US$ 0 | repositório público |
+
+## 4. Ambiente
+
+**Rotina na nuvem** (https://code.claude.com/docs/en/cloud-environments):
+
+- Cada sessão ganha uma VM nova com Ubuntu 24.04 x86_64, 4 vCPUs, 16 GB de RAM e 30 GB de disco.
+- Vêm instalados Docker ("docker, dockerd, docker compose"), Node 20, 21 e 22 (22 no `PATH`), pnpm, `gh`, `jq` e Chrome. **Não há Node 24**: o projeto o instalaria num script de setup, e `nodejs.org` está na lista de domínios liberados por padrão.
+- A lista padrão inclui Docker Hub, `ghcr.io`, `mcr.microsoft.com` (imagem do Playwright) e `registry.npmjs.org`.
+- O script de setup vira um retrato do disco quando termina em uns cinco minutos, com as imagens já baixadas; serviços em execução não entram no retrato.
+- Tempo por comando: 2 minutos por padrão, até 10 a pedido, e mais 30 em segundo plano; ajustável por `BASH_DEFAULT_TIMEOUT_MS` e `BASH_MAX_TIMEOUT_MS`.
+- **Hipótese a testar**: o `pnpm verify` roda inteiro na VM. Nada na documentação o impede, mas o build da imagem chama `pnpm install` dentro do Docker, atrás do proxy de segurança, e o contêiner do Playwright pede `--ipc=host`; nenhum dos dois foi provado.
+- A favor: as credenciais do GitHub ficam fora da VM, então o código das dependências que o `pnpm verify` executa não alcança o token.
+
+**Workflow do GitHub Actions**:
+
+- O runner `ubuntu-24.04` (imagem 20261111.370.1) traz Docker 28.0.4, Compose 2.38.2, Node 22.23.4 como padrão e o Node 24.22.2 em cache (https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md). O runner padrão de repositório público tem 4 CPUs e 16 GB (https://docs.github.com/en/actions/reference/runners/github-hosted-runners, citado em [validacao-em-esteira.md](https://github.com/ThiagoPanini/minimal-me/blob/research/validacao-em-esteira/docs/research/validacao-em-esteira.md)).
+- É a mesma máquina do job `e2e` da CI. O `pnpm verify` roda aqui pelo mesmo motivo que a CI roda (**inferência** forte).
+- Contra: o código das dependências roda no job que tem o token do app e a credencial da Anthropic. A action avisa: "A command that runs repository code (`npm install`, `bun test`, `make`) runs whatever the checkout contains, in a job that holds your workflow's tokens", e em `schedule` a restrição automática de comandos não se aplica (`docs/security.md`, "Running code from pull requests"). O que reduz o risco: o pnpm 12 não roda script de instalação fora de `allowBuilds` (decisão 8 de #52), o token do app "will expire after 1 hour" (https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app) e o token federado da Anthropic também é de curta duração (https://platform.claude.com/docs/en/manage-claude/workload-identity-federation).
+- Um detalhe de implementação: no modo de automação, os commits por API caem no branch de `CLAUDE_BRANCH`, ou, sem ele, no `GITHUB_REF_NAME` (`src/modes/agent/index.ts` no commit `c84e279`). Numa execução agendada isso é a `main`, que o ruleset recusa; o workflow cria antes um branch por problema e o passa em `CLAUDE_BRANCH` (**inferência**).
+
+**Precisa rodar o `pnpm verify`?** A CI do PR do agente roda o `gate` de graça (seção 3.1) e é quem decide o merge. O `pnpm verify` antes do push só poupa voltas de CI. A decisão 13 de #52 põe o `pnpm verify` no ciclo de todo agente, e o workflow cumpre isso sem custo extra; na rotina, depende da hipótese acima.
+
+## 5. Limites
+
+### 5.1 A ronda
+
+1. **Triagem, sem modelo** (passo em shell, com o token do app):
+   - PRs abertos do Dependabot com o `gate` vermelho depois das três tentativas da nova tentativa diária (decisão 8 de #52). O critério de "defeito real" vem daí: o que falhou três vezes não é instabilidade passageira.
+   - A última rodada da `main` vermelha depois das três tentativas.
+   - Alertas abertos do Dependabot (inclusive malware) sem PR que os corrija, e alertas abertos do CodeQL.
+   - Issues abertas pela própria ronda que ainda não fecharam.
+   - Lista vazia: o job termina verde, sem modelo, sem issue e sem comentário.
+2. **Conserto, um problema por vez**, cada um num branch próprio: o agente lê a falha, corrige, roda o `pnpm verify`, empurra com commit assinado e abre um PR próprio (seção 2.6). Um passo determinístico liga o auto-merge com o token do app; o `gate` decide.
+3. **Teto por ronda**: `timeout-minutes` no job, `--max-turns` no Claude e no máximo duas tentativas de conserto por problema; o que sobra vira relato. (Os valores saem da implementação.)
+
+### 5.2 O que mescla sozinho (pelo `gate`, sem ninguém)
+
+- O conserto de código, teste, configuração ou lockfile que faz passar uma atualização de robô, inclusive major. Exceção mantida de #52: a major do Node, que o `dependabot.yml` passa a ignorar até o Next suportar o 26, para não gerar PR nem relato.
+- O conserto da `main` vermelha, inclusive por corrida entre PRs.
+- A correção de alerta do Dependabot que o robô não abriu, com `pnpm up` ou override, gravando a exceção de maturidade do pnpm no mesmo commit (seção 2.4 de [seguranca-e-entrega.md](https://github.com/ThiagoPanini/minimal-me/blob/research/seguranca-e-entrega/docs/research/seguranca-e-entrega.md)).
+- A correção de alerta do CodeQL no código.
+- A atualização de referência visual quando a causa é a troca de versão do navegador ou do Playwright, dita no corpo do PR (regra da decisão 5 de #52: nenhuma mudança visual espera o Autor).
+
+### 5.3 O que só relata
+
+| Situação | Por quê | Para onde vai |
+|---|---|---|
+| O conserto exigiria mudar uma decisão: relaxar tolerância visual, orçamento de peso ou LCP, desligar um teste ou check, mexer no ruleset, nas permissões de workflow, nos segredos ou na entrega | decisão registrada não muda em manutenção | issue `needs-triage`, lida pela próxima sessão de agente |
+| Duas tentativas sem `gate` verde | o agente agendado não conseguiu; um agente com sessão pode | issue `ready-for-agent` com o diagnóstico e o branch |
+| Alerta de segredo vazado (secret scanning) | girar a credencial exige a conta do Autor | issue `ready-for-human` que menciona o Autor |
+| Alerta de malware numa dependência que entrou no build | o agente remove ou fixa o pacote e mescla, mas uma imagem já publicada pode ter levado o código; avaliar e girar segredos é do Autor | conserto mesclado e issue `ready-for-human` |
+| Alerta alto ou crítico do CodeQL que o agente julga falso positivo | dispensar alerta de segurança é decisão | issue `needs-triage`; médio e baixo o agente dispensa com a justificativa no próprio alerta (pergunta 6) |
+
+Os rótulos são os do vocabulário do repositório ([docs/agents/triage-labels.md](../agents/triage-labels.md)). Cada problema tem uma issue só: a ronda procura a aberta antes de criar outra e a fecha quando o problema some.
+
+**Quem lê**: a regra (a) da decisão 12 de #52 faz toda sessão de agente começar pela ronda; ela passa a incluir as issues abertas pela ronda. A issue `ready-for-human` menciona o Autor, e ter o nome mencionado é um dos motivos de notificação do GitHub (https://docs.github.com/en/subscriptions-and-notifications/concepts/about-notifications); é o único caso em que ele é chamado.
+
+### 5.4 Como avisa quando não consegue rodar
+
+- **O job falha** (credencial vencida, limite de gasto, erro do runner): "Notifications for scheduled workflows are sent to the user who initially created the workflow" (https://docs.github.com/en/actions/concepts/workflows-and-actions/notifications-for-workflow-runs), por e-mail ou na web, conforme a configuração dele. Um passo final `if: failure()` abre ou atualiza uma issue `ready-for-agent` com o motivo, para a próxima sessão.
+- **O agendamento atrasa ou cai sob carga**: a próxima semana cobre; a nova tentativa diária segue rodando. Escolher um minuto fora da hora cheia reduz o risco (https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows).
+- **O agendamento é desligado por 60 dias sem atividade**: com o Dependabot semanal em três ecossistemas e o merge automático, a `main` recebe commits toda semana (**inferência**). Não vale montar vigia para isso.
+- **Na rotina**, as falhas aparecem só no histórico da tarefa em claude.ai ("**Error**", "**Cancelled**" ou nada), e "These outcomes say how the session ended, not whether Claude completed the work"; uma execução recusada por limite de uso ou pulada por conexão do GitHub vencida não deixa rastro no repositório (https://code.claude.com/docs/en/routines). Para ter leitor, a rotina precisaria de um vigia no GitHub que conferisse a data da última ronda: uma peça a mais.
+
+### 5.5 Duplo cheque das travas
+
+Critério do Autor: trava só fica se disparar com problema real e um agente puder resolver; sinal sem leitor sai; o que exige a conta dele vira preparação única.
+
+| Possível trava ou sinal | Rotina na nuvem | Workflow agendado | Veredito |
+|---|---|---|---|
+| Merge feito pelo modelo, bloqueado pelo auto mode e esperando aprovação | existe; contornado por workflow de auto-merge | não existe: o merge é passo determinístico | tirar o merge do modelo nas duas |
+| `GITHUB_TOKEN` exigindo "Approve workflows to run" | não se aplica | evitado com o token do app | nunca usar `GITHUB_TOKEN` para escrever |
+| Serviço de assinatura da sessão fora do ar (já aconteceu duas vezes) | trava sem defeito: PR impossível de mesclar | não se aplica: a API do GitHub assina | ponto contra a rotina |
+| Limite de uso da assinatura esgotado | trava sem defeito, sem rastro | só com o token da assinatura; falha visível | ponto contra a rotina |
+| Conexão do GitHub vencida | desliga a tarefa em 72 horas, e só o Autor religa | não se aplica | ponto contra a rotina |
+| Token da assinatura vencido em um ano | não se aplica | só com o token da assinatura: trava anual que só o Autor resolve | preferir WIF |
+| Limite de gasto da API atingido | não se aplica | falha visível; relata; volta no mês seguinte | aceitável: só dispara em mês de muito conserto |
+| Falha passageira ou de terceiro | — | — | fica com a nova tentativa diária; a ronda só olha o que falhou três vezes |
+| Relatório semanal "tudo verde" | — | — | sinal sem leitor: não existe |
+| Issue de problema não resolvido | — | — | tem leitor: a próxima sessão de agente |
+
+## 6. Exageros
+
+Para um site pessoal, estático e não crítico, com um mantenedor:
+
+- **Rodar mais de uma vez por semana, ou a cada falha** (gatilho por evento, como o auto-fix de PR da nuvem ou um workflow em `workflow_run` falho): a nova tentativa diária já cobre o passageiro, e o export estático tira a pressa dos patches do Next ([ADR 0005](../adr/0005-home-em-export-estatico.md)). Reagir a cada falha brigaria com a nova tentativa e gastaria mais.
+- **Rodar as duas opções** (rotina e workflow) ou dois fornecedores de agente: dois robôs mexendo nos mesmos PRs, sem ganho.
+- **Um segundo agente revisor** do conserto, ou aprovação humana no PR do agente: o `gate` é o juiz, e o ruleset tem zero aprovações por decisão.
+- **Vigia externo** (healthchecks, painel, notificação em Slack ou Telegram): no workflow, a falha já vira e-mail e issue.
+- **Relatório semanal, comentário em PR ou issue de "tudo em ordem"**: sinal sem leitor.
+- **Opus 5.5 como modelo padrão** e modo rápido: o dobro do custo para consertos que, em geral, são de versão e tipo.
+- **Runner próprio ou agente na VPS**: manutenção de máquina para economizar minutos que já são gratuitos.
+- **Assinar commits com a chave SSH do Autor num segredo** (`ssh_signing_key`): um segredo de longa duração com a identidade dele no job que roda código de terceiros, quando a API do GitHub assina como o app sem segredo nenhum.
+- **Memória própria entre execuções** (banco, artefatos de grupo de automação): as issues abertas e os PRs já guardam o estado.
+- **Automações do Copilot**: não existem para repositório público (seção 1.3).
