@@ -16,3 +16,7 @@ apps/web/design-system/generated/
 *.tsbuildinfo
 test-results/
 playwright-report/
+
+# as regras do Next para agentes, que o `next dev` escreve quando roda dentro de um agente; as
+# do repositório estão no AGENTS.md da raiz
+apps/web/AGENTS.md
