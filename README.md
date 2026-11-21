@@ -35,7 +35,7 @@ O servidor de desenvolvimento abre em `http://localhost:3000`. Em produção nã
 | `pnpm test:e2e` | Constrói a imagem da Home, sobe-a no Docker Compose com o contêiner oficial do Playwright e roda os testes contra ela. Precisa do Docker de pé. |
 | `pnpm verify` | Os dois acima, nessa ordem. Rode antes de abrir ou atualizar um PR. |
 
-No `pnpm test:e2e`, o Playwright roda em Chromium a 390 e a 1440 de largura e, num subconjunto, em WebKit com o iPhone 13. Cada worktree sobe o próprio projeto do Compose, sem porta no host, então vários worktrees testam ao mesmo tempo. Argumentos extras vão para o `playwright test`, como em `pnpm test:e2e --grep 404`.
+No `pnpm test:e2e`, o Playwright roda em Chromium a 390 e a 1440 de largura e, num subconjunto, em WebKit com o iPhone 13. No mesmo contêiner, o Lighthouse mede a primeira visita a 390px, com fator de escala 3 e Slow 4G simulado: o peso trava em 1.000.000 bytes transferidos, e a mediana do LCP em cinco rodadas só aparece na saída. Cada worktree sobe o próprio projeto do Compose, sem porta no host, então vários worktrees testam ao mesmo tempo. Argumentos extras vão para o `playwright test`, como em `pnpm test:e2e --grep 404`.
 
 ## Como a CI valida
 
