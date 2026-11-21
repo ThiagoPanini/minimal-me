@@ -6,6 +6,7 @@ import { OpeningIllustration } from "@/components/OpeningIllustration";
 import { SectionHeader } from "@/components/SectionHeader";
 import { SpaceSlit, SpaceSlitRow } from "@/components/SpaceSlit";
 import { Toast, ToastProvider } from "@/components/Toast";
+import { PageMotion } from "@/motion/page-motion";
 import { spaceCount, spaces } from "@/spaces/catalog";
 
 // A frase da abertura, que é também a descrição da Home para buscadores e na prévia de
@@ -29,6 +30,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <ToastProvider>
+      <PageMotion />
       <header id="top" className="flex h-svh min-h-[600px] flex-col stacked:h-auto stacked:min-h-0">
         <OpeningIllustration page="home" />
         <Masthead kicker="hub pessoal e minimalista" tagline={tagline} />

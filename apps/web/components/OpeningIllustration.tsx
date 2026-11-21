@@ -45,7 +45,7 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
           <a
             href={markHref}
             aria-label="Minimal Me, início"
-            className="inline-flex focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-4"
+            className="inline-flex focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-4 entering:[animation:fade-in_1.2s_var(--ease)_1.2s_backwards]"
           >
             <Mark background="sky" />
           </a>
