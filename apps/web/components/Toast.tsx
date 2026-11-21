@@ -16,7 +16,8 @@ import { matchesMedia } from "@/app/use-media";
 // responde a uma ação sem destino, centrada no pé da tela. Hoje, o "Acessar" de um space que
 // ainda não abre. Fixo a 20px do pé, dentro da área segura, nunca mais largo que a tela menos
 // 32px; aparece e some por opacidade em 0,5s (só com movimento) e fica 2,6s à vista. Acionar
-// de novo reinicia o tempo.
+// de novo reinicia o tempo. O texto é `small`, com a entrelinha de 1,5 do guia, em vez da do
+// estilo.
 //
 // O aparecer e o sumir são uma transição de vista do React (`<ViewTransition>`): com movimento,
 // cada mudança do aviso entra numa transição, e o navegador funde o quadro velho do aviso no
@@ -92,7 +93,7 @@ export function Toast() {
       <div
         role="status"
         data-shown={notice?.shown || undefined}
-        className="pointer-events-none fixed inset-x-0 bottom-[calc(20px+env(safe-area-inset-bottom,0px))] z-60 mx-auto w-fit max-w-[calc(100vw-32px)] border border-toast-border bg-toast-bg px-[14px] py-[9px] text-center font-light font-mono text-[12px] text-light leading-[1.5] opacity-0 data-shown:opacity-100"
+        className="pointer-events-none fixed inset-x-0 bottom-[calc(20px+env(safe-area-inset-bottom,0px))] z-60 mx-auto w-fit max-w-[calc(100vw-32px)] border border-toast-border bg-toast-bg px-[14px] py-[9px] text-center font-mono text-small text-light leading-[1.5] opacity-0 data-shown:opacity-100"
       >
         {notice && <span key={notice.key}>{notice.message}</span>}
       </div>

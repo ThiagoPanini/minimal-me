@@ -4,9 +4,15 @@
  * Os valores vêm do sistema de design: `design-system/tokens.ts` declara em `:root`
  * as variáveis com os nomes do sistema (`--ground`, `--font-sans`, `--square`...).
  * Aqui o Tailwind ganha utilitários com esses nomes, e só com eles, nas cores,
- * nas famílias, nos pesos e nos raios: `bg-ground`, `text-mist`, `font-sans`,
- * `font-light`, `rounded-square`. Um utilitário que a Home usa e cujo token sumiu
- * deixa uma `var()` sem declaração, e o build quebra (design-system/check-css-variables.ts).
+ * nas famílias, nos pesos, nos estilos de texto e nos raios: `bg-ground`, `text-mist`,
+ * `font-sans`, `font-light`, `text-label`, `rounded-square`. Um utilitário que a Home usa e
+ * cujo token sumiu deixa uma `var()` sem declaração, e o build quebra
+ * (design-system/check-css-variables.ts).
+ *
+ * Um estilo de texto (`text-<estilo>`) dá o tamanho, a entrelinha, o peso e o espaçamento do
+ * estilo; a família vem à parte, a do grupo dele (`font-sans` ou `font-mono`). Onde o guia
+ * pede tamanho fluido (`wordmark`, `title` e `tagline`), o componente acrescenta o tamanho, e
+ * o resto continua do estilo.
  */
 @theme inline {
   --color-*: initial;
@@ -23,8 +29,51 @@
   --color-toast-bg: var(--toast-bg);
 
   --font-*: initial;
-  --font-weight-light: 300;
-  --font-weight-normal: 400;
+  --font-weight-*: initial;
+  --font-weight-light: var(--weight-light);
+  --font-weight-normal: var(--weight-normal);
+
+  --text-*: initial;
+  --text-wordmark: var(--wordmark-font-size);
+  --text-wordmark--line-height: var(--wordmark-line-height);
+  --text-wordmark--font-weight: var(--wordmark-font-weight);
+  --text-wordmark--letter-spacing: var(--wordmark-letter-spacing);
+  --text-title: var(--title-font-size);
+  --text-title--line-height: var(--title-line-height);
+  --text-title--font-weight: var(--title-font-weight);
+  --text-title--letter-spacing: var(--title-letter-spacing);
+  --text-label: var(--label-font-size);
+  --text-label--line-height: var(--label-line-height);
+  --text-label--font-weight: var(--label-font-weight);
+  --text-label--letter-spacing: var(--label-letter-spacing);
+  --text-kicker: var(--kicker-font-size);
+  --text-kicker--line-height: var(--kicker-line-height);
+  --text-kicker--font-weight: var(--kicker-font-weight);
+  --text-kicker--letter-spacing: var(--kicker-letter-spacing);
+  --text-tagline: var(--tagline-font-size);
+  --text-tagline--line-height: var(--tagline-line-height);
+  --text-tagline--font-weight: var(--tagline-font-weight);
+  --text-paragraph: var(--paragraph-font-size);
+  --text-paragraph--line-height: var(--paragraph-line-height);
+  --text-paragraph--font-weight: var(--paragraph-font-weight);
+  --text-lead: var(--lead-font-size);
+  --text-lead--line-height: var(--lead-line-height);
+  --text-lead--font-weight: var(--lead-font-weight);
+  --text-number: var(--number-font-size);
+  --text-number--line-height: var(--number-line-height);
+  --text-number--font-weight: var(--number-font-weight);
+  --text-number--letter-spacing: var(--number-letter-spacing);
+  --text-link: var(--link-font-size);
+  --text-link--line-height: var(--link-line-height);
+  --text-link--font-weight: var(--link-font-weight);
+  --text-link--letter-spacing: var(--link-letter-spacing);
+  --text-status: var(--status-font-size);
+  --text-status--line-height: var(--status-line-height);
+  --text-status--font-weight: var(--status-font-weight);
+  --text-status--letter-spacing: var(--status-letter-spacing);
+  --text-small: var(--small-font-size);
+  --text-small--line-height: var(--small-line-height);
+  --text-small--font-weight: var(--small-font-weight);
 
   --radius-*: initial;
   --radius-square: var(--square);
@@ -301,7 +350,7 @@
    quem usa diz quando: `in-slit-open:w-10` na fresta aberta, `group-hover:w-10` e
    `group-focus-visible:w-10` no cursor e no teclado. */
 @utility action-link {
-  @apply inline-flex items-center gap-3 font-mono font-normal text-[11px] text-light uppercase leading-[1.4] tracking-[.16em] no-underline;
+  @apply inline-flex items-center gap-3 font-mono text-link text-light uppercase no-underline;
 }
 
 @utility link-dash {

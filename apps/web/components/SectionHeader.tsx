@@ -20,12 +20,12 @@ export function SectionHeader({ id, label, count }: SectionHeaderProps) {
     >
       <h2
         id={id}
-        className="m-0 font-normal font-sans text-[12px] text-light uppercase leading-[1.4] tracking-[.34em] unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_backwards]"
+        className="m-0 font-sans text-label text-light uppercase unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_backwards]"
       >
         {label}
       </h2>
       {count && (
-        <span className="font-mono font-normal text-[11px] text-mist tabular-nums leading-[1.4] tracking-[.16em] unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_.25s_backwards]">
+        <span className="font-mono text-number text-mist tabular-nums unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_.25s_backwards]">
           {count}
         </span>
       )}

@@ -94,16 +94,14 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
     >
       <div className="absolute top-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:left-0 in-slit-closed:w-(--slit-unit) unrevealed:opacity-0 revealed:[animation:fade-up_.9s_var(--ease-out)_calc(var(--reveal-delay)_+_.4s)_backwards]">
         <p className="flex items-center gap-[14px] whitespace-nowrap @max-[1240px]:flex-col @max-[1240px]:items-start @max-[1240px]:gap-[9px] stacked:gap-[10px] in-slit-closed:gap-[9px]">
-          <span className="font-mono font-normal text-[11px] text-mist tabular-nums leading-none tracking-[.16em]">
-            {space.number}
-          </span>{" "}
+          <span className="font-mono text-number text-mist tabular-nums">{space.number}</span>{" "}
           <StatusLine
             status={space.status}
             word={space.statusWord}
             wordClassName="in-slit-closed:sr-only"
           />
         </p>
-        <h3 className="text-nowrap pt-3 font-light font-sans text-[length:clamp(15px,calc((var(--slit-unit)_-_2*var(--slit-pad))/8.4),27px)] text-light leading-[1.08] tracking-[-.005em] stacked:text-balance stacked:text-[length:clamp(21px,5.8vw,25px)] motion-safe:stacked:[transition:opacity_.5s_var(--ease)_.3s] in-slit-closed:pointer-events-none in-slit-closed:opacity-0 motion-safe:in-slit-closed:[transition:none]">
+        <h3 className="text-nowrap pt-3 font-sans text-title text-[length:clamp(15px,calc((var(--slit-unit)_-_2*var(--slit-pad))/8.4),27px)] text-light stacked:text-balance stacked:text-[length:clamp(21px,5.8vw,25px)] motion-safe:stacked:[transition:opacity_.5s_var(--ease)_.3s] in-slit-closed:pointer-events-none in-slit-closed:opacity-0 motion-safe:in-slit-closed:[transition:none]">
           {space.name}
         </h3>
       </div>
@@ -141,10 +139,10 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
 
       <div className="absolute bottom-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)*1.9_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:pointer-events-none in-slit-closed:opacity-0 unrevealed:opacity-0 revealed:[animation:fade-up_.9s_var(--ease-out)_calc(var(--reveal-delay)_+_.4s)_backwards]">
         <span className="block h-px w-6 bg-mist opacity-0 motion-safe:[transition:width_.5s_var(--ease),opacity_.4s_var(--ease)] in-slit-open:w-full in-slit-open:opacity-55 motion-safe:in-slit-open:[transition:width_1.1s_var(--ease-out)_.2s,opacity_.5s_var(--ease)_.2s]" />
-        <p className="translate-y-2 text-pretty pt-4 font-light font-mono text-[14px] text-body leading-[1.72] opacity-0 motion-safe:[transition:opacity_.4s_var(--ease),translate_.5s_var(--ease)] @max-[1120px]:hidden motion-reduce:translate-y-0 in-slit-open:translate-y-0 in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.7s_var(--ease)_.38s,translate_.9s_var(--ease-out)_.38s]">
+        <p className="translate-y-2 text-pretty pt-4 font-mono text-paragraph text-body opacity-0 motion-safe:[transition:opacity_.4s_var(--ease),translate_.5s_var(--ease)] @max-[1120px]:hidden motion-reduce:translate-y-0 in-slit-open:translate-y-0 in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.7s_var(--ease)_.38s,translate_.9s_var(--ease-out)_.38s]">
           {space.description}
         </p>
-        <p className="hidden translate-y-2 text-pretty pt-[14px] font-light font-mono text-[13px] text-body leading-[1.62] opacity-0 motion-safe:[transition:opacity_.4s_var(--ease),translate_.5s_var(--ease)] @max-[1120px]:block stacked:pt-[13px] motion-reduce:translate-y-0 in-slit-open:translate-y-0 in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.7s_var(--ease)_.38s,translate_.9s_var(--ease-out)_.38s]">
+        <p className="hidden translate-y-2 text-pretty pt-[14px] font-mono text-lead text-body opacity-0 motion-safe:[transition:opacity_.4s_var(--ease),translate_.5s_var(--ease)] @max-[1120px]:block stacked:pt-[13px] motion-reduce:translate-y-0 in-slit-open:translate-y-0 in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.7s_var(--ease)_.38s,translate_.9s_var(--ease-out)_.38s]">
           {space.lead}
         </p>
         <div className="flex items-end pt-[18px] stacked:pt-[14px]">

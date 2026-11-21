@@ -25,10 +25,8 @@ export default function NotFound() {
       <main className="pt-[clamp(30px,3.4vw,54px)] pb-[clamp(44px,5vw,80px)]">
         <div className="page-inner page-grid">
           <div className="col-span-12 flex flex-col items-start gap-3">
-            <h1 className="font-normal font-sans text-[11px] text-mist uppercase leading-[1.4] tracking-[.3em]">
-              página não encontrada
-            </h1>
-            <p className="max-w-[34ch] text-pretty font-light font-mono text-[length:clamp(14px,1.1vw,16px)] text-body leading-[1.62] narrow:text-[14px]">
+            <h1 className="font-sans text-kicker text-mist uppercase">página não encontrada</h1>
+            <p className="max-w-[34ch] text-pretty font-mono text-tagline text-[length:clamp(14px,1.1vw,16px)] text-body narrow:text-[14px]">
               Este endereço não leva a nenhum lugar do Minimal Me.
             </p>
             <a

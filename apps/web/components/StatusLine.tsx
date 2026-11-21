@@ -24,7 +24,7 @@ type StatusLineProps = {
 export function StatusLine({ status, word, wordClassName }: StatusLineProps) {
   return (
     <span
-      className={`inline-flex items-center gap-2 whitespace-nowrap font-mono font-normal text-[11px] leading-none tracking-[.05em] ${status === "in-development" ? "text-status-in-development" : "text-body"}`}
+      className={`inline-flex items-center gap-2 whitespace-nowrap font-mono text-status ${status === "in-development" ? "text-status-in-development" : "text-body"}`}
     >
       <span className={`block size-[5px] flex-none rounded-circle ${dotByStatus[status]}`} />
       <span className={wordClassName}>{word}</span>
