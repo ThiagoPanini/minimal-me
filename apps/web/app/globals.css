@@ -1,0 +1,433 @@
+@import "tailwindcss";
+
+/*
+ * Os valores vêm do sistema de design: `design-system/tokens.ts` declara em `:root`
+ * as variáveis com os nomes do sistema (`--ground`, `--font-sans`, `--square`...).
+ * Aqui o Tailwind ganha utilitários com esses nomes, e só com eles, nas cores,
+ * nas famílias, nos pesos, nos estilos de texto e nos raios: `bg-ground`, `text-mist`,
+ * `font-sans`, `font-light`, `text-label`, `rounded-square`. Um utilitário que a Home usa e
+ * cujo token sumiu deixa uma `var()` sem declaração, e o build quebra
+ * (design-system/check-css-variables.ts).
+ *
+ * Um estilo de texto (`text-<estilo>`) dá o tamanho, a entrelinha, o peso e o espaçamento do
+ * estilo; a família vem à parte, a do grupo dele (`font-sans` ou `font-mono`). Onde o guia
+ * pede tamanho fluido (`wordmark`, `title` e `tagline`), o componente acrescenta o tamanho, e
+ * o resto continua do estilo.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-ground: var(--ground);
+  --color-sky: var(--sky);
+  --color-ink: var(--ink);
+  --color-light: var(--light);
+  --color-body: var(--body);
+  --color-text: var(--text);
+  --color-mist: var(--mist);
+  --color-hairline: var(--hairline);
+  --color-status-in-development: var(--status-in-development);
+  --color-toast-border: var(--toast-border);
+  --color-toast-bg: var(--toast-bg);
+
+  --font-*: initial;
+  --font-weight-*: initial;
+  --font-weight-light: var(--weight-light);
+  --font-weight-normal: var(--weight-normal);
+
+  --text-*: initial;
+  --text-wordmark: var(--wordmark-font-size);
+  --text-wordmark--line-height: var(--wordmark-line-height);
+  --text-wordmark--font-weight: var(--wordmark-font-weight);
+  --text-wordmark--letter-spacing: var(--wordmark-letter-spacing);
+  --text-title: var(--title-font-size);
+  --text-title--line-height: var(--title-line-height);
+  --text-title--font-weight: var(--title-font-weight);
+  --text-title--letter-spacing: var(--title-letter-spacing);
+  --text-label: var(--label-font-size);
+  --text-label--line-height: var(--label-line-height);
+  --text-label--font-weight: var(--label-font-weight);
+  --text-label--letter-spacing: var(--label-letter-spacing);
+  --text-kicker: var(--kicker-font-size);
+  --text-kicker--line-height: var(--kicker-line-height);
+  --text-kicker--font-weight: var(--kicker-font-weight);
+  --text-kicker--letter-spacing: var(--kicker-letter-spacing);
+  --text-tagline: var(--tagline-font-size);
+  --text-tagline--line-height: var(--tagline-line-height);
+  --text-tagline--font-weight: var(--tagline-font-weight);
+  --text-paragraph: var(--paragraph-font-size);
+  --text-paragraph--line-height: var(--paragraph-line-height);
+  --text-paragraph--font-weight: var(--paragraph-font-weight);
+  --text-lead: var(--lead-font-size);
+  --text-lead--line-height: var(--lead-line-height);
+  --text-lead--font-weight: var(--lead-font-weight);
+  --text-number: var(--number-font-size);
+  --text-number--line-height: var(--number-line-height);
+  --text-number--font-weight: var(--number-font-weight);
+  --text-number--letter-spacing: var(--number-letter-spacing);
+  --text-link: var(--link-font-size);
+  --text-link--line-height: var(--link-line-height);
+  --text-link--font-weight: var(--link-font-weight);
+  --text-link--letter-spacing: var(--link-letter-spacing);
+  --text-status: var(--status-font-size);
+  --text-status--line-height: var(--status-line-height);
+  --text-status--font-weight: var(--status-font-weight);
+  --text-status--letter-spacing: var(--status-letter-spacing);
+  --text-small: var(--small-font-size);
+  --text-small--line-height: var(--small-line-height);
+  --text-small--font-weight: var(--small-font-weight);
+
+  --radius-*: initial;
+  --radius-square: var(--square);
+  --radius-circle: var(--circle);
+
+  --ease-*: initial;
+
+  --animate-*: initial;
+  /* O pulso do ponto de "Em desenvolvimento" (StatusLine): 2,6s, `ease-io`, em laço. */
+  --animate-status-pulse: status-pulse 2.6s var(--ease-io) infinite;
+  @keyframes status-pulse {
+    0%,
+    100% {
+      opacity: 0.28;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+ * As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`). As
+ * arbitrárias do Tailwind não servem: `max-[900px]` é `width < 900px`, `min-[901px]` é
+ * `width >= 901px`, e a 900px exatos nenhuma das duas vale; o `pnpm check` as recusa
+ * (`scripts/checks/tailwind-variants.mjs`). Até 900px a página empilha (`stacked:`; acima,
+ * `not-stacked:`); até 760px, as camadas da abertura usam a posição estreita e a frase do
+ * Masthead fica em 14px (`narrow:`). As consultas de contêiner (`@max-[…]:`) são livres.
+ *
+ * Ordem no CSS gerado: a base, as variantes do próprio Tailwind (`hover:`, `motion-safe:`), as
+ * consultas de contêiner e, por fim, as daqui, na ordem em que estão declaradas (`not-stacked:`
+ * sai logo depois da base). Numa disputa da mesma propriedade, vence a que vem depois.
+ */
+@custom-variant stacked (@media (max-width: 900px));
+@custom-variant narrow (@media (max-width: 760px));
+
+/*
+ * O estado de cada fresta da fileira de spaces (SpaceSlit), no atributo `data-focus` do item:
+ * `active` é a fresta com foco; `kept` é a que fica aberta até 900px enquanto nenhuma outra
+ * tem foco (no começo, a primeira, já no HTML exportado). No máximo uma fresta leva o atributo.
+ * Aberta: com foco em qualquer largura e, até 900px, também a guardada. Fechada: até 900px,
+ * toda fresta sem o atributo. Recuada: a que não está aberta numa fileira em que outra está.
+ * `slit-open:` vale na própria fresta; `in-slit-*:`, dentro dela.
+ *
+ * Transição só com movimento: `motion-safe:[transition:…]`. Tirá-la com `motion-reduce:` não
+ * adianta, porque estas variantes vêm depois no CSS e a trazem de volta (o `pnpm check` recusa
+ * o `transition-none` nessa variante).
+ */
+@custom-variant slit-open {
+  &:where([data-focus="active"]) {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    &:where([data-focus="kept"]) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-open {
+  :where([data-space][data-focus="active"]) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space][data-focus="kept"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-closed {
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-receded {
+  :where([data-spaces]:has([data-focus="active"]) > [data-space]:not([data-focus="active"])) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
+}
+
+/*
+ * O movimento da página (`motion/entrance.ts`): a entrada da abertura e a revelação ao rolar.
+ * Tudo vale só com movimento e depois que o script da entrada marcou o `html` com
+ * `data-motion`; sem script ou com movimento reduzido, nenhuma regra daqui vale, e a página
+ * fica no estado final. `entering:` vale enquanto há movimento; `opening-waiting:` enquanto a
+ * abertura espera as duas camadas, e `opening-arrived:` depois. `unrevealed:` vale num bloco
+ * (`data-reveal`) que ainda não entrou na tela, ou dentro dele; `revealed:`, depois que entrou.
+ * Declaradas depois das `slit-*`, ganham delas numa disputa da mesma propriedade.
+ *
+ * Bloco novo que entra ao rolar: `data-reveal` no bloco e, nas partes, `unrevealed:opacity-0`
+ * com `revealed:[animation:<keyframe>_<tempo>_var(--ease-out)_backwards]`, usando um dos
+ * keyframes abaixo. O script da entrada observa todo `[data-reveal]` que já está no HTML
+ * exportado; um bloco que só nasce no cliente ficaria invisível com movimento.
+ */
+@custom-variant entering {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant opening-waiting {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion="waiting"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant opening-arrived {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion="arrived"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant unrevealed {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(html[data-motion] [data-reveal]:not([data-revealed])),
+    :where(html[data-motion] [data-reveal]:not([data-revealed])) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant revealed {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(html[data-motion] [data-revealed]),
+    :where(html[data-motion] [data-revealed]) & {
+      @slot;
+    }
+  }
+}
+
+/* As entradas partem de um quadro e terminam no estado que o elemento já tem (`backwards`):
+   o pé de uma fresta fechada, por exemplo, sobe e continua invisível. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+/* Cada palavra do nome sobe de baixo da própria linha, por trás de uma máscara. */
+@keyframes line-up {
+  from {
+    translate: 0 105%;
+  }
+}
+
+/* O fio de uma seção cresce da esquerda. */
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+}
+
+/* As camadas da abertura: o céu se aproxima, e as dunas sobem. */
+@keyframes sky-in {
+  from {
+    opacity: 0;
+    scale: 1.045;
+  }
+}
+
+@keyframes dunes-in {
+  from {
+    opacity: 0;
+    translate: 0 4%;
+  }
+}
+
+/* A foto de um space se revela como uma cópia no banho: de lavada e clara até a luz dela. */
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: contrast(0.35) brightness(1.6);
+  }
+}
+
+/*
+ * As transições de vista (`<ViewTransition>` do React). Só entra numa transição quem a pede:
+ * a página inteira não é capturada, e continua à vista e respondendo ao cursor e ao toque. O
+ * aviso (Toast) aparece e some por opacidade em 0,5s: o quadro velho dele se funde no novo,
+ * sem crescer nem se mover. Como toda animação da página, a fusão vale só com movimento: sem
+ * ele, nenhum quadro do aviso anima, e a transição em curso quando a preferência muda termina
+ * na hora.
+ */
+:root {
+  view-transition-name: none;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(.toast-fade),
+::view-transition-old(.toast-fade),
+::view-transition-new(.toast-fade) {
+  animation-name: none;
+}
+
+/* Com movimento, os dois quadros voltam à fusão do navegador (`revert`), em 0,5s e com `ease`. */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(.toast-fade),
+  ::view-transition-new(.toast-fade) {
+    animation-name: revert;
+    animation-duration: 0.5s;
+    animation-timing-function: var(--ease);
+  }
+}
+
+/* As famílias têm no sistema o mesmo nome que teriam no tema do Tailwind
+   (`--font-sans`); por isso os dois utilitários são declarados à mão. */
+@utility font-sans {
+  font-family: var(--font-sans);
+}
+
+@utility font-mono {
+  font-family: var(--font-mono);
+}
+
+/* A coluna da página: margem lateral entre `gutter-min` e `gutter-max` (ou a área
+   segura, se for maior) e largura máxima `max-width`. */
+@utility page-inner {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-left: max(
+    clamp(var(--gutter-min), 4.4vw, var(--gutter-max)),
+    env(safe-area-inset-left, 0px)
+  );
+  padding-right: max(
+    clamp(var(--gutter-min), 4.4vw, var(--gutter-max)),
+    env(safe-area-inset-right, 0px)
+  );
+}
+
+/* A grade de 12 colunas que atravessa a página, com o vão entre `gap-min` e `gap-max`. */
+@utility page-grid {
+  --grid-gap: clamp(var(--gap-min), 2vw, var(--gap-max));
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+}
+
+/* O fio de 1px em `hairline`, de margem a margem do bloco, que abre o rodapé e fecha o
+   cabeçalho de uma seção (Footer e SectionHeader). Fica num pseudo-elemento, e quem usa diz a
+   borda: `after:top-0` ou `after:bottom-0`. Com movimento, cresce da esquerda em 1,2s quando o
+   bloco entra na tela (`data-reveal`, motion/entrance.ts). */
+@utility hairline-rule {
+  @apply relative after:absolute after:inset-x-0 after:h-px after:origin-left after:bg-hairline unrevealed:after:[scale:0_1] revealed:after:[animation:grow-x_1.2s_var(--ease-out)_backwards];
+}
+
+/* O link de ação, como o "Acessar" de um space e o "voltar ao início" da 404, seguido de um
+   traço de 22px na cor dele (`link-dash`). O traço cresce para 40px quando o link responde, e
+   quem usa diz quando: `in-slit-open:w-10` na fresta aberta, `group-hover:w-10` e
+   `group-focus-visible:w-10` no cursor e no teclado. */
+@utility action-link {
+  @apply inline-flex items-center gap-3 font-mono text-link text-light uppercase no-underline;
+}
+
+@utility link-dash {
+  @apply block h-px w-[22px] bg-current motion-safe:[transition:width_.6s_var(--ease-out)];
+}
+
+/* A foto de uma fresta com as quatro bordas esfumadas em 2%. */
+@utility slit-feather {
+  mask-image:
+    linear-gradient(to right, transparent, black 2%, black 98%, transparent),
+    linear-gradient(to bottom, transparent, black 2%, black 98%, transparent);
+  mask-composite: intersect;
+}
+
+/* O recorte da foto numa fresta (`illustrations.json`): presa no ponto (x, y) e com o zoom,
+   pelos valores da fileira larga e, até 900px, da empilhada. Quem usa declara as seis
+   variáveis `--crop-wide-*` e `--crop-stacked-*`. */
+@utility slit-crop {
+  --crop-x: var(--crop-wide-x);
+  --crop-y: var(--crop-wide-y);
+  --crop-zoom: var(--crop-wide-zoom);
+  @media (max-width: 900px) {
+    --crop-x: var(--crop-stacked-x);
+    --crop-y: var(--crop-stacked-y);
+    --crop-zoom: var(--crop-stacked-zoom);
+  }
+  position: absolute;
+  left: calc((1 - var(--crop-zoom)) * var(--crop-x) * 100%);
+  top: calc((1 - var(--crop-zoom)) * var(--crop-y) * 100%);
+  width: calc(var(--crop-zoom) * 100%);
+  height: calc(var(--crop-zoom) * 100%);
+  max-width: none;
+  object-fit: cover;
+  object-position: calc(var(--crop-x) * 100%) calc(var(--crop-y) * 100%);
+}
+
+/* Os véus de uma fresta, em `ground`. O do topo fica sempre sob o número, o Status e o nome. */
+@utility slit-veil-top {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ground) 62%, transparent) 0,
+    color-mix(in srgb, var(--ground) 30%, transparent) 18%,
+    transparent 38%
+  );
+}
+
+/* O véu do foco escurece a duna, sob a descrição, e reforça o topo, onde a foto clareia ao
+   perder a chave de repouso. */
+@utility slit-veil-focus {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ground) 49%, transparent) 0,
+      color-mix(in srgb, var(--ground) 80%, transparent) 8.5%,
+      color-mix(in srgb, var(--ground) 52%, transparent) 21.5%,
+      transparent 30.5%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--ground) 90%, transparent) 0,
+      color-mix(in srgb, var(--ground) 76%, transparent) 23%,
+      color-mix(in srgb, var(--ground) 67%, transparent) 39%,
+      transparent 60%
+    );
+}
+
+@layer base {
+  /* Foco visível em todo controle: 1,5px na cor do texto, afastado 3px. */
+  :focus-visible {
+    outline: 1.5px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* A página rola no documento; os links para o topo rolam suave só quando há movimento. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}

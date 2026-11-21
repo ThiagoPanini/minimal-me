@@ -1,6 +1,22 @@
-# worktrees locais das pesquisas do wayfinder
+# worktrees só em .claude/worktrees/; .worktrees/ guarda os antigos das pesquisas do wayfinder
 .worktrees/
 
-# estado local do Claude Code (permissoes e worktrees de subagentes)
+# estado local do Claude Code (permissoes e worktrees) e do Codex, que importa o .mcp.json
+# com /import
 .claude/settings.local.json
 .claude/worktrees/
+.codex/
+
+# dependências, build do Next e resultados do Playwright
+node_modules/
+.next/
+out/
+next-env.d.ts
+apps/web/design-system/generated/
+*.tsbuildinfo
+test-results/
+playwright-report/
+
+# as regras do Next para agentes, que o `next dev` escreve quando roda dentro de um agente; as
+# do repositório estão no AGENTS.md da raiz
+apps/web/AGENTS.md

@@ -1,0 +1,94 @@
+# Os robôs das dependências (seção "Dependências" da #57). Toda segunda de manhã, o Dependabot
+# abre por ecossistema um PR com as atualizações patch e minor juntas e um PR para cada major,
+# depois de 3 dias de cooldown de cada versão. As atualizações de segurança chegam sem cooldown,
+# uma por PR, e seguem ligadas no repositório. O workflow `auto-merge` mescla o que passa no
+# `gate`, e o `retry` tenta de novo, todo dia, o que falhou.
+#
+# O cooldown fica nos 3 dias que a spec decidiu, abaixo dos 7 que o zizmor pede: já passa da
+# maturidade de um dia do pnpm, e o atraso de uma versão nova, somado ao ciclo semanal, fica em
+# até dez dias, em vez de duas semanas.
+#
+# Os títulos ficam em inglês, como exceção de robô à regra de idioma, com o prefixo fixo
+# `build(deps)` em todos os ecossistemas: o título vira o assunto do commit da `main` e passa
+# pelo commitlint no `pr-title` (`scripts/commit-titles.test.mjs` confere os formatos deles).
+#
+# A major do Node fica no 24 até o Next suportar o 26: nem a imagem `node` do Dockerfile nem os
+# tipos `@types/node`, que acompanham o runtime, sobem de major. Quando o Next suportar o 26,
+# saem as duas regras e a exceção do `auto-merge`, e o `engines` do package.json sobe junto.
+version: 2
+
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      # Os 3 dias da spec, abaixo dos 7 que o zizmor pede: ver o topo.
+      default-days: 3 # zizmor: ignore[dependabot-cooldown]
+    commit-message:
+      prefix: build(deps)
+    groups:
+      npm:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      # Os 3 dias da spec, abaixo dos 7 que o zizmor pede: ver o topo.
+      default-days: 3 # zizmor: ignore[dependabot-cooldown]
+    commit-message:
+      prefix: build(deps)
+    groups:
+      github-actions:
+        update-types: [minor, patch]
+
+  # O Dockerfile da web, com as imagens do Node e do nginx.
+  - package-ecosystem: docker
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      # Os 3 dias da spec, abaixo dos 7 que o zizmor pede: ver o topo.
+      default-days: 3 # zizmor: ignore[dependabot-cooldown]
+    commit-message:
+      prefix: build(deps)
+    groups:
+      docker:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: node
+        update-types: ["version-update:semver-major"]
+      # O Dependabot também lê os YAML do diretório, e o compose.e2e.yaml monta a etiqueta do
+      # Playwright com a versão de @playwright/test, que sobe pelo npm.
+      - dependency-name: "*playwright"
+
+  # O compose.tools.yaml da raiz: gitleaks, actionlint e zizmor, com etiqueta e digest juntos.
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    cooldown:
+      # Os 3 dias da spec, abaixo dos 7 que o zizmor pede: ver o topo.
+      default-days: 3 # zizmor: ignore[dependabot-cooldown]
+    commit-message:
+      prefix: build(deps)
+    groups:
+      docker-compose:
+        update-types: [minor, patch]

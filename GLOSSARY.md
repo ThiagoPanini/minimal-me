@@ -1,6 +1,6 @@
 # Minimal Me
 
-Hub pessoal do Autor, público, organizado em quatro spaces. Este glossário fixa as palavras usadas em tickets, documentos e código. Os termos são em português, para a prosa; cada um traz a forma em inglês usada em código. A exceção é space: o termo da prosa também é em inglês, como os nomes dos spaces (ver `AGENTS.md`).
+Hub pessoal do Autor, público, organizado em quatro spaces. Este glossário fixa as palavras usadas em tickets, documentos e código. Os termos são em português, para a prosa; cada um traz a forma em inglês usada em código. A exceção é space: o termo da prosa também é em inglês, como os nomes dos spaces (ver `CODING_STANDARDS.md`).
 
 ## Language
 

@@ -1,23 +1,26 @@
 {
   "mcpServers": {
-    "hostinger-vps": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "--package", "hostinger-api-mcp@0.2.5", "hostinger-vps-mcp"],
-      "env": {}
+    "hostinger": {
+      "type": "http",
+      "url": "https://mcp.hostinger.com"
+    },
+    "cloudflare": {
+      "type": "http",
+      "url": "https://mcp.cloudflare.com/mcp"
     },
     "coolify": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@masonator/coolify-mcp@2.12.0"],
+      "args": ["-y", "@masonator/coolify-mcp@3.10.1"],
       "env": {
         "COOLIFY_BASE_URL": "https://vps.panlabs.tech",
         "COOLIFY_ACCESS_TOKEN": "${COOLIFY_ACCESS_TOKEN}"
       }
     },
-    "cloudflare": {
-      "type": "http",
-      "url": "https://mcp.cloudflare.com/mcp"
+    "next-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@0.4.0"]
     }
   }
 }

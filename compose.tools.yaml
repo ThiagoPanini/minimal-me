@@ -1,0 +1,22 @@
+# As ferramentas que rodam de imagem Docker, fixadas por digest, iguais na máquina, nos
+# agentes e na CI. Quem as chama é `node scripts/tool.mjs <ferramenta> [argumentos]`, que monta
+# o repositório no mesmo caminho da máquina, só para leitura, e roda com o usuário dela.
+# Nenhuma precisa de rede: o zizmor roda com --offline. O Dependabot atualiza a etiqueta e o
+# digest juntos.
+name: minimal-me-tools
+
+services:
+  gitleaks:
+    image: ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+    network_mode: none
+    read_only: true
+
+  actionlint:
+    image: rhysd/actionlint:1.7.12@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667
+    network_mode: none
+    read_only: true
+
+  zizmor:
+    image: ghcr.io/zizmorcore/zizmor:1.32.0@sha256:3014cc8f68f663935f69b3c3e0e41f5ce102b268d97db13db0f62208747f860d
+    network_mode: none
+    read_only: true

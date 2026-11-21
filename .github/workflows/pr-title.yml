@@ -1,0 +1,39 @@
+# O título do PR vira o assunto do commit da `main` no squash, então segue Conventional Commits
+# (seção "Esteira" da #57). O commitlint usa o commitlint.config.mjs da raiz.
+# Quem edita este arquivo regenera o `actions.lock` com `gh actions-lock`.
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+      # A versão exata vem do packageManager, como no Dockerfile, e uma versão publicada no npm
+      # não muda: por isso a instalação fora do lockfile é aceita aqui.
+      - name: Instala o pnpm fixado em packageManager
+        run: npm install --global "$(node -p "require('./package.json').packageManager")" # zizmor: ignore[adhoc-packages]
+      - name: Instala só as dependências da raiz
+        run: pnpm install --frozen-lockfile --filter minimal-me
+      # O título chega por variável de ambiente, nunca interpolado no script.
+      - name: Valida o título com o commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint --verbose

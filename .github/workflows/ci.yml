@@ -1,0 +1,283 @@
+# A validação de todo PR e da `main` (seção "Esteira" da #57). O resultado vira o check `gate`.
+# No PR, o job `image` constrói a imagem e a testa sem push. Na `main`, o job `publish` a constrói
+# uma vez, envia ao GHCR como `sha-<commit>`, com proveniência, SBOM e atestado, e o e2e roda
+# contra esse digest. São dois jobs para que só a `main` receba permissão de escrita. Depois do
+# `gate` da `main`, o job `deploy` põe esse digest no ar (seção "Entrega" da #57).
+# Quem edita este arquivo regenera o `actions.lock` com `gh actions-lock`.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions: {}
+
+# Nos PRs, uma rodada nova cancela a anterior do mesmo PR. Na `main`, cada commit tem o próprio
+# grupo, e nada é cancelado.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  IMAGE: ghcr.io/thiagopanini/minimal-me/web
+  PR_IMAGE: minimal-me-web:pr
+  PRODUCTION_URL: https://minimalme.dev
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          # O gitleaks lê os commits do PR ou do push, então o histórico vem inteiro.
+          fetch-depth: 0
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+      # Antes da instalação, para o código das dependências não rodar antes da busca.
+      - name: Procura segredos nos commits do PR ou do push
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+        run: node scripts/tool.mjs gitleaks git --redact --no-banner --verbose --log-opts="$BASE..$HEAD"
+      # A versão exata vem do packageManager, como no Dockerfile, e uma versão publicada no npm
+      # não muda: por isso a instalação fora do lockfile é aceita aqui.
+      - name: Instala o pnpm fixado em packageManager
+        run: npm install --global "$(node -p "require('./package.json').packageManager")" # zizmor: ignore[adhoc-packages]
+      - name: Instala as dependências
+        run: pnpm install --frozen-lockfile
+      - name: Roda o pnpm check
+        run: pnpm check
+
+  # Falha com vulnerabilidade alta ou crítica trazida pelo PR, no escopo `runtime`. Na `main`,
+  # compara o push com o commit anterior, que é o que o PR trouxe.
+  dependency-review:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/dependency-review-action@v5.0.1
+        with:
+          fail-on-severity: high
+          fail-on-scopes: runtime
+          # Só valem fora do `pull_request`; no PR, a action usa a base e a ponta dele.
+          base-ref: ${{ github.event.before }}
+          head-ref: ${{ github.sha }}
+
+  # PR: a imagem vai para um arquivo e segue ao e2e como artefato, sem push. O cache só é lido.
+  image:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@v4.4.1
+      - name: Constrói a imagem do PR
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          build-args: COMMIT=${{ github.sha }}
+          tags: ${{ env.PR_IMAGE }}
+          outputs: type=docker,dest=${{ runner.temp }}/web-image.tar
+          provenance: false
+          sbom: false
+          cache-from: type=gha,scope=web
+      - name: Entrega a imagem do PR ao e2e
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: web-image
+          path: ${{ runner.temp }}/web-image.tar
+          if-no-files-found: error
+          retention-days: 1
+
+  # `main`: construída uma vez e publicada; só a `main` escreve o cache.
+  publish:
+    if: github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # O push da imagem ao GHCR e o do atestado ao lado dela.
+      packages: write
+      # O certificado do Sigstore que assina o atestado.
+      id-token: write
+      # O registro do atestado no repositório.
+      attestations: write
+    outputs:
+      # A imagem que o e2e e a entrega usam: o digest publicado.
+      ref: ${{ format('{0}@{1}', env.IMAGE, steps.publish.outputs.digest) }}
+      digest: ${{ steps.publish.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@v4.4.1
+      - name: Entra no GHCR
+        uses: docker/login-action@v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Constrói e publica a imagem
+        id: publish
+        uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          build-args: COMMIT=${{ github.sha }}
+          tags: ${{ env.IMAGE }}:sha-${{ github.sha }}
+          labels: org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+          push: true
+          provenance: mode=max
+          # Com o ARG BUILDKIT_SBOM_SCAN_STAGE do Dockerfile, a SBOM cobre o estágio de build.
+          sbom: true
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+      - name: Atesta o digest publicado
+        uses: actions/attest@v4.2.2
+        with:
+          subject-name: ${{ env.IMAGE }}
+          subject-digest: ${{ steps.publish.outputs.digest }}
+          push-to-registry: true
+          # Registro de armazenamento só existe para repositório de organização.
+          create-storage-record: false
+
+  # Roda contra a imagem do evento: a do PR, do `image`, ou o digest da `main`, do `publish`.
+  # Se o job da imagem do evento não termina em success, o e2e é pulado e o gate fica vermelho.
+  e2e:
+    needs: [image, publish]
+    if: ${{ !cancelled() && (needs.image.result == 'success' || needs.publish.result == 'success') }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # O pull do digest publicado, na `main`. É só leitura, e separar o e2e por evento
+      # duplicaria o job inteiro.
+      packages: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Recebe a imagem do PR
+        if: github.event_name == 'pull_request'
+        uses: actions/download-artifact@v8.0.2
+        with:
+          name: web-image
+          path: ${{ runner.temp }}
+      - name: Carrega a imagem do PR
+        if: github.event_name == 'pull_request'
+        run: docker load --input "$RUNNER_TEMP/web-image.tar"
+      # O login sai antes da instalação, para o código das dependências não ver a credencial.
+      - name: Baixa a imagem publicada pelo digest
+        if: github.event_name == 'push'
+        env:
+          WEB_IMAGE: ${{ needs.publish.outputs.ref }}
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          docker pull "$WEB_IMAGE"
+          docker logout ghcr.io
+
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+      # Fora do lockfile pelo mesmo motivo do `quality`.
+      - name: Instala o pnpm fixado em packageManager
+        run: npm install --global "$(node -p "require('./package.json').packageManager")" # zizmor: ignore[adhoc-packages]
+      - name: Instala as dependências
+        run: pnpm install --frozen-lockfile
+      - name: Testa a imagem com o Playwright
+        env:
+          WEB_IMAGE: ${{ github.event_name == 'push' && needs.publish.outputs.ref || env.PR_IMAGE }}
+        run: pnpm test:e2e
+      - name: Guarda traces e capturas das falhas
+        if: failure()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: playwright-results
+          path: apps/web/test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # O check obrigatório. Roda sempre e só passa com `success` em todos os jobs que lista, os
+  # mesmos nos dois eventos: falha, pulo ou cancelamento de qualquer um o deixa vermelho. A
+  # imagem entra pelo e2e, que só roda depois do `image` (PR) ou do `publish` (`main`). Um job
+  # novo da validação roda nos dois eventos e entra no `needs` daqui.
+  gate:
+    if: always()
+    needs: [quality, dependency-review, e2e]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Exige success de todos os jobs
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          jq -r 'to_entries[] | "\(.key): \(.value.result)"' <<<"$NEEDS"
+          if ! jq -e 'length > 0 and all(.[]; .result == "success")' <<<"$NEEDS" >/dev/null; then
+            echo "::error::O gate só passa com success em todos os jobs da validação."
+            exit 1
+          fi
+
+  # A entrega: só no push da `main`, depois do `gate`, no environment `production` (restrito à
+  # `main`, sem revisor nem espera), que guarda o COOLIFY_TOKEN e a variável COOLIFY_APP_UUID.
+  # O scripts/delivery/deliver.mjs confere o atestado do digest publicado, aponta a tag
+  # `production` para ele, chama o /deploy do Coolify e roda o smoke contra a URL pública; se algo
+  # falha depois de a tag mudar, devolve `production` ao digest anterior, chama o /deploy de novo e
+  # termina vermelho. Este job não instala dependências: é o único que vê o token. O rollback
+  # manual é o workflow `rollback`, que passa pelo mesmo script.
+  deploy:
+    needs: [publish, gate]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: ${{ env.PRODUCTION_URL }}
+    # Um grupo só com o rollback manual: uma entrega por vez, uma pendente, nenhuma cancelada no
+    # meio. Uma pendente mais nova toma o lugar da anterior.
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      # Apontar a tag `production` para o digest publicado.
+      packages: write
+      # Ler o atestado do digest no `gh attestation verify`.
+      attestations: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+          # Nada de cache: este job não restaura o que outro job gravou.
+          package-manager-cache: false
+      - name: Entra no GHCR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Entrega o digest publicado
+        env:
+          DIGEST: ${{ needs.publish.outputs.digest }}
+          GH_TOKEN: ${{ github.token }}
+          COOLIFY_URL: https://vps.panlabs.tech
+          COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: node scripts/delivery/deliver.mjs --commit "$GITHUB_SHA" --digest "$DIGEST"
+      - name: Sai do GHCR
+        if: always()
+        run: docker logout ghcr.io
