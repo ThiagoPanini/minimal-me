@@ -9,6 +9,15 @@ import { grainStyle, type OpeningLayer, openingLayers } from "@/design-system/il
 // Na Home, a abertura ocupa a altura da tela que o Masthead deixa (até 900px, uma altura
 // própria), e a marca leva ao topo. Na 404, só o céu, sem as dunas e sem a figura: a abertura
 // ocupa a altura que a página deixa em qualquer largura, e a marca leva à Home.
+//
+// Com movimento, na Home, a ilustração espera as duas camadas (`data-opening-layer`), por no
+// máximo 5s, e entra como no protótipo (motion/entrance.ts): o céu se aproxima em 2,4s, e as
+// dunas sobem em 1,9s, 150ms depois; a marca aparece por último.
+
+const layerEntrances: Record<string, string> = {
+  sky: "opening-arrived:[animation:sky-in_2.4s_var(--ease-out)_backwards]",
+  dunes: "opening-arrived:[animation:dunes-in_1.9s_var(--ease-out)_.15s_backwards]",
+};
 
 const percent = ({ x, y }: { x: number; y: number }) => `${x * 100}% ${y * 100}%`;
 
@@ -52,7 +61,7 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
         </div>
       </div>
       {layers.map((layer) => (
-        <div key={layer.id} className="absolute inset-[-3%]">
+        <div key={layer.id} data-opening-layer={layer.id} className="absolute inset-[-3%]">
           {/* biome-ignore lint/performance/noImgElement: export estático; as larguras responsivas vêm de design-system/generate-illustrations.ts. */}
           <img
             src={layer.image.src}
@@ -64,7 +73,7 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
             fetchPriority="high"
             decoding="async"
             style={positionStyle(layer)}
-            className="block size-full max-w-none object-cover object-(--position-wide) narrow:object-(--position-narrow)"
+            className={`block size-full max-w-none object-cover object-(--position-wide) narrow:object-(--position-narrow) opening-waiting:opacity-0 ${layerEntrances[layer.id] ?? ""}`}
           />
         </div>
       ))}

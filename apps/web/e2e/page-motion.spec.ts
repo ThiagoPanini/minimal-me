@@ -129,3 +129,95 @@ test("a abertura entra como no protótipo: o nome sobe por máscara, palavra a p
     expect(await renderedOpacity(text)).toBe(1);
   }
 });
+
+// As camadas da abertura: o céu (decorativo, sem texto alternativo) e as dunas.
+function openingLayers(page: Page): { sky: Locator; dunes: Locator } {
+  return {
+    sky: page.getByRole("banner").locator('img[src*="/media/sky"]'),
+    dunes: page.getByRole("img", {
+      name: "Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste.",
+    }),
+  };
+}
+
+// Segura as dunas na rede até o teste soltá-las.
+async function holdDunes(page: Page): Promise<() => void> {
+  let release = () => {};
+  const held = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route(/\/_next\/static\/media\/dunes[-.]/, async (route) => {
+    await held;
+    await route.continue();
+  });
+  return release;
+}
+
+function arrived(image: Locator): Promise<boolean> {
+  return image.evaluate((node: HTMLImageElement) => node.complete && node.naturalWidth > 0);
+}
+
+const skyEntrance = {
+  duration: 2400,
+  delay: 0,
+  easing: easeOut,
+  from: { opacity: "0", scale: "1.045" },
+};
+const dunesEntrance = {
+  duration: 1900,
+  delay: 150,
+  easing: easeOut,
+  from: { opacity: "0", translate: "0px 4%" },
+};
+
+test("a ilustração da abertura espera as duas camadas: o céu fica escondido até as dunas chegarem", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const clock = await animationClock(page);
+  await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
+  const releaseDunes = await holdDunes(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.clock.pauseAt(new Date("2026-11-20T10:00:01Z"));
+  const { sky, dunes } = openingLayers(page);
+
+  // O céu chegou, mas não aparece sem as dunas.
+  await expect.poll(() => arrived(sky)).toBe(true);
+  expect(await renderedOpacity(sky)).toBe(0);
+  expect(await entrancesOf(sky)).toEqual([]);
+
+  // Com as dunas, as duas entram: o céu em 2,4s, as dunas em 1,9s, 150ms depois.
+  await clock.stop();
+  releaseDunes();
+  await expect.poll(() => entrancesOf(sky)).toEqual([skyEntrance]);
+  expect(await entrancesOf(dunes)).toEqual([dunesEntrance]);
+
+  await clock.run();
+  await settle(page);
+  expect(await renderedOpacity(sky)).toBe(1);
+  expect(await renderedOpacity(dunes)).toBe(1);
+});
+
+test("a abertura aparece mesmo se uma camada não chegar em 5s", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const clock = await animationClock(page);
+  await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
+  const releaseDunes = await holdDunes(page);
+  await page.goto("/", { waitUntil: "domcontentloaded" });
+  await page.clock.pauseAt(new Date("2026-11-20T10:00:01Z"));
+  const { sky } = openingLayers(page);
+  await expect.poll(() => arrived(sky)).toBe(true);
+
+  // A espera conta desde o começo da página: 4s depois, o céu ainda está escondido; 6s
+  // depois, já entrou.
+  await page.clock.runFor(3000);
+  expect(await renderedOpacity(sky)).toBe(0);
+  await clock.stop();
+  await page.clock.runFor(2000);
+  await expect.poll(() => entrancesOf(sky)).toEqual([skyEntrance]);
+
+  await clock.run();
+  await settle(page);
+  expect(await renderedOpacity(sky)).toBe(1);
+  releaseDunes();
+});
