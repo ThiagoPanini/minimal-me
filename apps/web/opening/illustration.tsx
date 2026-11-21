@@ -6,6 +6,8 @@ import { grainStyle, type OpeningLayer, openingLayers } from "@/design-system/il
 // A ilustração da abertura: o céu e as dunas em duas camadas, a descida para `ground`
 // no pé, o grão por cima e a marca em `ink` no canto superior esquerdo, como link para
 // o início. Os dados de cada camada (posição e texto alternativo) vêm de `illustrations.json`.
+// Não é componente do sistema de design: é a abertura da Home, que a 404 reaproveita só com o
+// céu, e por isso mora em `opening/`, fora de `components/`.
 //
 // Na Home, a abertura ocupa a altura da tela que o Masthead deixa (até 900px, uma altura
 // própria), e a marca leva ao topo. Na 404, só o céu, sem as dunas e sem a figura: a abertura

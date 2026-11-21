@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Footer } from "@/components/Footer";
-import { OpeningIllustration } from "@/components/OpeningIllustration";
+import { OpeningIllustration } from "@/opening/illustration";
 
 // A página de quem erra o endereço: o export a grava como `404.html`, e o nginx a serve, com
 // status 404, a qualquer rota que não existe. Só peças do sistema: o céu da abertura, sem as

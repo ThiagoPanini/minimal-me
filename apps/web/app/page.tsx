@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { siteName } from "@/app/site";
 import { Footer } from "@/components/Footer";
 import { Masthead } from "@/components/Masthead";
-import { OpeningIllustration } from "@/components/OpeningIllustration";
 import { SectionHeader } from "@/components/SectionHeader";
 import { SpaceSlit, SpaceSlitRow } from "@/components/SpaceSlit";
 import { Toast, ToastProvider } from "@/components/Toast";
 import { PageMotion } from "@/motion/page-motion";
+import { OpeningIllustration } from "@/opening/illustration";
 import { spaceCount, spaces } from "@/spaces/catalog";
 
 // A frase da abertura, que é também a descrição da Home para buscadores e na prévia de
