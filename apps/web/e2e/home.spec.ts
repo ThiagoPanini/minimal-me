@@ -53,6 +53,32 @@ test("a Home abre em pt-BR com o título Minimal Me e o Masthead @webkit", async
   ).toBeVisible();
 });
 
+test("a abertura mostra a ilustração das dunas, a marca que leva ao início e o nome @webkit", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const opening = page.getByRole("banner");
+  await expect(opening.getByRole("link", { name: "Minimal Me, início" })).toBeVisible();
+  await expect(
+    opening.getByRole("img", {
+      name: "Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste.",
+    }),
+  ).toBeVisible();
+  await expect(opening.getByRole("heading", { level: 1, name: "Minimal Me" })).toBeVisible();
+});
+
+test("o rodapé mostra a marca, o nome, o ano e o link de volta ao início @webkit", async ({
+  page,
+}) => {
+  await page.goto("/");
+
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByText("Minimal Me", { exact: true })).toBeVisible();
+  await expect(footer.getByText("© 2026")).toBeVisible();
+  await expect(footer.getByRole("link", { name: "voltar ao início ↑" })).toBeVisible();
+});
+
 test("o Masthead fica sobre ground, com as cores do sistema de design", async ({ page }) => {
   await page.goto("/");
 

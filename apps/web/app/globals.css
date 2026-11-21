@@ -42,3 +42,42 @@
 @utility font-mono {
   font-family: var(--font-mono);
 }
+
+/* A coluna da página: margem lateral entre `gutter-min` e `gutter-max` (ou a área
+   segura, se for maior) e largura máxima `max-width`. */
+@utility page-inner {
+  width: 100%;
+  max-width: var(--max-width);
+  margin-inline: auto;
+  padding-left: max(
+    clamp(var(--gutter-min), 4.4vw, var(--gutter-max)),
+    env(safe-area-inset-left, 0px)
+  );
+  padding-right: max(
+    clamp(var(--gutter-min), 4.4vw, var(--gutter-max)),
+    env(safe-area-inset-right, 0px)
+  );
+}
+
+/* A grade de 12 colunas que atravessa a página, com o vão entre `gap-min` e `gap-max`. */
+@utility page-grid {
+  --grid-gap: clamp(var(--gap-min), 2vw, var(--gap-max));
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  column-gap: var(--grid-gap);
+}
+
+@layer base {
+  /* Foco visível em todo controle: 1,5px na cor do texto, afastado 3px. */
+  :focus-visible {
+    outline: 1.5px solid currentColor;
+    outline-offset: 3px;
+  }
+
+  /* A página rola no documento; os links para o topo rolam suave só quando há movimento. */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+}
