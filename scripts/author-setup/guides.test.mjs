@@ -201,6 +201,33 @@ describe("guided steps", () => {
     assert.ok(!printed(output).includes("PRIVATE KEY"));
   });
 
+  test("the certificate pasted with the terminal paste marks or on one line is stored clean", async () => {
+    const certificate = fixture("origin-certificate.pem");
+    for (const pasted of [
+      `\u001b[200~${certificate.replaceAll("\n", "\r\n")}\u001b[201~`,
+      certificate.replaceAll("\n", ""),
+    ]) {
+      const terminal = fakeTerminal({ blocks: [pasted], confirms: [true] });
+      const { context } = fakeGuideContext({ terminal });
+      await guides["origin-certificate"](context);
+      assert.equal(context.state.originCertificate?.certificate, certificate);
+    }
+  });
+
+  test("a pasted private key or CSR is named, and the key is neither shown nor stored", async () => {
+    const key = "-----BEGIN PRIVATE KEY-----\nMIGHAgEAchave-de-teste\n-----END PRIVATE KEY-----\n";
+    const request =
+      "-----BEGIN CERTIFICATE REQUEST-----\nMIHRMHkCAQAwcsr-de-teste\n-----END CERTIFICATE REQUEST-----\n";
+    const terminal = fakeTerminal({ blocks: [key, request] });
+    const { context, output } = fakeGuideContext({ terminal });
+    await guides["origin-certificate"](context);
+    await guides["origin-certificate"](context);
+    assert.equal(context.state.originCertificate, undefined);
+    assert.match(printed(output), /é uma chave privada, não o certificado/);
+    assert.match(printed(output), /é o CSR, não o certificado/);
+    assert.ok(!printed(output).includes("chave-de-teste"));
+  });
+
   test("a certificate from another issuer and for other names is refused", async () => {
     const terminal = fakeTerminal({ blocks: [fixture("other-certificate.pem")] });
     const { context, output } = fakeGuideContext({ terminal });

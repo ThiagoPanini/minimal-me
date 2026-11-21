@@ -55,18 +55,27 @@ function questionHidden(prompt) {
   });
 }
 
-/** Lê várias linhas coladas até a linha END de um bloco PEM. */
-function questionBlock(prompt) {
-  process.stdout.write(`  ${bold(prompt)}\n`);
-  const reader = createInterface({ input: process.stdin, terminal: false });
+/**
+ * Lê as linhas coladas até a que traz o END de um bloco PEM. O END vale em qualquer ponto da
+ * linha: o terminal pode pôr a marca de fim de colagem depois dele ou juntar o bloco numa
+ * linha só. Quem confere o bloco tira o que o terminal acrescentou.
+ * @param {NodeJS.ReadableStream} input
+ */
+export function readBlock(input) {
+  const reader = createInterface({ input, terminal: false });
   const lines = [];
   return new Promise((resolve) => {
     reader.on("line", (line) => {
       lines.push(line.trim());
-      if (/^-----END [A-Z ]+-----$/.test(line.trim())) reader.close();
+      if (/-----END [A-Z0-9 ]+-----/.test(line)) reader.close();
     });
     reader.on("close", () => resolve(`${lines.filter(Boolean).join("\n")}\n`));
   });
+}
+
+function questionBlock(prompt) {
+  process.stdout.write(`  ${bold(prompt)}\n`);
+  return readBlock(process.stdin);
 }
 
 /** @returns {import("./guides.mjs").Terminal & { clear: () => void, heading: (text: string) => void }} */
