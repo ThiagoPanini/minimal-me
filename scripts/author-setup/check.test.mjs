@@ -2,7 +2,7 @@
 // feito e quebra uma coisa, para provar que a conferência lista exatamente o que falta.
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { runCheck } from "./check.mjs";
+import { formatPlan, runCheck } from "./check.mjs";
 
 const repo = "/repos/ThiagoPanini/minimal-me";
 
@@ -359,5 +359,19 @@ describe("modo de conferência", () => {
       openUrl: trap("openUrl"),
     });
     assert.deepEqual(writes, []);
+  });
+});
+
+describe("o duplo cheque no roteiro", () => {
+  test("diz, para cada passo, por que fica com o Autor e o que o agente faz", () => {
+    const lines = formatPlan().split("\n");
+    const numbered = lines.filter((line) => /^\d\. /.test(line));
+    assert.equal(numbered.length, 7);
+    for (const title of numbered) {
+      const at = lines.indexOf(title);
+      assert.match(lines[at + 1], /^ {3}Fica com o Autor: \S/);
+      assert.match(lines[at + 2], /^ {3}O agente: \S/);
+    }
+    assert.match(lines.join("\n"), /Conferido em 2026-11-20, só por leitura/);
   });
 });

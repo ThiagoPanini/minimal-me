@@ -1,6 +1,6 @@
 // Modo de conferência: lê o estado de cada passo do Autor e lista só o que falta, sem mudar
 // nada. Recebe as portas de leitura prontas, para ser testado com respostas falsas das APIs.
-import { steps as allSteps } from "./steps.mjs";
+import { steps as allSteps, doubleCheck } from "./steps.mjs";
 
 /**
  * @param {import("./steps.mjs").CheckContext} context
@@ -34,5 +34,23 @@ function formatReport(pending, total) {
     }
   }
   lines.push("", "Para fazer o que falta: pnpm author-setup");
+  return lines.join("\n");
+}
+
+/** O resultado do duplo cheque: o que fica com o Autor, por quê, e o que o agente faz. */
+export function formatPlan(steps = allSteps) {
+  const lines = [
+    "Preparação única do Autor: o duplo cheque.",
+    "",
+    `Conferido em ${doubleCheck.checkedOn}, só por leitura, ${doubleCheck.sources}: ${doubleCheck.outcome}.`,
+    "",
+  ];
+  for (const [index, step] of steps.entries()) {
+    lines.push(
+      `${index + 1}. ${step.title}`,
+      `   Fica com o Autor: ${step.reason}.`,
+      `   O agente: ${step.agent}.`,
+    );
+  }
   return lines.join("\n");
 }

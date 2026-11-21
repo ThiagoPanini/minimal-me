@@ -11,6 +11,10 @@ const fixture = (name) => readFileSync(path.join(import.meta.dirname, "fixtures"
 function fakeTerminal({ hidden = [], blocks = [], answers = [], confirms = [] } = {}) {
   const output = [];
   const record = (text) => output.push(text);
+  const answer = (queue, fallback) => async (prompt) => {
+    record(prompt);
+    return queue.shift() ?? fallback;
+  };
   return {
     output,
     io: {
@@ -20,11 +24,11 @@ function fakeTerminal({ hidden = [], blocks = [], answers = [], confirms = [] } 
       ok: record,
       warn: record,
       command: record,
-      ask: async (prompt) => (record(prompt), answers.shift() ?? ""),
-      askHidden: async (prompt) => (record(prompt), hidden.shift() ?? ""),
-      askBlock: async (prompt) => (record(prompt), blocks.shift() ?? ""),
-      pause: async (prompt) => record(prompt ?? ""),
-      confirm: async (question) => (record(question), confirms.shift() ?? false),
+      ask: answer(answers, ""),
+      askHidden: answer(hidden, ""),
+      askBlock: answer(blocks, ""),
+      pause: answer([], undefined),
+      confirm: answer(confirms, false),
     },
   };
 }
@@ -102,7 +106,10 @@ describe("passos guiados", () => {
       },
       mergeApp: {
         create: async () => conversion,
-        verifyInstallation: async (credentials) => (verified.push(credentials), installation),
+        async verifyInstallation(credentials) {
+          verified.push(credentials);
+          return installation;
+        },
       },
     });
     await guides["merge-app"](context);

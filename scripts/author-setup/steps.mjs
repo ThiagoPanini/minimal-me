@@ -35,6 +35,8 @@ export const mergeAppPermissions = {
  * @typedef {object} Step
  * @property {string} id
  * @property {string} title
+ * @property {string} reason por que o passo fica com o Autor, segundo o duplo cheque
+ * @property {string} agent o que o agente faz em volta do passo
  * @property {string} where
  * @property {(context: CheckContext) => Promise<StepResult>} check
  */
@@ -210,47 +212,81 @@ async function checkMcpLogin({ mcp, state }) {
   );
 }
 
+// O duplo cheque de 2026-11-20 conferiu, só por leitura, se um agente faria cada passo pelas
+// APIs e pelos MCPs sem expor segredo: GitHub (REST e GraphQL), Coolify 4.7.6 (rotas da API na
+// tag da VPS), Hostinger (VPS e firewall) e Cloudflare (MCP e documentação). Nenhum passo
+// passou ao agente; `reason` diz por quê, e `agent` diz o que o agente faz em volta dele.
+export const doubleCheck = {
+  checkedOn: "2026-11-20",
+  sources:
+    "nas APIs do GitHub (REST e GraphQL), do Coolify 4.7.6 e da Hostinger, e no MCP e na documentação da Cloudflare",
+  outcome: "nenhum dos sete passos passou ao agente",
+};
+
 /** @type {Step[]} */
 export const steps = [
   {
     id: "coolify-token",
     title: "Token do Coolify no environment `production`",
+    reason:
+      "o Coolify 4.7.6 cria e edita token de API só pelo painel, sem rota na API, e mostra o valor uma vez só; o token que o agente usa vale para a frota inteira e não deve virar o token de deploy",
+    agent:
+      "cria o environment `production`, restrito à `main`, na #74, e lê de volta só o nome do segredo",
     where: `${coolifyUrl}/security/api-tokens`,
     check: checkCoolifyToken,
   },
   {
     id: "merge-app",
     title: "GitHub App do merge automático",
+    reason:
+      "criar um GitHub App numa conta pessoal e instalá-lo pedem a sessão do Autor no navegador; o roteiro leva a chave privada e o Client ID do GitHub direto para os segredos do Dependabot, sem passar pelo repositório, pelas issues nem pelo agente",
+    agent:
+      "lê de volta as permissões do App e os nomes dos segredos; a #78 prova o merge automático ao vivo",
     where: "o formulário que `pnpm author-setup` abre no navegador",
     check: checkMergeApp,
   },
   {
     id: "ghcr-package",
     title: "Pacote do GHCR público",
+    reason:
+      "a API do GitHub lê a visibilidade de um pacote, mas não a muda, e o pacote nasce privado na primeira publicação",
+    agent:
+      "confere a primeira publicação da `main` na #74; se o pacote já nascer público, o passo some sozinho",
     where: `https://github.com/users/${owner}/packages/container/package/${encodeURIComponent(packageName)}`,
     check: checkPackage,
   },
   {
     id: "malware-alerts",
     title: "Alertas de malware do Dependabot",
+    reason:
+      "nem a REST (`security_and_analysis`) nem a GraphQL do GitHub ligam ou leem esses alertas num repositório pessoal; só a página de configurações os liga",
+    agent: "confere pela API que os alertas do Dependabot, que vêm antes, estão ligados",
     where: `https://github.com/${repository}/settings/security_analysis`,
     check: checkMalwareAlerts,
   },
   {
     id: "coolify-auto-update",
     title: "Atualização automática semanal do Coolify",
+    reason:
+      "a API do Coolify 4.7.6 não tem rota para as configurações de atualização, nem para ler; só o painel as muda, e o padrão é diário",
+    agent: "nada; sem rota na API, o agente não lê nem muda essa configuração",
     where: `${coolifyUrl}/settings/updates`,
     check: checkCoolifyAutoUpdate,
   },
   {
     id: "origin-certificate",
     title: "Origin Certificate na configuração dinâmica do Traefik",
+    reason:
+      "a chave tem de nascer e ficar na VPS; a API da Cloudflare assina um CSR, mas nem a API do Coolify 4.7.6 nem a da Hostinger gravam arquivo ou rodam comando na VPS, e o duplo cheque não abriu SSH; o único caminho por API seria um contêiner temporário montando o diretório do proxy, que serve a frota inteira, e um erro ali derruba o TLS dos outros projetos",
+    agent: "prova o certificado no primeiro deploy, na #76, pela URL pública em Full (strict)",
     where: `o Terminal e o Proxy do servidor localhost em ${coolifyUrl}/servers, e o Origin Server da zona minimalme.dev na Cloudflare`,
     check: checkOriginCertificate,
   },
   {
     id: "mcp-login",
     title: "Login OAuth dos MCPs remotos",
+    reason: "o login OAuth pede o consentimento da conta do Autor no navegador",
+    agent: "usa os MCPs depois do login, nas operações da #74 à #78",
     where: "`/mcp` no Claude Code, aberto na raiz do repositório",
     check: checkMcpLogin,
   },
