@@ -62,7 +62,7 @@ function decodedImage(page: Page, url: string) {
   }, url);
 }
 
-test("a Home tem o título Minimal Me, a frase da abertura como descrição e o endereço canônico @webkit", async ({
+test("the Home has the title Minimal Me, the opening tagline as description and the canonical address @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -75,7 +75,7 @@ test("a Home tem o título Minimal Me, a frase da abertura como descrição e o 
   expect(new URL(canonical ?? "").href).toBe(site);
 });
 
-test("a prévia de compartilhamento traz o título, a frase da abertura e a imagem da abertura", async ({
+test("the share preview carries the title, the opening tagline and the opening image", async ({
   page,
 }) => {
   await page.goto("/");
@@ -98,7 +98,7 @@ test("a prévia de compartilhamento traz o título, a frase da abertura e a imag
   expect(meta["twitter:image"]).toBe(meta["og:image"]);
 });
 
-test("a imagem de compartilhamento é a abertura recortada, com o céu no alto e as dunas no pé", async ({
+test("the share image is the cropped opening, with the sky on top and the dunes at the bottom", async ({
   page,
   baseURL,
 }) => {
@@ -145,7 +145,7 @@ function middleRowRuns(page: Page, url: string) {
   }, url);
 }
 
-test("a aba mostra o ícone da marca: o anel e o ponto sobre ground @webkit", async ({
+test("the tab shows the brand icon: the ring and the dot on ground @webkit", async ({
   page,
   baseURL,
 }) => {
@@ -166,7 +166,7 @@ test("a aba mostra o ícone da marca: o anel e o ponto sobre ground @webkit", as
   expect(decoded.runs).toEqual(["escuro", "claro", "escuro", "claro"]);
 });
 
-test("o robots.txt libera tudo e aponta para o sitemap.xml", async ({ request }) => {
+test("robots.txt allows everything and points to sitemap.xml", async ({ request }) => {
   const response = await request.get("/robots.txt");
   expect(response.status()).toBe(200);
   expect(response.headers()["content-type"]).toContain("text/plain");
@@ -187,7 +187,7 @@ test("o robots.txt libera tudo e aponta para o sitemap.xml", async ({ request })
   ]);
 });
 
-test("o sitemap.xml lista só a Home, que responde", async ({ request, baseURL }) => {
+test("sitemap.xml lists only the Home, which responds", async ({ request, baseURL }) => {
   const response = await request.get("/sitemap.xml");
   expect(response.status()).toBe(200);
   expect(response.headers()["content-type"]).toContain("xml");
@@ -215,10 +215,10 @@ function ownAddresses(page: Page): Promise<string[]> {
 }
 
 for (const { name, route } of [
-  { name: "da Home", route: "/" },
-  { name: "da 404", route: "/esta-rota-nao-existe" },
+  { name: "of the Home", route: "/" },
+  { name: "of the 404", route: "/esta-rota-nao-existe" },
 ]) {
-  test(`os links internos ${name} levam a algum lugar`, async ({ page, baseURL }) => {
+  test(`the internal links ${name} lead somewhere`, async ({ page, baseURL }) => {
     await page.goto(route);
     const here = new URL(page.url());
 

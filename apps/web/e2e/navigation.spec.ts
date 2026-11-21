@@ -20,7 +20,7 @@ async function scrollSettled(page: Page): Promise<void> {
     .toBe(true);
 }
 
-test("a página rola no documento, pelo teclado, e o voltar do navegador devolve a rolagem @webkit", async ({
+test("the page scrolls in the document, by keyboard, and the browser's back button restores the scroll @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -41,7 +41,7 @@ test("a página rola no documento, pelo teclado, e o voltar do navegador devolve
   await expect.poll(scrollY(page)).toBe(bottom);
 });
 
-test("pela tabulação, voltar ao início e a marca recebem foco visível e levam ao topo", async ({
+test("by tabbing, the back-to-top link and the mark get a visible focus and lead to the top", async ({
   page,
 }) => {
   await page.goto("/");
@@ -73,7 +73,7 @@ test("pela tabulação, voltar ao início e a marca recebem foco visível e leva
   await expect.poll(scrollY(page)).toBe(0);
 });
 
-test("a rolagem até o topo é suave só quando há movimento, mesmo se a preferência mudar", async ({
+test("scrolling to the top is smooth only with motion, even if the preference changes", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });

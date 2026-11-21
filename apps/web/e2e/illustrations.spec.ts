@@ -85,7 +85,7 @@ async function servedIllustrations(page: Page, baseURL: string | undefined, scop
   return found;
 }
 
-test("as camadas da abertura vêm do sistema de design, em larguras responsivas com hash no nome", async ({
+test("the opening layers come from the design system, in responsive widths with a hashed name", async ({
   page,
   baseURL,
 }) => {
@@ -103,7 +103,7 @@ test("as camadas da abertura vêm do sistema de design, em larguras responsivas 
   ]);
 });
 
-test("a 404 mostra só o céu da abertura, sem as dunas e sem a figura", async ({
+test("the 404 shows only the opening sky, without the dunes and the figure", async ({
   page,
   baseURL,
 }) => {
@@ -114,7 +114,7 @@ test("a 404 mostra só o céu da abertura, sem as dunas e sem a figura", async (
   ]);
 });
 
-test("as ilustrações dos spaces vêm do sistema de design, com o texto alternativo de illustrations.json e carga preguiçosa", async ({
+test("the space illustrations come from the design system, with the alt text from illustrations.json and lazy loading", async ({
   page,
   baseURL,
 }) => {

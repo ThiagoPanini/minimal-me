@@ -34,7 +34,7 @@ function spaceTexts(page: Page): Locator[] {
   });
 }
 
-test("sem JavaScript, o texto e as ilustrações aparecem @webkit", async ({ page }) => {
+test("without JavaScript, the text and the illustrations show up @webkit", async ({ page }) => {
   await page.goto("/");
 
   const texts = [
@@ -67,7 +67,7 @@ test("sem JavaScript, o texto e as ilustrações aparecem @webkit", async ({ pag
   }
 });
 
-test("sem JavaScript, o Acessar fica na própria fresta @webkit", async ({ page }) => {
+test("without JavaScript, the Acessar link stays in its own slit @webkit", async ({ page }) => {
   await page.goto("/");
   const slit = page.getByRole("main").getByRole("listitem").first();
 

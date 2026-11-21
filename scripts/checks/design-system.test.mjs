@@ -8,15 +8,15 @@ import { assertNone } from "./assert-none.mjs";
 import { previewVariableProblems, tokensFile, tokensProblems } from "./design-system.mjs";
 import { designSystemDir, previewFiles, root } from "./repository.mjs";
 
-describe("o sistema de design do repositório", () => {
+describe("the repository design system", () => {
   const tokensText = readFileSync(path.join(root, tokensFile), "utf8");
 
-  test("o tokens.json é válido, com nomes em minúsculas e sem repetição", () => {
+  test("tokens.json is valid, with lowercase names and no repetition", () => {
     const fontExists = (file) => existsSync(path.join(designSystemDir, file));
     assertNone(tokensProblems(tokensText, fontExists), "Problemas no tokens.json:");
   });
 
-  test("toda var(--x) das prévias é token, família ou propriedade da própria prévia", () => {
+  test("every var(--x) in the previews is a token, a family or a property of the preview itself", () => {
     const previews = previewFiles();
     assert.ok(previews.length > 0, "Nenhuma prévia em docs/design/system/components/.");
     let tokens;
@@ -76,19 +76,19 @@ function tokensWith(change) {
   return JSON.stringify(tokens);
 }
 
-describe("o tokens.json", () => {
-  test("válido, não tem problema", () => {
+describe("tokens.json", () => {
+  test("valid, has no problem", () => {
     assert.deepEqual(tokensProblems(JSON.stringify(validTokens), fontExists), []);
   });
 
-  test("acusa o JSON que não abre", () => {
+  test("flags JSON that does not parse", () => {
     const problems = tokensProblems('{ "color": { "tokens": [ }', fontExists);
 
     assert.equal(problems.length, 1);
     assert.match(problems[0], /^docs\/design\/system\/tokens\.json: não é JSON válido \(.+\)$/);
   });
 
-  test("acusa o que falta na forma do arquivo e a fonte que não existe", () => {
+  test("flags what is missing in the file shape and a font that does not exist", () => {
     const text = tokensWith((tokens) => {
       delete tokens.color.tokens[1].value;
       tokens.type.fonts[0].file = "fonts/Sumiu.woff2";
@@ -106,7 +106,7 @@ describe("o tokens.json", () => {
     ]);
   });
 
-  test("acusa cada nome fora das minúsculas, de token, de estilo de texto e de família", () => {
+  test("flags each name outside lowercase, of a token, a text style and a family", () => {
     const text = tokensWith((tokens) => {
       tokens.color.tokens[0].name = "Ground";
       tokens.easing.tokens[0].name = "easeOut";
@@ -123,7 +123,7 @@ describe("o tokens.json", () => {
     ]);
   });
 
-  test("acusa a variável CSS que sai de dois nomes e o estilo de texto repetido", () => {
+  test("flags a CSS variable coming from two names and a repeated text style", () => {
     const text = tokensWith((tokens) => {
       tokens.spacing.tokens.push({ name: "ground", value: "8px", usage: "Repete a cor." });
       tokens.radius.tokens.push({ name: "font-sans", value: "0", usage: "Repete a família." });
@@ -142,10 +142,10 @@ describe("o tokens.json", () => {
   });
 });
 
-describe("as variáveis CSS das prévias", () => {
+describe("the CSS variables of the previews", () => {
   const file = "docs/design/system/components/Exemplo/preview.html";
 
-  test("token, família de type.families e propriedade declarada na prévia passam", () => {
+  test("a token, a type.families family and a property declared in the preview pass", () => {
     const html = `<!-- @dsCard height=100 -->
 <style>
   body{background:var(--ground,#161616);font:300 12px/1.6 var(--font-mono,monospace)}
@@ -159,7 +159,7 @@ describe("as variáveis CSS das prévias", () => {
     assert.deepEqual(previewVariableProblems(file, html, validTokens), []);
   });
 
-  test("acusa a variável que não é token, família nem propriedade da prévia, uma vez cada", () => {
+  test("flags a variable that is not a token, a family or a preview property, once each", () => {
     const html = `<style>
   body{background:var(--chao,#161616);color:var(--light)}
   .a{border-color:var(--chao)}
@@ -175,7 +175,7 @@ describe("as variáveis CSS das prévias", () => {
     ]);
   });
 
-  test("acusa a declaração local com nome de token ou de família", () => {
+  test("flags a local declaration with the name of a token or a family", () => {
     const html = `<style>
   .in{--ground:#000;--font-sans:"Jost";--g:24px}
 </style>
@@ -188,7 +188,7 @@ describe("as variáveis CSS das prévias", () => {
     ]);
   });
 
-  test("comentário não conta, de HTML nem de CSS", () => {
+  test("comments do not count, neither HTML nor CSS", () => {
     const html = `<!-- antes era var(--chao); --ground:#000 -->
 <style>
   /* var(--nevoa) saiu; --mist:#fff */

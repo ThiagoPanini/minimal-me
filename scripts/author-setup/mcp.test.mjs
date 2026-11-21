@@ -3,8 +3,8 @@ import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import { parseMcpStatus, remoteServersOf } from "./mcp.mjs";
 
-describe("MCPs remotos", () => {
-  test("os remotos são os servidores http do .mcp.json", () => {
+describe("remote MCPs", () => {
+  test("the remote ones are the http servers of .mcp.json", () => {
     const config = JSON.stringify({
       mcpServers: {
         hostinger: { type: "http", url: "https://mcp.hostinger.com" },
@@ -15,7 +15,7 @@ describe("MCPs remotos", () => {
     assert.deepEqual(remoteServersOf(config), ["hostinger", "cloudflare"]);
   });
 
-  test("lê conectado, login pendente e falha na saída do claude", () => {
+  test("reads connected, pending login and failure from the claude output", () => {
     const output = (status) =>
       `cloudflare:\n  Scope: Project config (shared via .mcp.json)\n  Status: ${status}\n  Type: http\n`;
     assert.equal(parseMcpStatus(output("✔ Connected")), "connected");

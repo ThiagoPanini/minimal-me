@@ -96,14 +96,14 @@ async function smokeThrough(fault: (answer: Answer) => Answer): Promise<SmokeRun
   }
 }
 
-test("o smoke passa contra a imagem da Home", async () => {
+test("the smoke passes against the Home image", async () => {
   const run = await runSmoke(baseURL(), expectedCommit());
 
   expect(run.stderr).toBe("");
   expect(run.code).toBe(0);
 });
 
-test("o smoke falha quando o version.json não mostra o commit esperado", async () => {
+test("the smoke fails when version.json does not show the expected commit", async () => {
   const other = "0".repeat(40);
 
   const run = await runSmoke(baseURL(), other, "--timeout", "2", "--interval", "0.5");
@@ -114,7 +114,7 @@ test("o smoke falha quando o version.json não mostra o commit esperado", async 
   ]);
 });
 
-test("o smoke falha quando o cabeçalho Server diz a versão", async () => {
+test("the smoke fails when the Server header tells the version", async () => {
   const run = await smokeThrough((answer) => ({
     ...answer,
     headers: { ...answer.headers, server: "nginx/1.31.9" },
@@ -124,7 +124,7 @@ test("o smoke falha quando o cabeçalho Server diz a versão", async () => {
   expect(failures(run)).toEqual(['falha: O cabeçalho Server diz a versão: "nginx/1.31.9".']);
 });
 
-test("o smoke falha quando o que tem hash no nome vem sem cache longo", async () => {
+test("the smoke fails when what has a hash in its name comes without long caching", async () => {
   const run = await smokeThrough((answer) =>
     answer.route.startsWith("/_next/static/")
       ? { ...answer, headers: { ...answer.headers, "cache-control": "no-cache" } }
@@ -139,7 +139,7 @@ test("o smoke falha quando o que tem hash no nome vem sem cache longo", async ()
   ]);
 });
 
-test("o smoke falha quando uma rota inexistente não responde 404", async () => {
+test("the smoke fails when a missing route does not answer 404", async () => {
   // Como um servidor que devolve a página de erro com 200.
   const run = await smokeThrough((answer) =>
     answer.status === 404 ? { ...answer, status: 200 } : answer,
@@ -151,7 +151,7 @@ test("o smoke falha quando uma rota inexistente não responde 404", async () => 
   ]);
 });
 
-test("o smoke falha quando a 404 não é o 404.html do export", async () => {
+test("the smoke fails when the 404 is not the 404.html of the export", async () => {
   // Como o proxy do Coolify quando nenhuma aplicação atende o domínio.
   const run = await smokeThrough((answer) =>
     answer.status === 404

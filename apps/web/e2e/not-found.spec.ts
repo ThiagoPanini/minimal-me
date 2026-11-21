@@ -26,7 +26,7 @@ async function openNotFound(page: Page): Promise<void> {
   expect(response?.status()).toBe(404);
 }
 
-test("qualquer rota que não existe responde 404 com a página não encontrada @webkit", async ({
+test("any route that does not exist answers 404 with the not-found page @webkit", async ({
   page,
 }) => {
   for (const route of missingRoutes) {
@@ -40,7 +40,7 @@ test("qualquer rota que não existe responde 404 com a página não encontrada @
   }
 });
 
-test("a 404 mostra a marca, o sobretítulo, a frase, o caminho de volta e o rodapé só com o ano @webkit", async ({
+test("the 404 shows the mark, the kicker, the tagline, the way back and the footer with only the year @webkit", async ({
   page,
 }) => {
   await openNotFound(page);
@@ -68,7 +68,7 @@ test("a 404 mostra a marca, o sobretítulo, a frase, o caminho de volta e o roda
   await expect(footer.getByRole("link")).toHaveCount(0);
 });
 
-test("a 404 cabe numa tela, do céu ao rodapé", async ({ page }) => {
+test("the 404 fits in one screen, from the sky to the footer", async ({ page }) => {
   await openNotFound(page);
 
   const { scrollHeight, innerHeight } = await page.evaluate(() => ({
@@ -79,7 +79,7 @@ test("a 404 cabe numa tela, do céu ao rodapé", async ({ page }) => {
   await expect(page.getByRole("contentinfo").getByText("© 2026")).toBeInViewport();
 });
 
-test("o texto da 404 tem os estilos kicker, tagline e link, sobre ground", async ({ page }) => {
+test("the 404 text uses the kicker, tagline and link styles, on ground", async ({ page }) => {
   await openNotFound(page);
   const content = page.getByRole("main");
 
@@ -114,7 +114,7 @@ test("o texto da 404 tem os estilos kicker, tagline e link, sobre ground", async
   expect(await firstFamily(link)).toBe("ibmPlexMono");
 });
 
-test("pela tabulação, a marca e o voltar ao início recebem foco visível e levam à Home", async ({
+test("by tabbing, the mark and the back-home link get a visible focus and lead to the Home", async ({
   page,
 }) => {
   await openNotFound(page);
@@ -141,7 +141,7 @@ test("pela tabulação, a marca e o voltar ao início recebem foco visível e le
   await expect(page.getByRole("heading", { level: 1, name: "Minimal Me" })).toBeVisible();
 });
 
-test("a marca da 404 leva à Home @webkit", async ({ page }) => {
+test("the 404 mark leads to the Home @webkit", async ({ page }) => {
   await openNotFound(page);
 
   await page.getByRole("banner").getByRole("link", { name: "Minimal Me, início" }).click();

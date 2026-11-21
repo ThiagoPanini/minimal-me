@@ -17,7 +17,7 @@ const notices = [
   { name: "Write & Learn", message: "Em planejamento · Write & Learn ainda não está disponível." },
 ];
 
-test("o Acessar de cada space mostra o aviso com o Status e o nome, anunciado por role=status @webkit", async ({
+test("the Acessar link of each space shows the toast with the Status and the name, announced by role=status @webkit", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -37,7 +37,7 @@ test("o Acessar de cada space mostra o aviso com o Status e o nome, anunciado po
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
 });
 
-test("o aviso fica 2,6s à vista e sai da página quando some, e acionar de novo reinicia o tempo", async ({
+test("the toast stays 2.6s in view and leaves the page when it fades out, and triggering it again restarts the time", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -137,7 +137,7 @@ async function viewTransitionDone(page: Page): Promise<void> {
     .toBe(0);
 }
 
-test("o aviso aparece e some por opacidade em 0,5s, numa transição de vista só dele", async ({
+test("the toast appears and fades out by opacity in 0.5s, in a view transition of its own", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -165,7 +165,7 @@ test("o aviso aparece e some por opacidade em 0,5s, numa transição de vista s�
   expect(await renderedOpacity(toast)).toBe(0);
 });
 
-test("o aviso fica a 20px do pé da tela, centrado e nunca mais largo que a tela menos 32px @webkit", async ({
+test("the toast sits 20px from the bottom of the screen, centered and never wider than the screen minus 32px @webkit", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });

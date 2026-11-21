@@ -32,7 +32,7 @@ async function layoutAt(page: Page, width: number) {
   };
 }
 
-test("a 900px exatos a Home inteira empilha, e a 901px nada empilha", async ({
+test("at exactly 900px the whole Home stacks, and at 901px nothing stacks", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-1440", "mede larguras da tela larga");
@@ -57,7 +57,7 @@ test("a 900px exatos a Home inteira empilha, e a 901px nada empilha", async ({
   expect(wide.firstSlitToSecond).toBeCloseTo(1, 2);
 });
 
-test("a 760px exatos as camadas da abertura já usam a posição estreita, e a 761px a larga", async ({
+test("at exactly 760px the opening layers already use the narrow position, and at 761px the wide one", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-1440", "mede larguras da tela larga");

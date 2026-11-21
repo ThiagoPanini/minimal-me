@@ -57,8 +57,8 @@ function fakePorts({
   return { ports, registry, deployed, smoked, verified, lines };
 }
 
-describe("a entrega da `main`", () => {
-  test("confere o atestado, aponta production para o digest, chama o /deploy e roda o smoke", async () => {
+describe("the delivery from `main`", () => {
+  test("checks the attestation, points production to the digest, calls /deploy and runs the smoke", async () => {
     const fake = fakePorts();
 
     await deliver({ commit, digest }, fake.ports);
@@ -69,7 +69,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.smoked, [commit]);
   });
 
-  test("com o atestado que não confere, nada muda", async () => {
+  test("with an attestation that does not check out, nothing changes", async () => {
     const fake = fakePorts({ attestationFailure: "nenhum atestado do ci.yml para este digest" });
 
     await assert.rejects(
@@ -80,7 +80,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.deployed, []);
   });
 
-  test("sem o token ou a aplicação do Coolify, falha antes de mover production", async () => {
+  test("without the Coolify token or application, fails before moving production", async () => {
     const fake = fakePorts({ missingConfig: "Falta o segredo COOLIFY_TOKEN." });
 
     await assert.rejects(deliver({ commit, digest }, fake.ports), /Falta o segredo COOLIFY_TOKEN/);
@@ -89,7 +89,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.deployed, []);
   });
 
-  test("se o smoke falha com a versão nova, devolve production ao digest anterior, chama o /deploy de novo e falha", async () => {
+  test("if the smoke fails with the new version, points production back to the previous digest, calls /deploy again and fails", async () => {
     const fake = fakePorts({ smokeFailures: ['O cabeçalho Server diz a versão: "nginx/1.31.9".'] });
 
     await assert.rejects(deliver({ commit, digest }, fake.ports), (error) => {
@@ -102,7 +102,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.deployed, [digest, previous]);
   });
 
-  test("se o /deploy falha, também devolve production ao digest anterior", async () => {
+  test("if /deploy fails, also points production back to the previous digest", async () => {
     const fake = fakePorts({ deployFailures: ["O Coolify recusou o /deploy com 500."] });
 
     await assert.rejects(
@@ -114,7 +114,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.smoked, []);
   });
 
-  test("na primeira entrega, sem digest anterior, não há para onde voltar", async () => {
+  test("on the first delivery, without a previous digest, there is nowhere to go back to", async () => {
     const fake = fakePorts({
       tags: { [`sha-${commit}`]: digest },
       smokeFailures: ["A Home respondeu 502, não 200 com HTML."],
@@ -127,7 +127,7 @@ describe("a entrega da `main`", () => {
     assert.deepEqual(fake.deployed, [digest]);
   });
 
-  test("se o rollback também falha, a mensagem diz as duas falhas", async () => {
+  test("if the rollback also fails, the message tells both failures", async () => {
     const fake = fakePorts({
       deployFailures: [
         "O Coolify recusou o /deploy com 500.",
@@ -142,8 +142,8 @@ describe("a entrega da `main`", () => {
   });
 });
 
-describe("o rollback manual", () => {
-  test("volta ao digest publicado para o commit pelo mesmo caminho da entrega", async () => {
+describe("the manual rollback", () => {
+  test("goes back to the digest published for the commit along the same path as the delivery", async () => {
     const fake = fakePorts({ tags: { production: digest, [`sha-${previousCommit}`]: previous } });
 
     await deliver({ commit: previousCommit }, fake.ports);
@@ -154,7 +154,7 @@ describe("o rollback manual", () => {
     assert.deepEqual(fake.smoked, [previousCommit]);
   });
 
-  test("com um commit que a `main` não publicou, nada muda", async () => {
+  test("with a commit that `main` did not publish, nothing changes", async () => {
     const unknown = "3".repeat(40);
     const fake = fakePorts();
 
@@ -167,7 +167,7 @@ describe("o rollback manual", () => {
     assert.deepEqual(fake.deployed, []);
   });
 
-  test("se o smoke falha, volta ao digest que estava no ar antes do rollback", async () => {
+  test("if the smoke fails, goes back to the digest that was live before the rollback", async () => {
     const fake = fakePorts({
       tags: { production: digest, [`sha-${previousCommit}`]: previous },
       smokeFailures: ["A Home respondeu 500, não 200 com HTML."],

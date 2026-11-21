@@ -10,8 +10,8 @@ import { markdownFiles, root } from "./repository.mjs";
 
 const repositoryMarkdown = markdownFiles();
 
-describe("os Markdown do repositório", () => {
-  test("a prosa não tem travessão, fora o contador da interface", () => {
+describe("the repository Markdown files", () => {
+  test("the prose has no em dash, except the interface counter", () => {
     assert.ok(repositoryMarkdown.length > 0, "Nenhum Markdown listado pelo git.");
     assertNone(
       repositoryMarkdown.flatMap(({ file, text }) => emDashProblems(file, text)),
@@ -19,7 +19,7 @@ describe("os Markdown do repositório", () => {
     );
   });
 
-  test("todo caminho docs/ citado existe, fora a Linhagem de docs/design/README.md", () => {
+  test("every cited docs/ path exists, except in the Linhagem section of docs/design/README.md", () => {
     const exists = (cited) => existsSync(path.join(root, cited));
     assertNone(
       repositoryMarkdown.flatMap(({ file, text }) => missingDocPaths(file, text, exists)),
@@ -28,8 +28,8 @@ describe("os Markdown do repositório", () => {
   });
 });
 
-describe("o travessão na prosa", () => {
-  test("acusa o arquivo, a linha e o trecho de cada travessão na prosa", () => {
+describe("the em dash in prose", () => {
+  test("flags the file, the line and the excerpt of each em dash in prose", () => {
     const text = ["# Título", "", "Uma frase — com um aparte.", "Outra linha."].join("\n");
 
     assert.deepEqual(emDashProblems("docs/exemplo.md", text), [
@@ -37,7 +37,7 @@ describe("o travessão na prosa", () => {
     ]);
   });
 
-  test("o contador da interface, como 01 — 04, passa; um travessão na mesma linha, não", () => {
+  test("the interface counter, like 01 — 04, passes; an em dash on the same line does not", () => {
     const counter = 'Mostre a contagem como "01 — 04", em `number`.';
     const both = "A contagem 01 — 04 fica à direita — e o rótulo à esquerda.";
 
@@ -47,7 +47,7 @@ describe("o travessão na prosa", () => {
     ]);
   });
 
-  test("código não é prosa: nem o trecho entre crases, nem o bloco cercado", () => {
+  test("code is not prose: neither the backtick excerpt nor the fenced block", () => {
     const text = [
       "Rode `echo a — b` e ``printf '`—`'`` no terminal.",
       "",
@@ -69,7 +69,7 @@ describe("o travessão na prosa", () => {
     ]);
   });
 
-  test("uma crase sem par não abre código: o travessão depois dela é prosa", () => {
+  test("an unpaired backtick does not open code: the em dash after it is prose", () => {
     const text = ["Uma crase solta ` e um travessão — na prosa.", "", "Outro `parágrafo`."].join(
       "\n",
     );
@@ -80,11 +80,11 @@ describe("o travessão na prosa", () => {
   });
 });
 
-describe("os caminhos docs/ citados", () => {
+describe("the cited docs/ paths", () => {
   const present = new Set(["docs/brief.md", "docs/adr/", "docs/design/README.md"]);
   const exists = (cited) => present.has(cited);
 
-  test("acusa o arquivo, a linha e o caminho que não existe", () => {
+  test("flags the file, the line and the path that does not exist", () => {
     const text = [
       "O brief está em `docs/brief.md`; as decisões, em `docs/adr/`.",
       "",
@@ -97,7 +97,7 @@ describe("os caminhos docs/ citados", () => {
     ]);
   });
 
-  test("a pontuação depois do caminho, a âncora e a linha citada não fazem parte dele", () => {
+  test("the punctuation after the path, the anchor and the cited line are not part of it", () => {
     const text = [
       "Leia docs/brief.md. Depois, docs/adr/: as decisões.",
       "A seção em docs/design/README.md#linhagem e a linha docs/brief.md:12.",
@@ -106,7 +106,7 @@ describe("os caminhos docs/ citados", () => {
     assert.deepEqual(missingDocPaths("a.md", text, exists), []);
   });
 
-  test("um endereço web, um caminho num commit e um caminho de outra raiz não são citações", () => {
+  test("a web address, a path in a commit and a path from another root are not citations", () => {
     const text = [
       "A [documentação do Next](https://nextjs.org/docs/app/guides/static-exports).",
       "`git show 1551e5b:docs/design/prototype/mvp-2026-11-13/index.html`",
@@ -116,7 +116,7 @@ describe("os caminhos docs/ citados", () => {
     assert.deepEqual(missingDocPaths("b.md", text, exists), []);
   });
 
-  test("a seção Linhagem de docs/design/README.md fica de fora, e só ela", () => {
+  test("the Linhagem section of docs/design/README.md is left out, and only it", () => {
     const text = [
       "# Design",
       "",

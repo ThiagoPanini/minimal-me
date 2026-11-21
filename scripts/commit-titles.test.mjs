@@ -60,8 +60,8 @@ const robotTitles = {
   ],
 };
 
-describe("os títulos de PR no commitlint", () => {
-  test("todo ecossistema do Dependabot usa o prefixo fixo build(deps)", () => {
+describe("PR titles in commitlint", () => {
+  test("every Dependabot ecosystem uses the fixed build(deps) prefix", () => {
     const config = parse(readFileSync(path.join(root, ".github/dependabot.yml"), "utf8"));
     const prefixes = Object.fromEntries(
       config.updates.map((update) => [update["package-ecosystem"], update["commit-message"]]),
@@ -76,12 +76,12 @@ describe("os títulos de PR no commitlint", () => {
   });
 
   for (const [ecosystem, titles] of Object.entries(robotTitles)) {
-    test(`os títulos do Dependabot para ${ecosystem} passam, mesmo acima de 100 caracteres`, async () => {
+    test(`the Dependabot titles for ${ecosystem} pass, even above 100 characters`, async () => {
       assert.deepEqual(await failuresOf(titles), []);
     });
   }
 
-  test("os títulos de gente seguem o Conventional Commits, com até 100 caracteres", async () => {
+  test("human titles follow Conventional Commits, with up to 100 characters", async () => {
     const accepted = [
       "feat(web): abertura da Home",
       "ci: merge automático e nova tentativa diária dos PRs de robô",

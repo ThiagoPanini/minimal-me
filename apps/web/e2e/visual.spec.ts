@@ -40,14 +40,14 @@ async function everythingLoaded(page: Page): Promise<void> {
   await page.evaluate(() => window.scrollTo(0, 0));
 }
 
-test("a Home inteira, em repouso", async ({ page }) => {
+test("the whole Home, at rest", async ({ page }) => {
   await page.goto("/");
   await everythingLoaded(page);
 
   await expect(page).toHaveScreenshot("home.png", { fullPage: true, ...tolerance });
 });
 
-test("a 404 inteira", async ({ page }) => {
+test("the whole 404", async ({ page }) => {
   const response = await page.goto("/esta-rota-nao-existe");
   expect(response?.status()).toBe(404);
   await everythingLoaded(page);
@@ -55,7 +55,7 @@ test("a 404 inteira", async ({ page }) => {
   await expect(page).toHaveScreenshot("not-found.png", { fullPage: true, ...tolerance });
 });
 
-test("a fileira com o foco de teclado em Music & Feeling", async ({ page }, testInfo) => {
+test("the row with keyboard focus on Music & Feeling", async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-1440", "um estado de foco, na tela larga");
   await page.goto("/");
   await everythingLoaded(page);

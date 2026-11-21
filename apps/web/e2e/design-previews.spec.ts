@@ -67,12 +67,12 @@ ${fragment}
 </html>`;
 }
 
-test("há prévias para renderizar", () => {
+test("there are previews to render", () => {
   expect(components.length).toBeGreaterThan(0);
 });
 
 for (const component of components) {
-  test(`a prévia de ${component} renderiza sem erro de console, com as imagens e as fontes`, async ({
+  test(`the ${component} preview renders without console errors, with its images and fonts`, async ({
     page,
   }) => {
     const unknownBlobs: string[] = [];

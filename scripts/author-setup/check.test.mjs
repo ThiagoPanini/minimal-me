@@ -96,15 +96,15 @@ function fakeContext({ responses = {}, state = {}, mcp = fakeMcp() } = {}) {
   };
 }
 
-describe("modo de conferência", () => {
-  test("com tudo feito, diz que nada falta", async () => {
+describe("check mode", () => {
+  test("with everything done, says nothing is missing", async () => {
     const { context } = fakeContext();
     const result = await runCheck(context);
     assert.equal(result.pendingCount, 0);
     assert.match(result.text, /Nada falta/);
   });
 
-  test("sem o token no environment, lista só o token", async () => {
+  test("without the token in the environment, lists only the token", async () => {
     const { context } = fakeContext({
       responses: {
         [`${repo}/environments/production/secrets?per_page=100`]: {
@@ -119,7 +119,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: o segredo `COOLIFY_TOKEN` no environment `production`/);
   });
 
-  test("sem o environment `production`, o token espera o agente", async () => {
+  test("without the `production` environment, the token waits for the agent", async () => {
     const { context, calls } = fakeContext({
       responses: { [`${repo}/environments/production`]: { status: 404, body: null } },
     });
@@ -129,7 +129,7 @@ describe("modo de conferência", () => {
     assert.ok(!calls.includes(`${repo}/environments/production/secrets?per_page=100`));
   });
 
-  test("sem o App criado pelo roteiro, lista o App e os dois segredos", async () => {
+  test("without the App created by the walkthrough, lists the App and both secrets", async () => {
     const { context } = fakeContext({
       state: { mergeApp: undefined },
       responses: {
@@ -149,7 +149,7 @@ describe("modo de conferência", () => {
     );
   });
 
-  test("com o App criado e não instalado, lista só a instalação", async () => {
+  test("with the App created and not installed, lists only the installation", async () => {
     const { context } = fakeContext({
       state: { mergeApp: { slug: "minimal-me-merge" } },
       responses: {
@@ -169,13 +169,13 @@ describe("modo de conferência", () => {
     assert.deepEqual(falta, ["   Falta: instalar o App só neste repositório."]);
   });
 
-  test("com o App instalado sem a conferência da instalação, pede a conferência", async () => {
+  test("with the App installed without the installation check, asks for the check", async () => {
     const { context } = fakeContext({ state: { mergeApp: { slug: "minimal-me-merge" } } });
     const result = await runCheck(context);
     assert.match(result.text, /Falta: conferir que a instalação é só deste repositório/);
   });
 
-  test("com o App sem a permissão de workflows, lista a permissão", async () => {
+  test("with the App lacking the workflows permission, lists the permission", async () => {
     const { context } = fakeContext({
       responses: {
         "/apps/minimal-me-merge": {
@@ -192,7 +192,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: a permissão `workflows: write` no App/);
   });
 
-  test("com o App apagado no GitHub, diz que ele não existe mais", async () => {
+  test("with the App deleted on GitHub, says it no longer exists", async () => {
     const { context } = fakeContext({
       responses: { "/apps/minimal-me-merge": { status: 404, body: null } },
     });
@@ -200,7 +200,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: o App `minimal-me-merge`, que não existe mais no GitHub/);
   });
 
-  test("antes da primeira publicação da `main`, o pacote espera o agente", async () => {
+  test("before the first publication from `main`, the package waits for the agent", async () => {
     const { context } = fakeContext({
       responses: { "/user/packages/container/minimal-me%2Fweb": { status: 404, body: null } },
     });
@@ -210,7 +210,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Espera: a primeira publicação da imagem na `main`/);
   });
 
-  test("com o pacote privado, lista a visibilidade", async () => {
+  test("with the package private, lists the visibility", async () => {
     const { context } = fakeContext({
       responses: {
         "/user/packages/container/minimal-me%2Fweb": {
@@ -224,7 +224,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: tornar público o pacote `minimal-me\/web`/);
   });
 
-  test("sem a permissão de ler pacotes no gh, diz como pedi-la", async () => {
+  test("without permission to read packages in gh, says how to ask for it", async () => {
     const { context } = fakeContext({
       responses: { "/user/packages/container/minimal-me%2Fweb": { status: 403, body: {} } },
     });
@@ -232,7 +232,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /gh auth refresh -s read:packages/);
   });
 
-  test("sem a confirmação dos alertas de malware, lista os alertas", async () => {
+  test("without the malware alerts confirmation, lists the alerts", async () => {
     const { context } = fakeContext({ state: { malwareAlerts: undefined } });
     const result = await runCheck(context);
     assert.equal(result.pendingCount, 1);
@@ -240,7 +240,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: ligar os alertas de malware do Dependabot e confirmar/);
   });
 
-  test("com os alertas do Dependabot desligados, pede-os antes dos de malware", async () => {
+  test("with the Dependabot alerts turned off, asks for them before the malware ones", async () => {
     const { context } = fakeContext({
       responses: { [`${repo}/vulnerability-alerts`]: { status: 404, body: null } },
     });
@@ -248,7 +248,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: ligar os alertas do Dependabot, que vêm antes/);
   });
 
-  test("sem a confirmação da atualização semanal do Coolify, lista a atualização", async () => {
+  test("without the confirmation of the weekly Coolify update, lists the update", async () => {
     const { context } = fakeContext({ state: { coolifyAutoUpdate: undefined } });
     const result = await runCheck(context);
     assert.equal(result.pendingCount, 1);
@@ -256,7 +256,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: ligar Automatic updates com Update frequency `17 4 \* \* 0`/);
   });
 
-  test("com a atualização confirmada em outra frequência, pede a semanal", async () => {
+  test("with the update confirmed at another frequency, asks for the weekly one", async () => {
     const { context } = fakeContext({
       state: { coolifyAutoUpdate: { confirmedAt: "2026-11-21T10:10:00.000Z", frequency: "daily" } },
     });
@@ -264,7 +264,7 @@ describe("modo de conferência", () => {
     assert.equal(result.pendingCount, 1);
   });
 
-  test("sem o Origin Certificate, lista o certificado e a carga no Traefik", async () => {
+  test("without the Origin Certificate, lists the certificate and its loading in Traefik", async () => {
     const { context } = fakeContext({ state: { originCertificate: undefined } });
     const result = await runCheck(context);
     assert.equal(result.pendingCount, 1);
@@ -273,7 +273,7 @@ describe("modo de conferência", () => {
     assert.match(result.text, /Falta: gravar o certificado na VPS e carregá-lo na configuração/);
   });
 
-  test("com o certificado conferido e não carregado, lista só a carga", async () => {
+  test("with the certificate checked and not loaded, lists only the loading", async () => {
     const { context } = fakeContext({
       state: {
         originCertificate: {
@@ -290,7 +290,7 @@ describe("modo de conferência", () => {
     ]);
   });
 
-  test("com um MCP remoto sem login, lista só o login dele", async () => {
+  test("with a remote MCP not logged in, lists only its login", async () => {
     const { context } = fakeContext({
       mcp: fakeMcp({ cloudflare: "connected", hostinger: "needs-auth" }),
     });
@@ -301,7 +301,7 @@ describe("modo de conferência", () => {
     assert.deepEqual(falta, ["   Falta: o login OAuth de `hostinger`."]);
   });
 
-  test("sem o comando claude para conferir, vale a confirmação do Autor", async () => {
+  test("without the claude command to check with, the Author's confirmation applies", async () => {
     const unavailable = fakeMcp({ cloudflare: "unavailable", hostinger: "unavailable" });
     const pending = await runCheck(fakeContext({ mcp: unavailable }).context);
     assert.match(pending.text, /Falta: fazer o login OAuth de `cloudflare` e `hostinger`/);
@@ -314,7 +314,7 @@ describe("modo de conferência", () => {
     assert.equal(confirmed.pendingCount, 0);
   });
 
-  test("do zero, lista os sete passos e os dois que esperam o agente", async () => {
+  test("from scratch, lists the seven steps and the two that wait for the agent", async () => {
     const { context } = fakeContext({
       state: {
         mergeApp: undefined,
@@ -348,7 +348,7 @@ describe("modo de conferência", () => {
     assert.equal(result.text.match(/Espera:/g).length, 2);
   });
 
-  test("não muda nada: só lê, sem gravar segredo, estado nem abrir o navegador", async () => {
+  test("changes nothing: only reads, without writing a secret or state, or opening the browser", async () => {
     const writes = [];
     const trap = (name) => () => writes.push(name);
     const { context } = fakeContext({ state: { mergeApp: undefined } });
@@ -362,8 +362,8 @@ describe("modo de conferência", () => {
   });
 });
 
-describe("o duplo cheque no roteiro", () => {
-  test("diz, para cada passo, por que fica com o Autor e o que o agente faz", () => {
+describe("the double check in the walkthrough", () => {
+  test("says, for each step, why it stays with the Author and what the agent does", () => {
     const lines = formatPlan().split("\n");
     const numbered = lines.filter((line) => /^\d\. /.test(line));
     assert.equal(numbered.length, 7);

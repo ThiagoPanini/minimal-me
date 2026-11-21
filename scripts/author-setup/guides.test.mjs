@@ -66,8 +66,8 @@ function fakeGuideContext({
 
 const printed = (output) => output.join("\n");
 
-describe("passos guiados", () => {
-  test("o token do Coolify vai só para o environment `production`, sem aparecer", async () => {
+describe("guided steps", () => {
+  test("the Coolify token goes only to the `production` environment, without showing up", async () => {
     const token = "coolify-token-de-teste-0123456789";
     const terminal = fakeTerminal({ hidden: [token] });
     const { context, secrets, output } = fakeGuideContext({ terminal });
@@ -77,13 +77,13 @@ describe("passos guiados", () => {
     assert.ok(!JSON.stringify(context.state).includes(token));
   });
 
-  test("sem token colado, nada é gravado", async () => {
+  test("without a pasted token, nothing is written", async () => {
     const { context, secrets } = fakeGuideContext();
     await guides["coolify-token"](context);
     assert.deepEqual(secrets, []);
   });
 
-  test("o App novo grava Client ID e chave como segredos do Dependabot, sem mostrá-los", async () => {
+  test("the new App writes the Client ID and the key as Dependabot secrets, without showing them", async () => {
     const conversion = {
       id: 4242,
       slug: "minimal-me-merge",
@@ -126,7 +126,7 @@ describe("passos guiados", () => {
     }
   });
 
-  test("uma instalação em todos os repositórios não passa na conferência", async () => {
+  test("an installation on all repositories does not pass the check", async () => {
     const { context, output } = fakeGuideContext({
       responses: {
         "/apps/minimal-me-merge": {
@@ -144,7 +144,7 @@ describe("passos guiados", () => {
     assert.match(printed(output), /Only select repositories/);
   });
 
-  test("o Origin Certificate colado é conferido e guardado sem chave", async () => {
+  test("the pasted Origin Certificate is checked and stored without a key", async () => {
     const certificate = fixture("origin-certificate.pem");
     const terminal = fakeTerminal({ blocks: [certificate], confirms: [true] });
     const { context, output } = fakeGuideContext({ terminal });
@@ -158,7 +158,7 @@ describe("passos guiados", () => {
     assert.ok(!printed(output).includes("PRIVATE KEY"));
   });
 
-  test("um certificado de outro emissor e outros nomes é recusado", async () => {
+  test("a certificate from another issuer and for other names is refused", async () => {
     const terminal = fakeTerminal({ blocks: [fixture("other-certificate.pem")] });
     const { context, output } = fakeGuideContext({ terminal });
     await guides["origin-certificate"](context);
@@ -168,7 +168,7 @@ describe("passos guiados", () => {
     assert.match(printed(output), /vale menos de 14 anos/);
   });
 
-  test("o pacote privado abre a página do pacote no GHCR", async () => {
+  test("the private package opens the package page on GHCR", async () => {
     const htmlUrl =
       "https://github.com/users/ThiagoPanini/packages/container/package/minimal-me%2Fweb";
     const { context, opened } = fakeGuideContext({
@@ -183,7 +183,7 @@ describe("passos guiados", () => {
     assert.deepEqual(opened, [htmlUrl]);
   });
 
-  test("os alertas de malware ficam confirmados só com o sim do Autor", async () => {
+  test("the malware alerts are confirmed only with the Author's yes", async () => {
     const no = fakeGuideContext({ terminal: fakeTerminal({ confirms: [false] }) });
     await guides["malware-alerts"](no.context);
     assert.equal(no.context.state.malwareAlerts, undefined);
@@ -192,7 +192,7 @@ describe("passos guiados", () => {
     assert.equal(yes.context.state.malwareAlerts.confirmedAt, "2026-11-21T12:00:00.000Z");
   });
 
-  test("a atualização do Coolify guarda a frequência semanal confirmada", async () => {
+  test("the Coolify update stores the confirmed weekly frequency", async () => {
     const { context } = fakeGuideContext({ terminal: fakeTerminal({ confirms: [true] }) });
     await guides["coolify-auto-update"](context);
     assert.equal(context.state.coolifyAutoUpdate.frequency, "17 4 * * 0");

@@ -11,7 +11,7 @@ const digest = `sha256:${"a".repeat(64)}`;
 const other = `sha256:${"b".repeat(64)}`;
 const commit = "1".repeat(40);
 
-describe("o Coolify", () => {
+describe("Coolify", () => {
   const token = "token-de-teste-0123456789";
   const applicationUuid = "app-uuid-1";
   const requests = [];
@@ -36,7 +36,7 @@ describe("o Coolify", () => {
 
   after(() => new Promise((resolve) => server.close(resolve)));
 
-  test("o /deploy vai por POST com o token e o UUID e pede sempre uma entrega nova", async () => {
+  test("/deploy goes by POST with the token and the UUID and always asks for a new delivery", async () => {
     requests.length = 0;
     reply = () => ({
       status: 200,
@@ -64,7 +64,7 @@ describe("o Coolify", () => {
     assert.match(message, /Application web deployment queued\./);
   });
 
-  test("um 200 sem entrega enfileirada é falha, com a mensagem do Coolify", async () => {
+  test("a 200 without a queued delivery is a failure, with the Coolify message", async () => {
     reply = () => ({
       status: 200,
       body: {
@@ -80,7 +80,7 @@ describe("o Coolify", () => {
     );
   });
 
-  test("uma recusa traz o status e a mensagem do Coolify, nunca o token", async () => {
+  test("a refusal carries the status and the Coolify message, never the token", async () => {
     reply = () => ({ status: 404, body: { message: "No resources found." } });
 
     await assert.rejects(createCoolify({ url, token, applicationUuid }).deploy(), (error) => {
@@ -90,7 +90,7 @@ describe("o Coolify", () => {
     });
   });
 
-  test("sem o token e sem o UUID da aplicação, diz o que falta no environment production", () => {
+  test("without the token and the application UUID, says what is missing in the production environment", () => {
     assert.throws(
       () => createCoolify({ url, token: "", applicationUuid: undefined }).assertConfigured(),
       /Falta no environment production: o segredo COOLIFY_TOKEN e a variável COOLIFY_APP_UUID\./,
@@ -123,15 +123,15 @@ function fakeDocker(tags) {
   };
 }
 
-describe("o registro", () => {
-  test("lê o digest de uma tag e não acha a que não existe", async () => {
+describe("the registry", () => {
+  test("reads the digest of a tag and does not find a tag that does not exist", async () => {
     const registry = createRegistry({ image, run: fakeDocker({ production: digest }) });
 
     assert.equal(await registry.digestOf("production"), digest);
     assert.equal(await registry.digestOf("sha-nao-publicado"), undefined);
   });
 
-  test("um erro que não é tag ausente vira falha", async () => {
+  test("an error other than a missing tag becomes a failure", async () => {
     const run = async () => ({ status: 1, stdout: "", stderr: "ERROR: denied: denied\n" });
 
     await assert.rejects(
@@ -140,7 +140,7 @@ describe("o registro", () => {
     );
   });
 
-  test("aponta a tag para o digest, o mesmo que o registro devolve depois", async () => {
+  test("points the tag to the digest, the same one the registry returns afterwards", async () => {
     const tags = { production: other };
     const registry = createRegistry({ image, run: fakeDocker(tags) });
 
@@ -149,7 +149,7 @@ describe("o registro", () => {
     assert.equal(tags.production, digest);
   });
 
-  test("falha se a tag não aponta para o digest depois de movida", async () => {
+  test("fails if the tag does not point to the digest after being moved", async () => {
     const tags = {};
     const docker = fakeDocker(tags);
     // Um registro que guarda outro digest no lugar do pedido.
@@ -166,10 +166,10 @@ describe("o registro", () => {
   });
 });
 
-describe("o atestado", () => {
+describe("the attestation", () => {
   const repository = "ThiagoPanini/minimal-me";
 
-  test("exige o ci.yml da main, no commit da entrega, num runner do GitHub", async () => {
+  test("requires the ci.yml of main, at the delivery commit, on a GitHub runner", async () => {
     const calls = [];
     const run = async (command, args) => {
       calls.push([command, ...args]);
@@ -197,7 +197,7 @@ describe("o atestado", () => {
     ]);
   });
 
-  test("uma verificação que falha traz a saída do gh", async () => {
+  test("a failing verification carries the gh output", async () => {
     const run = async () => ({
       status: 1,
       stdout: "",

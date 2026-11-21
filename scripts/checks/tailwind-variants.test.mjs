@@ -6,8 +6,8 @@ import { assertNone } from "./assert-none.mjs";
 import { webSourceFiles } from "./repository.mjs";
 import { tailwindVariantProblems } from "./tailwind-variants.mjs";
 
-describe("o código da web", () => {
-  test("não usa quebra arbitrária de largura da tela nem motion-reduce:transition-none", () => {
+describe("the web code", () => {
+  test("uses neither an arbitrary screen-width breakpoint nor motion-reduce:transition-none", () => {
     const files = webSourceFiles();
     assert.ok(files.length > 0, "Nenhum arquivo .ts, .tsx ou .css de apps/web listado pelo git.");
     assertNone(
@@ -17,8 +17,8 @@ describe("o código da web", () => {
   });
 });
 
-describe("as quebras arbitrárias de largura da tela", () => {
-  test("acusa max-[…]: e min-[…]: com o arquivo, a linha e o que usar", () => {
+describe("the arbitrary screen-width breakpoints", () => {
+  test("flags max-[…]: and min-[…]: with the file, the line and what to use", () => {
     const text = [
       "export function Row() {",
       '  return <div className="flex max-[900px]:flex-col min-[901px]:gap-4" />;',
@@ -35,7 +35,7 @@ describe("as quebras arbitrárias de largura da tela", () => {
     }
   });
 
-  test("acusa a quebra depois de outra variante, negada ou em outra unidade", () => {
+  test("flags the breakpoint after another variant, negated or in another unit", () => {
     const text = "hover:max-[760px]:hidden not-min-[56rem]:block";
 
     assert.deepEqual(
@@ -44,7 +44,7 @@ describe("as quebras arbitrárias de largura da tela", () => {
     );
   });
 
-  test("as consultas de contêiner e os tamanhos máximo e mínimo passam", () => {
+  test("container queries and the max and min sizes pass", () => {
     const text = [
       '<p className="@max-[1240px]:flex-col @min-[600px]:gap-2 @container" />',
       '<div className="max-w-[1440px] min-h-[calc(100%_-_8px)] stacked:max-w-none" />',
@@ -55,8 +55,8 @@ describe("as quebras arbitrárias de largura da tela", () => {
   });
 });
 
-describe("o motion-reduce:transition-none", () => {
-  test("acusa com o arquivo, a linha e o que usar, também depois de outra variante", () => {
+describe("motion-reduce:transition-none", () => {
+  test("flags it with the file, the line and what to use, also after another variant", () => {
     const text = [
       '<li className="transition-[flex] motion-reduce:transition-none" />',
       '<p className="stacked:motion-reduce:transition-none" />',
@@ -73,7 +73,7 @@ describe("o motion-reduce:transition-none", () => {
     }
   });
 
-  test("a transição em motion-safe: e o motion-reduce: de outra propriedade passam", () => {
+  test("a transition in motion-safe: and motion-reduce: on another property pass", () => {
     const text =
       '<div className="motion-safe:[transition:scale_.9s_var(--ease)] motion-reduce:translate-y-0" />';
 

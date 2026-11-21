@@ -41,7 +41,9 @@ function renderedFontUrl(text: Locator): Promise<string | null> {
   });
 }
 
-test("a Home abre em pt-BR com o título Minimal Me e o Masthead @webkit", async ({ page }) => {
+test("the Home opens in pt-BR with the title Minimal Me and the Masthead @webkit", async ({
+  page,
+}) => {
   await page.goto("/");
 
   await expect(page).toHaveTitle("Minimal Me");
@@ -53,7 +55,7 @@ test("a Home abre em pt-BR com o título Minimal Me e o Masthead @webkit", async
   ).toBeVisible();
 });
 
-test("a abertura mostra a ilustração das dunas, a marca que leva ao início e o nome @webkit", async ({
+test("the opening shows the dunes illustration, the mark that leads to the top and the name @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -68,7 +70,7 @@ test("a abertura mostra a ilustração das dunas, a marca que leva ao início e 
   await expect(opening.getByRole("heading", { level: 1, name: "Minimal Me" })).toBeVisible();
 });
 
-test("o rodapé mostra a marca, o nome, o ano e o link de volta ao início @webkit", async ({
+test("the footer shows the mark, the name, the year and the link back to the top @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -79,7 +81,7 @@ test("o rodapé mostra a marca, o nome, o ano e o link de volta ao início @webk
   await expect(footer.getByRole("link", { name: "voltar ao início ↑" })).toBeVisible();
 });
 
-test("o Masthead fica sobre ground, com as cores do sistema de design", async ({ page }) => {
+test("the Masthead sits on ground, with the design system colors", async ({ page }) => {
   await page.goto("/");
 
   const name = page.getByRole("heading", { level: 1, name: "Minimal Me" });
@@ -96,7 +98,7 @@ test("o Masthead fica sobre ground, com as cores do sistema de design", async ({
   ).toHaveCSS("color", "rgb(201, 201, 196)");
 });
 
-test("o Masthead é desenhado com as fontes do sistema, servidas pela própria Home", async ({
+test("the Masthead is drawn with the system fonts, served by the Home itself", async ({
   page,
   baseURL,
 }) => {

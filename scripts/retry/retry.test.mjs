@@ -59,8 +59,8 @@ function fakeGitHub({ pullRequests = [], runs = [], head = mainHead } = {}) {
   return { github, rerun, log: (line) => lines.push(line), lines };
 }
 
-describe("a nova tentativa diária", () => {
-  test("roda de novo a rodada que falhou num PR de robô", async () => {
+describe("the daily retry", () => {
+  test("reruns the failed run of a robot PR", async () => {
     const failed = run();
     const fake = fakeGitHub({ pullRequests: [robotPullRequest()], runs: [failed] });
 
@@ -69,7 +69,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, [failed.id]);
   });
 
-  test("deixa o PR de gente para quem o abriu", async () => {
+  test("leaves a human PR to whoever opened it", async () => {
     const humanHead = "c".repeat(40);
     const fake = fakeGitHub({
       pullRequests: [
@@ -88,7 +88,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, []);
   });
 
-  test("roda de novo o que falhou, estourou o tempo ou foi cancelado, e nada mais", async () => {
+  test("reruns what failed, timed out or was cancelled, and nothing else", async () => {
     const outcomes = [
       ["completed", "failure"],
       ["completed", "timed_out"],
@@ -114,7 +114,7 @@ describe("a nova tentativa diária", () => {
     );
   });
 
-  test("roda de novo a última rodada da main, a do push do commit da ponta", async () => {
+  test("reruns the latest main run, the push of the tip commit", async () => {
     const olderMain = "d".repeat(40);
     const latest = run({ event: "push", headSha: mainHead });
     const older = run({ event: "push", headSha: olderMain });
@@ -131,7 +131,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, [latest.id]);
   });
 
-  test("uma nova tentativa recusada não impede as outras e fica no relatório", async () => {
+  test("a refused retry does not stop the others and goes into the report", async () => {
     const refused = run();
     const latest = run({ event: "push", headSha: mainHead });
     const fake = fakeGitHub({ pullRequests: [robotPullRequest()], runs: [refused, latest] });
@@ -150,7 +150,7 @@ describe("a nova tentativa diária", () => {
     );
   });
 
-  test("no PR, só as rodadas do evento pull_request", async () => {
+  test("on a PR, only the runs of the pull_request event", async () => {
     const validation = run();
     const dependabotUpdate = run({
       workflowId: 9,
@@ -167,7 +167,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, [validation.id]);
   });
 
-  test("olha só a rodada mais recente de cada workflow no commit", async () => {
+  test("looks only at the most recent run of each workflow at the commit", async () => {
     const superseded = run({ runNumber: 7 });
     const latest = run({ runNumber: 8, conclusion: "success" });
     const otherWorkflow = run({ workflowId: 2, workflowName: "pr-title", runNumber: 3 });
@@ -181,7 +181,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, [otherWorkflow.id]);
   });
 
-  test("dá a terceira nova tentativa a quem falhou na terceira rodada", async () => {
+  test("gives the third retry to whoever failed on the third run", async () => {
     const failed = run({ attempt: 3 });
     const fake = fakeGitHub({ pullRequests: [robotPullRequest()], runs: [failed] });
 
@@ -190,7 +190,7 @@ describe("a nova tentativa diária", () => {
     assert.deepEqual(fake.rerun, [failed.id]);
   });
 
-  test("para depois de três novas tentativas e avisa que a rodada fica com o agente", async () => {
+  test("stops after three retries and warns that the run stays with the agent", async () => {
     const failed = run({ attempt: 4 });
     const fake = fakeGitHub({ pullRequests: [robotPullRequest()], runs: [failed] });
 

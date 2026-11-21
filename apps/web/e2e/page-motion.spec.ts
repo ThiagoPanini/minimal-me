@@ -105,7 +105,7 @@ async function drawnBy(page: Page, text: Locator): Promise<number> {
   return largest;
 }
 
-test("a abertura entra como no protótipo: o nome sobe por máscara, palavra a palavra, e o sobretítulo, a frase e a marca entram depois", async ({
+test("the opening enters as in the prototype: the name rises through a mask, word by word, and the kicker, the tagline and the mark enter after it", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -188,7 +188,7 @@ const dunesEntrance = {
   from: { opacity: "0", translate: "0px 4%" },
 };
 
-test("a ilustração da abertura espera as duas camadas: o céu fica escondido até as dunas chegarem", async ({
+test("the opening illustration waits for both layers: the sky stays hidden until the dunes arrive", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -216,7 +216,7 @@ test("a ilustração da abertura espera as duas camadas: o céu fica escondido a
   expect(await renderedOpacity(dunes)).toBe(1);
 });
 
-test("a abertura aparece mesmo se uma camada não chegar em 5s", async ({ page }) => {
+test("the opening shows up even if a layer does not arrive within 5s", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   const clock = await animationClock(page);
   await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
@@ -256,7 +256,7 @@ function runningEntrances(page: Page): Promise<number> {
 
 const spaceNames = ["Frames & Songs", "Music & Feeling", "Code & Share", "Write & Learn"];
 
-test("ao rolar, cada bloco entra uma vez: o fio cresce, as fotos se revelam como uma cópia no banho e os textos sobem, uma fresta depois da outra", async ({
+test("on scroll, each block enters once: the rule grows, the pictures develop like a print in the bath and the texts rise, one slit after the other", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -371,7 +371,7 @@ async function expectFinalState(page: Page): Promise<void> {
   }
 }
 
-test("com movimento reduzido, tudo aparece no estado final, sem nenhuma animação, nem com foco", async ({
+test("with reduced motion, everything shows up in its final state, without any animation, not even with focus", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -395,7 +395,7 @@ test("com movimento reduzido, tudo aparece no estado final, sem nenhuma animaç�
   expect(await animations()).toBe(0);
 });
 
-test("se a preferência passa a movimento reduzido no meio da entrada, tudo vai na hora ao estado final, e nada entra de novo quando ela volta", async ({
+test("if the preference switches to reduced motion mid-entrance, everything goes to its final state at once, and nothing enters again when it switches back", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -447,7 +447,7 @@ async function pointTo(page: Page, corner: "top-left" | "bottom-right"): Promise
   await runFor(page, 4000);
 }
 
-test("com o ponteiro, a abertura ganha profundidade: o céu vai até 6px e 3px contra ele, e as dunas até 12px e 5px com ele", async ({
+test("with the pointer, the opening gains depth: the sky moves up to 6px and 3px against it, and the dunes up to 12px and 5px with it", async ({
   page,
 }) => {
   await openStill(page);
@@ -464,7 +464,7 @@ test("com o ponteiro, a abertura ganha profundidade: o céu vai até 6px e 3px c
   expect(dunesShift.y).toBeCloseTo(5, 0);
 });
 
-test("as fotos dos spaces ganham profundidade: até 14px com a rolagem e até 3px com o ponteiro", async ({
+test("the space pictures gain depth: up to 14px with scrolling and up to 3px with the pointer", async ({
   page,
 }) => {
   await openStill(page);
@@ -508,7 +508,7 @@ test("as fotos dos spaces ganham profundidade: até 14px com a rolagem e até 3p
   expect(pointerShift.y / 2).toBeCloseTo(-2, 0);
 });
 
-test("com movimento reduzido nada ganha profundidade, e a troca da preferência vale na hora", async ({
+test("with reduced motion nothing gains depth, and changing the preference applies at once", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -542,7 +542,7 @@ test("com movimento reduzido nada ganha profundidade, e a troca da preferência 
   expect(await pictureOffset()).toEqual(still.picture);
 });
 
-test("em repouso, o laço da página para, e nenhum quadro é pedido", async ({ page }) => {
+test("at rest, the page loop stops, and no frame is requested", async ({ page }) => {
   await page.addInitScript(() => {
     const request = window.requestAnimationFrame.bind(window);
     const counter = window as unknown as { frameRequests: number };

@@ -26,14 +26,14 @@ async function hashedAssets(request: APIRequestContext) {
   return { css: pick(".css"), js: pick(".js"), font: pick(".woff2") };
 }
 
-test("uma rota inexistente responde com status 404", async ({ request }) => {
+test("a missing route answers with status 404", async ({ request }) => {
   const response = await request.get("/esta-rota-nao-existe");
 
   expect(response.status()).toBe(404);
   expect(response.headers()["content-type"]).toContain("text/html");
 });
 
-test("o que tem hash no nome leva cache longo e imutável", async ({ request }) => {
+test("what has a hash in its name gets long, immutable caching", async ({ request }) => {
   const assets = await hashedAssets(request);
 
   for (const asset of Object.values(assets)) {
@@ -47,7 +47,9 @@ test("o que tem hash no nome leva cache longo e imutável", async ({ request }) 
 // Next gera para os metadados (o ícone e a de compartilhamento), que saem sem extensão.
 const unhashed = ["/", "/version.json", "/robots.txt", "/sitemap.xml", "/icon", "/opengraph-image"];
 
-test("o que não tem hash no nome fica sem cache longo e sem no-transform", async ({ request }) => {
+test("what has no hash in its name gets neither long caching nor no-transform", async ({
+  request,
+}) => {
   for (const route of unhashed) {
     const response = await request.get(route);
     expect(response.status(), route).toBe(200);
@@ -58,7 +60,7 @@ test("o que não tem hash no nome fica sem cache longo e sem no-transform", asyn
   }
 });
 
-test("as respostas de texto vêm comprimidas", async ({ request }) => {
+test("text responses come compressed", async ({ request }) => {
   const { css, js } = await hashedAssets(request);
 
   for (const route of ["/", css, js, "/esta-rota-nao-existe"]) {
@@ -67,13 +69,13 @@ test("as respostas de texto vêm comprimidas", async ({ request }) => {
   }
 });
 
-test("o cabeçalho Server não diz a versão do nginx", async ({ request }) => {
+test("the Server header does not tell the nginx version", async ({ request }) => {
   const response = await request.get("/");
 
   expect(response.headers().server).toBe("nginx");
 });
 
-test("toda resposta leva os quatro cabeçalhos de segurança", async ({ request }) => {
+test("every response carries the four security headers", async ({ request }) => {
   const { css, font } = await hashedAssets(request);
 
   for (const route of [css, font, ...unhashed, "/esta-rota-nao-existe"]) {
@@ -84,7 +86,7 @@ test("toda resposta leva os quatro cabeçalhos de segurança", async ({ request 
   }
 });
 
-test("version.json traz o commit da imagem", async ({ request }) => {
+test("version.json carries the image commit", async ({ request }) => {
   const expected = process.env.EXPECTED_COMMIT;
   expect(expected, "EXPECTED_COMMIT vem de `pnpm test:e2e`").toMatch(/^[0-9a-f]{40}$/);
 

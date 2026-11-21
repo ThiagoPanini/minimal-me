@@ -74,7 +74,7 @@ async function expectOpen(page: Page, index: number): Promise<void> {
   expect((await boxOf(link.locator("span").last())).width).toBe(40);
 }
 
-test("o cursor abre a fresta sob ele, como no protótipo, e a fileira volta quando ele sai", async ({
+test("the pointer opens the slit under it, as in the prototype, and the row goes back when it leaves", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -117,7 +117,7 @@ test("o cursor abre a fresta sob ele, como no protótipo, e a fileira volta quan
   }
 });
 
-test("a 390 e a 1440, o foco de teclado num Acessar abre a fresta dele e fica visível", async ({
+test("at 390 and 1440, keyboard focus on an Acessar link opens its slit and stays visible", async ({
   page,
 }) => {
   // Sem transição, cada fresta já está no estado final quando o foco chega.
@@ -149,7 +149,7 @@ test("a 390 e a 1440, o foco de teclado num Acessar abre a fresta dele e fica vi
   }
 });
 
-test("com movimento reduzido a fresta abre sem transição e o foco continua valendo, mesmo se a preferência mudar com a página aberta", async ({
+test("with reduced motion the slit opens without a transition and focus still applies, even if the preference changes with the page open", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -163,7 +163,7 @@ test("com movimento reduzido a fresta abre sem transição e o foco continua val
   await expectOpen(page, 2);
 });
 
-test("a fresta inteira responde ao clique como o Acessar", async ({ page }) => {
+test("the whole slit answers a click like the Acessar link", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
   const code = slits(page).nth(2);
@@ -177,10 +177,10 @@ test("a fresta inteira responde ao clique como o Acessar", async ({ page }) => {
   await expectOpen(page, 2);
 });
 
-test.describe("em tela de toque", () => {
+test.describe("on a touch screen", () => {
   test.use({ hasTouch: true });
 
-  test("o primeiro toque escolhe a fresta, a rolagem não muda a escolha e o segundo toque mostra o aviso @webkit", async ({
+  test("the first tap chooses the slit, scrolling does not change the choice and the second tap shows the toast @webkit", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "reduce" });
@@ -200,7 +200,7 @@ test.describe("em tela de toque", () => {
     await expectOpen(page, 2);
   });
 
-  test("até 900px, a fresta aberta já está escolhida, e um toque nela mostra o aviso @webkit", async ({
+  test("up to 900px, the open slit is already chosen, and a tap on it shows the toast @webkit", async ({
     page,
   }) => {
     test.skip(!isStacked(page), "a fresta guardada só fica aberta até 900px");

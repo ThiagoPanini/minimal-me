@@ -46,7 +46,7 @@ function spacesSection(page: Page) {
   return page.getByRole("main").getByRole("region", { name: "Spaces" });
 }
 
-test("a seção Spaces mostra a contagem 01 — 04 e os quatro spaces na ordem, com número, Status, nome, descrição e Acessar @webkit", async ({
+test("the Spaces section shows the count 01 — 04 and the four spaces in order, with number, Status, name, description and Acessar @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -76,7 +76,7 @@ async function slitBoxes(page: Page): Promise<Box[]> {
   return Promise.all((await items.all()).map(boxOf));
 }
 
-test("na tela larga, as quatro frestas dividem a fileira por igual e mostram a foto inteira, em 3:4", async ({
+test("on a wide screen, the four slits split the row evenly and show the whole picture, in 3:4", async ({
   page,
 }) => {
   test.skip(isStacked(page), "a fileira larga só existe acima de 900px");
@@ -94,7 +94,7 @@ test("na tela larga, as quatro frestas dividem a fileira por igual e mostram a f
   }
 });
 
-test("até 900px, a fileira continua uma fileira, com Frames & Songs aberta a cinco vezes a largura das outras @webkit", async ({
+test("up to 900px, the row stays a row, with Frames & Songs open at five times the width of the others @webkit", async ({
   page,
 }) => {
   test.skip(!isStacked(page), "a fileira empilhada só existe até 900px");
@@ -145,7 +145,7 @@ test("até 900px, a fileira continua uma fileira, com Frames & Songs aberta a ci
   }
 });
 
-test("com a fileira abaixo de 1240px o Status desce para baixo do número, e abaixo de 1120px só a primeira frase entra", async ({
+test("with the row below 1240px the Status drops below the number, and below 1120px only the first sentence fits", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-1440", "mede larguras da tela larga");
@@ -223,7 +223,7 @@ function colorsOutOfGray(page: Page) {
   });
 }
 
-test("só Em desenvolvimento tem cor na página: o ponto e a palavra, em status-in-development @webkit", async ({
+test("only Em desenvolvimento has color on the page: the dot and the word, in status-in-development @webkit", async ({
   page,
 }) => {
   await page.goto("/");
@@ -262,7 +262,7 @@ function runningLoops(element: Locator) {
   );
 }
 
-test("o ponto diz o Status: cheio e pulsando em Em desenvolvimento, vazado em Em planejamento, e o pulso para com movimento reduzido @webkit", async ({
+test("the dot tells the Status: filled and pulsing for Em desenvolvimento, hollow for Em planejamento, and the pulse stops with reduced motion @webkit", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -286,7 +286,7 @@ test("o ponto diz o Status: cheio e pulsando em Em desenvolvimento, vazado em Em
   expect(await runningLoops(developing)).toEqual([]);
 });
 
-test("pela tabulação, os quatro Acessar são alcançados na ordem, com o foco visível por dentro da fresta", async ({
+test("by tabbing, the four Acessar links are reached in order, with the focus visible inside the slit", async ({
   page,
 }) => {
   await page.goto("/");

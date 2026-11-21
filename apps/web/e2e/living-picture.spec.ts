@@ -50,7 +50,7 @@ async function expectMoving(page: Page, slit: Locator, name: string): Promise<vo
   expect(samples.size, `${name} se move`).toBeGreaterThan(1);
 }
 
-test("com o foco, só a foto do space se move, e a que perde o foco volta ao repouso", async ({
+test("with focus, only the space's picture moves, and the one that loses focus goes back to rest", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -76,12 +76,12 @@ test("com o foco, só a foto do space se move, e a que perde o foco volta ao rep
   await expect.poll(() => drawnPictures(page)).toEqual(only(-1));
 });
 
-test.describe("em tela de toque", () => {
+test.describe("on a touch screen", () => {
   // O `tap()` no Chromium só funciona com `hasTouch`; no WebKit do iPhone 13, o toque já chega
   // como `pointerType` `touch`.
   test.use({ hasTouch: true });
 
-  test("a foto da fresta tocada acorda, e a da que estava aberta volta ao repouso @webkit", async ({
+  test("the picture of the tapped slit wakes up, and the one of the slit tapped before goes back to rest @webkit", async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: "no-preference" });
@@ -98,7 +98,7 @@ test.describe("em tela de toque", () => {
   });
 });
 
-test("com movimento reduzido nenhuma foto viva roda, mesmo com foco, e a preferência vale na hora", async ({
+test("with reduced motion no living picture runs, even with focus, and the preference applies at once", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -127,7 +127,7 @@ test("com movimento reduzido nenhuma foto viva roda, mesmo com foco, e a prefer�
   expect(await drawnPictures(page)).toEqual(only(-1));
 });
 
-test("a foto que perde o foco volta ao repouso em cerca de um segundo", async ({ page }) => {
+test("the picture that loses focus goes back to rest in about a second", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
   await page.goto("/");
@@ -153,7 +153,7 @@ test("a foto que perde o foco volta ao repouso em cerca de um segundo", async ({
   expect(await drawingOf(write), "1,5s depois").toBeNull();
 });
 
-test("em repouso ou fora da vista, o laço para e nenhum quadro é pedido", async ({ page }) => {
+test("at rest or out of view, the loop stops and no frame is requested", async ({ page }) => {
   await page.addInitScript(() => {
     const request = window.requestAnimationFrame.bind(window);
     const counter = window as unknown as { frameRequests: number };
@@ -240,7 +240,7 @@ function watchNetwork(page: Page) {
   };
 }
 
-test("na primeira visita, nem o desenho da foto viva nem o atlas das folhas são pedidos; chegam quando a foto acorda", async ({
+test("on the first visit, neither the living picture drawing nor the sheets atlas is requested; they arrive when a picture wakes up", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });

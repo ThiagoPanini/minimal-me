@@ -106,14 +106,14 @@ for (const { width, height, project } of widths) {
   // na entrada da página.
   const masthead = stacked ? ['"Minimal"', '"Me"'] : [];
 
-  test.describe(`a ${width}px`, () => {
+  test.describe(`at ${width}px`, () => {
     test.use({ viewport: { width, height } });
 
     test.beforeEach(({ page: _ }, testInfo) => {
       test.skip(testInfo.project.name !== project, `${width}px roda no projeto ${project}`);
     });
 
-    test("na Home em repouso, todo texto sobre ilustração fica legível no pior ponto", async ({
+    test("on the Home at rest, every text over an illustration stays readable at the worst point", async ({
       page,
     }, testInfo) => {
       await page.goto("/");
@@ -126,7 +126,7 @@ for (const { width, height, project } of widths) {
     });
 
     for (const space of spaces) {
-      test(`com foco em ${space.name}, todo texto sobre ilustração fica legível no pior ponto`, async ({
+      test(`with focus on ${space.name}, every text over an illustration stays readable at the worst point`, async ({
         page,
       }, testInfo) => {
         await page.goto("/");
@@ -139,7 +139,7 @@ for (const { width, height, project } of widths) {
       });
     }
 
-    test("na 404, todo texto sobre ilustração fica legível no pior ponto", async ({
+    test("on the 404, every text over an illustration stays readable at the worst point", async ({
       page,
     }, testInfo) => {
       await page.goto("/pagina-que-nao-existe");

@@ -26,18 +26,18 @@ async function expectNoAxeViolations(page: Page, testInfo: TestInfo): Promise<vo
 
 // As páginas da Home: ela mesma e a 404, que o nginx serve a qualquer rota que não existe.
 const pages = [
-  { name: "a Home", route: "/" },
-  { name: "a 404", route: "/esta-rota-nao-existe" },
+  { name: "the Home", route: "/" },
+  { name: "the 404", route: "/esta-rota-nao-existe" },
 ];
 
 for (const { name, route } of pages) {
-  test(`${name} passa no axe, com WCAG A e AA até 2.2`, async ({ page }, testInfo) => {
+  test(`${name} passes axe, with WCAG A and AA up to 2.2`, async ({ page }, testInfo) => {
     await page.goto(route);
     await expectNoAxeViolations(page, testInfo);
   });
 }
 
-test("com uma fresta aberta pelo teclado e o aviso à vista, a Home passa no axe", async ({
+test("with a slit opened by the keyboard and the toast in view, the Home passes axe", async ({
   page,
 }, testInfo) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -63,7 +63,7 @@ function description(page: Page, ...sentences: string[]): string {
 // atualiza a árvore aqui. O `status` vazio é o aviso (Toast), à espera de uma mensagem; o
 // `alert` vazio no fim é o anúncio de troca de rota do Next. No YAML, nome com ":" vai entre
 // aspas simples.
-test("a árvore ARIA da Home @webkit", async ({ page }) => {
+test("the ARIA tree of the Home @webkit", async ({ page }) => {
   await page.goto("/");
 
   await expect(page.locator("body")).toMatchAriaSnapshot(`
@@ -121,7 +121,7 @@ test("a árvore ARIA da Home @webkit", async ({ page }) => {
 
 // A árvore de acessibilidade da 404, inteira: a marca no céu, o texto com o caminho de volta e
 // o rodapé só com o ano.
-test("a árvore ARIA da 404 @webkit", async ({ page }) => {
+test("the ARIA tree of the 404 @webkit", async ({ page }) => {
   await page.goto("/esta-rota-nao-existe");
 
   await expect(page.locator("body")).toMatchAriaSnapshot(`

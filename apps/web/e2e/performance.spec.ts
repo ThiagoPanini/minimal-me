@@ -104,7 +104,7 @@ function lcpElementOf(lhr: Result): string {
 const bytes = (value: number) => value.toLocaleString("pt-BR");
 const milliseconds = (value: number) => Math.round(value).toLocaleString("pt-BR");
 
-test.describe("primeira visita a 390px", () => {
+test.describe("first visit at 390px", () => {
   const results: Result[] = [];
 
   test.beforeAll(async ({ baseURL }) => {
@@ -112,7 +112,7 @@ test.describe("primeira visita a 390px", () => {
     for (let run = 0; run < runs; run += 1) results.push(await audit(new URL("/", baseURL).href));
   });
 
-  test("pesa até 1.000.000 bytes transferidos", async () => {
+  test("weighs up to 1,000,000 transferred bytes", async () => {
     const weights = results.map(weightOf);
     await test.info().attach("peso", {
       body: JSON.stringify(weights, null, 2),
@@ -126,7 +126,7 @@ test.describe("primeira visita a 390px", () => {
     expect(heaviest.total, `bytes transferidos (${byType})`).toBeLessThanOrEqual(byteBudget);
   });
 
-  test("o LCP em Slow 4G simulado, na mediana das rodadas, fica no relatório", async () => {
+  test("the LCP on simulated Slow 4G, as the median of the runs, goes into the report", async () => {
     const lcps = results.map((lhr) => lhr.audits["largest-contentful-paint"].numericValue ?? 0);
     for (const lcp of lcps) expect(lcp, "LCP medido").toBeGreaterThan(0);
     const median = [...lcps].sort((a, b) => a - b)[Math.floor(lcps.length / 2)];
