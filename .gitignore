@@ -1,9 +1,11 @@
-# worktrees locais das pesquisas do wayfinder
+# worktrees só em .claude/worktrees/; .worktrees/ guarda os antigos das pesquisas do wayfinder
 .worktrees/
 
-# estado local do Claude Code (permissoes e worktrees de subagentes)
+# estado local do Claude Code (permissoes e worktrees) e do Codex, que importa o .mcp.json
+# com /import
 .claude/settings.local.json
 .claude/worktrees/
+.codex/
 
 # dependências, build do Next e resultados do Playwright
 node_modules/
