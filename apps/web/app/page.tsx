@@ -3,11 +3,12 @@ import { Masthead } from "@/components/Masthead";
 import { OpeningIllustration } from "@/components/OpeningIllustration";
 import { SectionHeader } from "@/components/SectionHeader";
 import { SpaceSlit, SpaceSlitRow } from "@/components/SpaceSlit";
+import { Toast, ToastProvider } from "@/components/Toast";
 import { spaceCount, spaces } from "@/spaces/catalog";
 
 export default function Home() {
   return (
-    <>
+    <ToastProvider>
       <header id="top" className="flex h-svh min-h-[600px] flex-col stacked:h-auto stacked:min-h-0">
         <OpeningIllustration />
         <Masthead
@@ -31,6 +32,7 @@ export default function Home() {
         </section>
       </main>
       <Footer year={2026} />
-    </>
+      <Toast />
+    </ToastProvider>
   );
 }

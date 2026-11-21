@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, type ReactNode, use, useReducer, useSyncExternalStore } from "react";
+import { useToast } from "@/components/Toast";
 import type { SpaceId } from "@/spaces/catalog";
 
 // O foco da fileira de spaces (módulo 4 da spec #57): decide qual space tem o foco, a partir
@@ -119,16 +120,21 @@ export function useSlitFocus(id: SpaceId): { focus: SlitFocus | undefined; open:
 type FocusableSlitProps = {
   id: SpaceId;
   anchor: string;
+  // O aviso do "Acessar", enquanto o space não tem página.
+  notice: string;
   className: string;
   children: ReactNode;
 };
 
 // O item da fileira que recebe o foco: o cursor (mouse ou caneta) ao entrar e sair, o foco
-// de teclado visível no "Acessar" e o toque, que escolhe.
-export function FocusableSlit({ id, anchor, className, children }: FocusableSlitProps) {
+// de teclado visível no "Acessar" e o toque, que escolhe. A fresta inteira responde como o
+// link: no Marco 1, com o aviso, sem sair do lugar.
+export function FocusableSlit({ id, anchor, notice, className, children }: FocusableSlitProps) {
   const { dispatch } = useSpaceFocus();
   const { focus } = useSlitFocus(id);
+  const showToast = useToast();
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: o teclado aciona o "Acessar", e o clique dele sobe até a fresta.
     <li
       id={anchor}
       data-space={id}
@@ -145,6 +151,10 @@ export function FocusableSlit({ id, anchor, className, children }: FocusableSlit
         if (event.target.matches(":focus-visible")) dispatch({ type: "keyboard-focus", id });
       }}
       onBlur={() => dispatch({ type: "keyboard-blur", id })}
+      onClick={(event) => {
+        event.preventDefault();
+        showToast(notice);
+      }}
     >
       {children}
     </li>

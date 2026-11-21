@@ -80,6 +80,7 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
     <FocusableSlit
       id={space.id}
       anchor={space.anchor}
+      notice={space.notice}
       className="relative isolate h-full min-w-0 shrink grow basis-0 overflow-hidden has-[a:focus-visible]:outline-1 has-[a:focus-visible]:outline-mist has-[a:focus-visible]:-outline-offset-1 motion-safe:[transition:flex-grow_.9s_var(--ease)] slit-open:grow-(--slit-open-grow)"
     >
       <div className="absolute top-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:left-0 in-slit-closed:w-(--slit-unit)">
