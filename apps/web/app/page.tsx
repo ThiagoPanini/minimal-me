@@ -22,9 +22,9 @@ export default function Home() {
         >
           <div className="page-inner">
             <SectionHeader id="spaces-title" label="Spaces" count={spaceCount} />
-            <SpaceSlitRow>
-              {spaces.map((space, index) => (
-                <SpaceSlit key={space.id} space={space} kept={index === 0} />
+            <SpaceSlitRow kept={spaces[0].id}>
+              {spaces.map((space) => (
+                <SpaceSlit key={space.id} space={space} />
               ))}
             </SpaceSlitRow>
           </div>

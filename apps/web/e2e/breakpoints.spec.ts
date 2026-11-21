@@ -43,6 +43,8 @@ test("a 900px exatos a Home inteira empilha, e a 901px nada empilha", async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== "chromium-1440", "mede larguras da tela larga");
+  // Sem transição, a fresta guardada já está aberta quando a tela estreita.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
   // Empilhada: a abertura tem 66% da altura da tela, o bloco de texto desce para baixo do
