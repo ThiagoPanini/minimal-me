@@ -67,7 +67,7 @@ const seeded = (seed: number) => {
 // obturador pisca, e o quadro tirado fica um instante. Três enquadramentos, um depois do outro.
 function shutter(
   { period, shots }: Extract<SpaceMotion, { kind: "shutter" }>,
-  ink: string,
+  lineRgb: string,
 ): PictureDrawing {
   return (context, map, seconds, awake) => {
     const turn = Math.floor(seconds / period);
@@ -106,7 +106,7 @@ function shutter(
       context.fillStyle = `rgba(255,255,255,${(awake * 0.2 * flash).toFixed(3)})`;
       context.fillRect(left, top, width, height);
     }
-    context.strokeStyle = `rgba(${ink},${(awake * 0.85 * alpha).toFixed(3)})`;
+    context.strokeStyle = `rgba(${lineRgb},${(awake * 0.85 * alpha).toFixed(3)})`;
     context.lineWidth = Math.max(1, 1.5 * map.scale);
     context.lineCap = "butt";
     context.beginPath();
@@ -145,7 +145,7 @@ function shutter(
 // e somem no ar sobre a duna.
 function waves(
   { source, arcs, period, from, to }: Extract<SpaceMotion, { kind: "waves" }>,
-  ink: string,
+  lineRgb: string,
 ): PictureDrawing {
   const start = Math.PI * from;
   const end = Math.PI * to;
@@ -163,7 +163,7 @@ function waves(
       for (let segment = 0; segment < segments; segment += 1) {
         const along = (segment + 0.5) / segments;
         const weight = Math.sin(Math.PI * along) ** 1.3;
-        context.strokeStyle = `rgba(${ink},${(alpha * weight).toFixed(3)})`;
+        context.strokeStyle = `rgba(${lineRgb},${(alpha * weight).toFixed(3)})`;
         context.beginPath();
         context.arc(
           center[0],
@@ -323,7 +323,7 @@ function sheets({ atlas, sheets: list }: Extract<SpaceMotion, { kind: "sheets" }
 const flickering: SpaceIllustrationKey = "tech";
 
 // A luz que toda ilustração tem atrás da figura respira um pouco enquanto a foto está acordada.
-function glow({ u, v, radius, alpha, rate }: Glow, flickers: boolean): PictureDrawing {
+function glowDrawing({ u, v, radius, alpha, rate }: Glow, flickers: boolean): PictureDrawing {
   return (context, map, seconds, awake) => {
     const [x, y] = map.at(u, v);
     const reach = radius * map.width;
@@ -337,12 +337,16 @@ function glow({ u, v, radius, alpha, rate }: Glow, flickers: boolean): PictureDr
   };
 }
 
-function motionDrawing(motion: SpaceMotion, size: [number, number], ink: string): PictureDrawing {
+function motionDrawing(
+  motion: SpaceMotion,
+  size: [number, number],
+  lineRgb: string,
+): PictureDrawing {
   switch (motion.kind) {
     case "shutter":
-      return shutter(motion, ink);
+      return shutter(motion, lineRgb);
     case "waves":
-      return waves(motion, ink);
+      return waves(motion, lineRgb);
     case "leds":
       return leds(motion, size);
     case "sheets":
@@ -351,14 +355,14 @@ function motionDrawing(motion: SpaceMotion, size: [number, number], ink: string)
 }
 
 // O desenho da foto viva de uma ilustração: o movimento dela e, por cima, a luz que respira.
-// `ink` é a cor dos fios, como "233,233,230" (o token `light`).
+// `lineRgb` é a cor dos fios em canais RGB, como "233,233,230" (o token `light`).
 export function pictureDrawing(
   key: SpaceIllustrationKey,
-  { size, glow: light, motion }: LivingPictureData,
-  ink: string,
+  { size, glow, motion }: LivingPictureData,
+  lineRgb: string,
 ): PictureDrawing {
-  const drawMotion = motionDrawing(motion, size, ink);
-  const drawGlow = glow(light, key === flickering);
+  const drawMotion = motionDrawing(motion, size, lineRgb);
+  const drawGlow = glowDrawing(glow, key === flickering);
   return (context, map, seconds, awake) => {
     drawMotion(context, map, seconds, awake);
     drawGlow(context, map, seconds, awake);

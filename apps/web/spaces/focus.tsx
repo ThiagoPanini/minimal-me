@@ -112,7 +112,7 @@ const SpaceFocusContext = createContext<SpaceFocusValue | null>(null);
 
 function useSpaceFocus(): SpaceFocusValue {
   const value = use(SpaceFocusContext);
-  if (!value) throw new Error("useSlitFocus fora do SpaceFocusProvider");
+  if (!value) throw new Error("useSpaceFocus fora do SpaceFocusProvider");
   return value;
 }
 
