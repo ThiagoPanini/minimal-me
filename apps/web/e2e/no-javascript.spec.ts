@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { renderedOpacity } from "./rendering";
+import { renderedOpacity } from "./helpers";
 
 test.use({ javaScriptEnabled: false });
 

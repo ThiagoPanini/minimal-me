@@ -1,7 +1,7 @@
 import type { CDPSession, Locator, Page } from "@playwright/test";
 import sharp from "sharp";
 import { expect, test } from "./fixtures";
-import { renderedOpacity } from "./rendering";
+import { renderedOpacity, runFor, settle } from "./helpers";
 
 // O movimento da página (módulo 6 da spec #57, "Movimento" no guia do sistema de design): a
 // abertura entra quando as duas camadas chegam, ou depois de 5s, com o nome subindo por
@@ -69,18 +69,6 @@ async function animationClock(
   const rate = (playbackRate: number) =>
     session.send("Animation.setPlaybackRate", { playbackRate });
   return { stop: () => rate(0).then(() => undefined), run: () => rate(1).then(() => undefined) };
-}
-
-// Espera as entradas terminarem (o pulso do ponto, em laço, fica de fora).
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(() =>
-    Promise.all(
-      document
-        .getAnimations()
-        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
-        .map((animation) => animation.finished.catch(() => undefined)),
-    ),
-  );
 }
 
 // O maior brilho, de 0 a 255, que um texto deixa na tela: a área dele capturada como está e
@@ -427,25 +415,6 @@ test("se a preferência passa a movimento reduzido no meio da entrada, tudo vai 
   expect(await runningEntrances(page)).toBe(0);
   await expectFinalState(page);
 });
-
-// Com o relógio da página parado, o tempo (e cada quadro) só anda por `runFor`; antes, três
-// voltas de mensagem deixam o React terminar o que mudou.
-async function runFor(page: Page, milliseconds: number): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        const channel = new MessageChannel();
-        let hops = 0;
-        channel.port1.onmessage = () => {
-          hops += 1;
-          if (hops === 3) resolve();
-          else channel.port2.postMessage(null);
-        };
-        channel.port2.postMessage(null);
-      }),
-  );
-  await page.clock.runFor(milliseconds);
-}
 
 // A página com movimento, depois da entrada da abertura, com o relógio parado.
 async function openStill(page: Page): Promise<void> {

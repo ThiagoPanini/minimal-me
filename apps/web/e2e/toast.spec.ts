@@ -1,6 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { renderedOpacity } from "./rendering";
+import { renderedOpacity, runFor } from "./helpers";
 
 // O aviso (Toast): no Marco 1 nenhum space tem página, e o "Acessar" de cada um responde com
 // "<Status> · <nome do space> ainda não está disponível.", anunciado por `role="status"`.
@@ -36,25 +36,6 @@ test("o Acessar de cada space mostra o aviso com o Status e o nome, anunciado po
   await page.waitForTimeout(100);
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
 });
-
-// Com o relógio parado, o tempo só anda por `runFor`. O React desenha o que um temporizador
-// mudou numa mensagem posta depois dele: três voltas de mensagem garantem o desenho.
-async function runFor(page: Page, milliseconds: number): Promise<void> {
-  await page.clock.runFor(milliseconds);
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        const channel = new MessageChannel();
-        let hops = 0;
-        channel.port1.onmessage = () => {
-          hops += 1;
-          if (hops === 3) resolve();
-          else channel.port2.postMessage(null);
-        };
-        channel.port2.postMessage(null);
-      }),
-  );
-}
 
 test("o aviso fica 2,6s à vista e sai da página quando some, e acionar de novo reinicia o tempo", async ({
   page,

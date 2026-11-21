@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { renderedOpacity } from "./rendering";
+import { boxOf, isStacked, renderedOpacity, settle, slits } from "./helpers";
 
 // O foco da fileira de spaces: vale o space sob o cursor, sob o teclado ou, em tela de toque,
 // o último tocado. A fresta com foco abre (1,9 vez as outras na tela larga; até 900px, cinco
@@ -17,10 +17,6 @@ const spaces = [
 // A curva `ease` do sistema de design, para mudanças de estado.
 const ease = "cubic-bezier(0.22, 0.61, 0.36, 1)";
 
-function isStacked(page: Page): boolean {
-  return (page.viewportSize()?.width ?? 0) <= 900;
-}
-
 // Quantas vezes a fresta aberta é mais larga que uma fechada.
 function openToClosed(page: Page): number {
   return isStacked(page) ? 5 : 1.9;
@@ -30,30 +26,6 @@ function openToClosed(page: Page): number {
 // primeira frase (a outra fica fora da página).
 function descriptionOf(item: Locator, lead: string): Locator {
   return item.getByText(lead).filter({ visible: true });
-}
-
-function slits(page: Page): Locator {
-  return page.getByRole("main").getByRole("region", { name: "Spaces" }).getByRole("listitem");
-}
-
-type Box = { x: number; y: number; width: number; height: number };
-
-async function boxOf(element: Locator): Promise<Box> {
-  const box = await element.boundingBox();
-  if (!box) throw new Error("elemento sem caixa na tela");
-  return box;
-}
-
-// Espera as transições terminarem (o pulso do ponto, em laço, fica de fora).
-async function settle(page: Page): Promise<void> {
-  await page.evaluate(() =>
-    Promise.all(
-      document
-        .getAnimations()
-        .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
-        .map((animation) => animation.finished.catch(() => undefined)),
-    ),
-  );
 }
 
 type Transition = { property: string; duration: number; delay: number; easing: string };

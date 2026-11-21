@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import type { Locator, Page, Response } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { runFor, slits } from "./helpers";
 
 // A foto viva (módulo 5 da spec #57 e "Foto viva" no guia da SpaceSlit): a ilustração do space
 // com foco acorda, com um movimento feito do que está pintado nela, desenhado sobre a imagem.
@@ -10,10 +11,6 @@ import { expect, test } from "./fixtures";
 // aberta sem foco, fica parada; com movimento reduzido, nenhuma foto viva roda.
 
 const names = ["Frames & Songs", "Music & Feeling", "Code & Share", "Write & Learn"];
-
-function slits(page: Page): Locator {
-  return page.getByRole("main").getByRole("region", { name: "Spaces" }).getByRole("listitem");
-}
 
 // O que está desenhado sobre a imagem de uma fresta: uma assinatura dos px do canvas, ou
 // `null` quando ele está todo transparente.
@@ -129,25 +126,6 @@ test("com movimento reduzido nenhuma foto viva roda, mesmo com foco, e a prefer�
   await page.waitForTimeout(500);
   expect(await drawnPictures(page)).toEqual(only(-1));
 });
-
-// Com o relógio parado, o tempo só anda por `runFor`; antes, três voltas de mensagem deixam o
-// React terminar o que o cursor mudou.
-async function runFor(page: Page, milliseconds: number): Promise<void> {
-  await page.evaluate(
-    () =>
-      new Promise<void>((resolve) => {
-        const channel = new MessageChannel();
-        let hops = 0;
-        channel.port1.onmessage = () => {
-          hops += 1;
-          if (hops === 3) resolve();
-          else channel.port2.postMessage(null);
-        };
-        channel.port2.postMessage(null);
-      }),
-  );
-  await page.clock.runFor(milliseconds);
-}
 
 test("a foto que perde o foco volta ao repouso em cerca de um segundo", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });

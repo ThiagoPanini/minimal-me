@@ -1,5 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { outlineWidth } from "./helpers";
 
 // A página de quem erra o endereço: o nginx a serve, com status 404, a qualquer rota que não
 // existe, a partir do `404.html` do export.
@@ -23,13 +24,6 @@ function firstFamily(text: Locator): Promise<string> {
 async function openNotFound(page: Page): Promise<void> {
   const response = await page.goto(missingRoutes[0]);
   expect(response?.status()).toBe(404);
-}
-
-// A espessura de um contorno como o navegador a desenha: arredondada para baixo em pixels
-// do dispositivo (1,5px vira 1px numa tela de densidade 1).
-async function outlineWidth(page: Page, width: number): Promise<string> {
-  const ratio = await page.evaluate(() => window.devicePixelRatio);
-  return `${Math.floor(width * ratio) / ratio}px`;
 }
 
 test("qualquer rota que não existe responde 404 com a página não encontrada @webkit", async ({

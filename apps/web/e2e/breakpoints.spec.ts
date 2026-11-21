@@ -1,17 +1,10 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { boxOf } from "./helpers";
 
 // As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`): a
 // 900px exatos a página inteira já empilha, e a 760px exatos as camadas da abertura já usam a
 // posição estreita. Um pixel acima, nenhuma das duas vale.
-
-type Box = { x: number; y: number; width: number; height: number };
-
-async function boxOf(element: Locator): Promise<Box> {
-  const box = await element.boundingBox();
-  if (!box) throw new Error("elemento sem caixa na tela");
-  return box;
-}
 
 function dunes(page: Page): Locator {
   return page.getByRole("img", {

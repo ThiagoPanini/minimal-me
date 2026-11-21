@@ -1,5 +1,6 @@
 import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
+import { outlineWidth } from "./helpers";
 
 function scrollY(page: Page): () => Promise<number> {
   return () => page.evaluate(() => window.scrollY);
@@ -17,13 +18,6 @@ async function scrollSettled(page: Page): Promise<void> {
       return settled;
     })
     .toBe(true);
-}
-
-// A espessura de um contorno como o navegador a desenha: arredondada para baixo em pixels
-// do dispositivo (1,5px vira 1px numa tela de densidade 1).
-async function outlineWidth(page: Page, width: number): Promise<string> {
-  const ratio = await page.evaluate(() => window.devicePixelRatio);
-  return `${Math.floor(width * ratio) / ratio}px`;
 }
 
 test("a página rola no documento, pelo teclado, e o voltar do navegador devolve a rolagem @webkit", async ({

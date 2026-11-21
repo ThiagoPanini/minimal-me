@@ -1,6 +1,6 @@
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
-import { renderedOpacity } from "./rendering";
+import { type Box, boxOf, isStacked, renderedOpacity } from "./helpers";
 
 // Os quatro spaces, na ordem e com os textos da tabela "O que a Home mostra" da spec #57.
 const spaces = [
@@ -42,11 +42,6 @@ const spaces = [
   },
 ];
 
-// Até 900px a fileira empilha, e sobre a duna só entra a primeira frase da descrição.
-function isStacked(page: Page): boolean {
-  return (page.viewportSize()?.width ?? 0) <= 900;
-}
-
 function spacesSection(page: Page) {
   return page.getByRole("main").getByRole("region", { name: "Spaces" });
 }
@@ -74,14 +69,6 @@ test("a seção Spaces mostra a contagem 01 — 04 e os quatro spaces na ordem, 
     `);
   }
 });
-
-type Box = { x: number; y: number; width: number; height: number };
-
-async function boxOf(element: Locator): Promise<Box> {
-  const box = await element.boundingBox();
-  if (!box) throw new Error("elemento sem caixa na tela");
-  return box;
-}
 
 async function slitBoxes(page: Page): Promise<Box[]> {
   const items = spacesSection(page).getByRole("listitem");
