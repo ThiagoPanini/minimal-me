@@ -208,6 +208,37 @@
   }
 }
 
+/*
+ * As transições de vista (`<ViewTransition>` do React). Só entra numa transição quem a pede:
+ * a página inteira não é capturada, e continua à vista e respondendo ao cursor e ao toque. O
+ * aviso (Toast) aparece e some por opacidade em 0,5s: o quadro velho dele se funde no novo,
+ * sem crescer nem se mover. Com movimento reduzido, a transição em curso termina na hora.
+ */
+:root {
+  view-transition-name: none;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(.toast-fade) {
+  animation-name: none;
+}
+
+::view-transition-old(.toast-fade),
+::view-transition-new(.toast-fade) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.toast-fade),
+  ::view-transition-new(.toast-fade) {
+    animation: none;
+  }
+}
+
 /* As famílias têm no sistema o mesmo nome que teriam no tema do Tailwind
    (`--font-sans`); por isso os dois utilitários são declarados à mão. */
 @utility font-sans {
