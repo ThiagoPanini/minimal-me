@@ -19,8 +19,9 @@ function isShown(id: string): id is IllustrationId {
   return Object.hasOwn(illustrationSources, id);
 }
 
-// O `src` é a maior largura, o próprio arquivo do sistema; o `srcSet` lista todas.
-function responsiveImage(id: string): ResponsiveImage {
+// As larguras de uma ilustração que passou pelo passo do build: o `src` é a maior, o próprio
+// arquivo do sistema; o `srcSet` lista todas.
+export function responsiveImage(id: string): ResponsiveImage {
   if (!isShown(id)) {
     throw new Error(`A ilustração "${id}" não passou por design-system/generate-illustrations.ts`);
   }
