@@ -4,10 +4,9 @@
 // segredos do Dependabot sem mostrá-la.
 import { createSign, randomBytes } from "node:crypto";
 import { createServer } from "node:http";
-import { githubHeaders } from "./adapters.mjs";
+import { createGitHubApi } from "../github-api.mjs";
 import { mergeAppPermissions, owner, repository } from "./steps.mjs";
 
-const githubApi = "https://api.github.com";
 const repositoryUrl = `https://github.com/${repository}`;
 const codeLifetime = 60 * 60 * 1000;
 
@@ -95,14 +94,12 @@ export async function createFromManifest({ openUrl }) {
 }
 
 async function exchangeCode(code) {
-  const response = await fetch(`${githubApi}/app-manifests/${code}/conversions`, {
-    method: "POST",
-    headers: githubHeaders,
-  });
-  if (response.status !== 201) {
-    throw new Error(`a troca do código pelo App respondeu ${response.status}`);
-  }
-  return response.json();
+  const { status, body } = await createGitHubApi().request(
+    "POST",
+    `/app-manifests/${code}/conversions`,
+  );
+  if (status !== 201) throw new Error(`a troca do código pelo App respondeu ${status}`);
+  return body;
 }
 
 const base64url = (value) => Buffer.from(value).toString("base64url");
@@ -118,14 +115,8 @@ function appJwt({ clientId, privateKey }) {
   return `${header}.${payload}.${signature}`;
 }
 
-async function call(method, apiPath, token, body) {
-  const response = await fetch(`${githubApi}${apiPath}`, {
-    method,
-    headers: { ...githubHeaders, Authorization: `Bearer ${token}` },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  if (!response.ok) throw new Error(`${method} ${apiPath} respondeu ${response.status}`);
-  return response.status === 204 ? null : response.json();
+function call(method, apiPath, token, body) {
+  return createGitHubApi({ token }).call(method, apiPath, body);
 }
 
 /**

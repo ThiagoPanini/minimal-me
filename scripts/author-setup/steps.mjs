@@ -5,6 +5,8 @@ export const owner = "ThiagoPanini";
 export const repository = `${owner}/minimal-me`;
 export const packageName = "minimal-me/web";
 export const productionEnvironment = "production";
+// A URL do Coolify, a única dos scripts; os workflows `ci` e `rollback` a repetem no COOLIFY_URL
+// (o YAML não importa daqui), e `steps.test.mjs` confere as cópias.
 export const coolifyUrl = "https://vps.panlabs.tech";
 
 // Semanal, num minuto qualquer da madrugada de domingo, longe da virada da hora em que outras

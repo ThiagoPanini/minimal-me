@@ -5,15 +5,8 @@ import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
+import { createGitHubApi } from "../github-api.mjs";
 import { repository } from "./steps.mjs";
-
-const githubApi = "https://api.github.com";
-
-export const githubHeaders = {
-  Accept: "application/vnd.github+json",
-  "X-GitHub-Api-Version": "2022-11-28",
-  "User-Agent": "minimal-me-author-setup",
-};
 
 /** Só leitura: a única porta da API que o modo de conferência recebe. */
 export function createGitHubReader() {
@@ -23,14 +16,12 @@ export function createGitHubReader() {
   } catch {
     throw new Error("o `gh` não está logado: rode `gh auth login` e tente de novo");
   }
+  const github = createGitHubApi({ token });
   return {
     /** @returns {Promise<import("./steps.mjs").ApiResponse>} */
     async get(apiPath) {
-      const response = await fetch(`${githubApi}${apiPath}`, {
-        headers: { ...githubHeaders, Authorization: `Bearer ${token}` },
-      });
-      const text = await response.text();
-      return { status: response.status, body: text ? JSON.parse(text) : null };
+      const { status, body } = await github.request("GET", apiPath);
+      return { status, body };
     },
   };
 }
