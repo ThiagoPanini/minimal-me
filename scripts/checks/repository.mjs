@@ -21,6 +21,22 @@ export function markdownFiles() {
     .map((file) => ({ file, text: readFileSync(path.join(root, file), "utf8") }));
 }
 
+/**
+ * O código da web que o git guarda (`apps/web/**` em `.ts`, `.tsx` e `.css`), com o caminho
+ * relativo à raiz e o texto. O que o build gera, em `design-system/generated/`, fica de fora.
+ */
+export function webSourceFiles() {
+  const listed = execFileSync(
+    "git",
+    ["ls-files", "-z", "--", "apps/web/*.ts", "apps/web/*.tsx", "apps/web/*.css"],
+    { cwd: root, encoding: "utf8" },
+  );
+  return listed
+    .split("\0")
+    .filter((file) => file && existsSync(path.join(root, file)))
+    .map((file) => ({ file, text: readFileSync(path.join(root, file), "utf8") }));
+}
+
 /** As prévias dos componentes do sistema de design, com o caminho relativo à raiz e o texto. */
 export function previewFiles() {
   const componentsDir = path.join(designSystemDir, "components");
