@@ -23,6 +23,7 @@ Tudo o que é código tem nome em inglês; toda prosa é em português do Brasil
 - **Fora do export**: Cache Components, Server Actions, `after()`, `proxy` e a otimização de imagem sob demanda. O primeiro space com recurso de servidor reabre a forma de saída (gatilho do ADR 0005).
 - **Estilo só com tokens.** O tema do Tailwind não tem paleta, famílias, raios nem curvas padrão: cores, pesos, raios e famílias saem do `tokens.json` (`bg-ground`, `font-light`, `rounded-square`), e espaços e curvas entram por variável (`ease-(--ease)`). Token novo no tema é uma linha no `@theme inline` de `app/globals.css`. Uma variável local é declarada no próprio CSS, como `[--grid-gap:...]`; sem a declaração, o build quebra.
 - **Testes pela borda**: contra a imagem que vai ao ar, com seletores por papel e nome acessível, importando `test` e `expect` de `e2e/fixtures.ts`, que falha o teste em qualquer erro de console. A Home não tem teste unitário.
+- **Referências visuais** (`e2e/visual.spec.ts-snapshots/`): o agente só atualiza uma quando a mudança visual é o objetivo do PR, ou quando uma versão nova do Playwright muda o desenho, e diz isso no corpo dele; nenhuma mudança visual espera o Autor. Elas se refazem só no contêiner, com `pnpm test:e2e visual.spec.ts --update-snapshots`, nunca na máquina.
 - **Versões**: a estável mais nova que funcione com o resto, nunca canary, beta ou alpha. Se o pnpm recusar uma versão por `trustPolicy` (publicada com menos garantia que a anterior), fique na anterior.
 
 ## Branches, commits e PRs
