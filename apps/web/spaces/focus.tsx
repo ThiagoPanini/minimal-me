@@ -24,7 +24,10 @@ type FocusState = {
   last: SpaceId;
 };
 
-type FocusAction = { type: "pointer-enter" | "pointer-leave"; id: SpaceId };
+type FocusAction = {
+  type: "pointer-enter" | "pointer-leave" | "keyboard-focus" | "keyboard-blur";
+  id: SpaceId;
+};
 
 function focusedId({ keyboard, pointer, touch }: FocusState): SpaceId | null {
   return keyboard ?? pointer ?? touch;
@@ -39,6 +42,12 @@ function nextState(state: FocusState, action: FocusAction): FocusState {
       break;
     case "pointer-leave":
       if (state.pointer === id) next.pointer = null;
+      break;
+    case "keyboard-focus":
+      next.keyboard = id;
+      break;
+    case "keyboard-blur":
+      if (state.keyboard === id) next.keyboard = null;
       break;
   }
   next.last = focusedId(next) ?? state.last;
@@ -131,6 +140,11 @@ export function FocusableSlit({ id, anchor, className, children }: FocusableSlit
       onPointerLeave={(event) => {
         if (event.pointerType !== "touch") dispatch({ type: "pointer-leave", id });
       }}
+      // O foco que o clique põe no link não conta: só o visível, que vem do teclado.
+      onFocus={(event) => {
+        if (event.target.matches(":focus-visible")) dispatch({ type: "keyboard-focus", id });
+      }}
+      onBlur={() => dispatch({ type: "keyboard-blur", id })}
     >
       {children}
     </li>

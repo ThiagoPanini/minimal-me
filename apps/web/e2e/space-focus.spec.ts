@@ -144,3 +144,49 @@ test("o cursor abre a fresta sob ele, como no protótipo, e a fileira volta quan
     expect(await renderedOpacity(items.nth(0).getByRole("img"))).toBe(1);
   }
 });
+
+test("a 390 e a 1440, o foco de teclado num Acessar abre a fresta dele e fica visível", async ({
+  page,
+}) => {
+  // Sem transição, cada fresta já está no estado final quando o foco chega.
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const items = slits(page);
+
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Minimal Me, início" })).toBeFocused();
+  for (const [index, { name }] of spaces.entries()) {
+    await page.keyboard.press("Tab");
+    const link = items.nth(index).getByRole("link", { name: `Acessar ${name}` });
+    await expect(link).toBeFocused();
+    await settle(page);
+    await expectOpen(page, index);
+    await expect(link).toBeInViewport();
+  }
+
+  // Fora da fileira: na tela larga, as quatro voltam ao repouso; até 900px, a última com foco
+  // fica aberta.
+  await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "voltar ao início ↑" })).toBeFocused();
+  await settle(page);
+  if (isStacked(page)) {
+    await expectOpen(page, spaces.length - 1);
+  } else {
+    const boxes = await Promise.all((await items.all()).map(boxOf));
+    for (const box of boxes) expect(box.width).toBeCloseTo(boxes[0].width, 1);
+  }
+});
+
+test("com movimento reduzido a fresta abre sem transição e o foco continua valendo, mesmo se a preferência mudar com a página aberta", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+
+  await slits(page).nth(2).hover();
+
+  // Nada roda na página, nem o pulso do ponto, e a fresta já está aberta.
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  await expectOpen(page, 2);
+});
