@@ -11,6 +11,7 @@ Tudo o que é código tem nome em inglês; toda prosa é em português do Brasil
 - **Termos do domínio**: o `GLOSSARY.md` dá a forma em inglês de cada termo, em "Em código". Use essa forma nos identificadores e o termo em português na prosa.
 - **Exceção de space**: "space" (plural "spaces") é o termo do domínio na prosa, e "Spaces" é o rótulo da seção na interface. Os dois ficam em inglês, como os nomes dos spaces (Frames & Songs, Music & Feeling, Code & Share e Write & Learn). O resto da prosa e dos textos da interface fica em português.
 - **Exceção dos arquivos de agente**: `AGENTS.md` e `CLAUDE.md` são escritos em inglês.
+- **Exceção dos robôs**: os títulos dos PRs e os commits do Dependabot ficam em inglês, com o prefixo fixo `build(deps)` do `.github/dependabot.yml`. O commitlint solta para eles o limite de 100 caracteres do cabeçalho, que eles passam quando citam o diretório e o grupo.
 
 ## Web
 

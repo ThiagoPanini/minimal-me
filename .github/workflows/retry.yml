@@ -1,0 +1,44 @@
+# A nova tentativa diária (seção "Dependências" da #57): roda de novo os jobs que falharam na
+# rodada mais recente de cada workflow dos PRs abertos por robô e da ponta da `main`, até três
+# novas tentativas por rodada, pelo scripts/retry/retry.mjs. O que falha depois disso fica para a
+# ronda do agente (AGENTS.md), com um aviso nesta rodada. Roda também à mão, pela `main`:
+#   gh workflow run retry.yml --ref main
+# Quem edita este arquivo regenera o `actions.lock` com `gh actions-lock`.
+name: retry
+
+on:
+  schedule:
+    # Todo dia, às 7h37 de Brasília: depois da rodada semanal do Dependabot (segunda, 6h) e da
+    # validação dos PRs dela, num minuto longe da virada da hora.
+    - cron: "37 10 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  retry:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+      # Ler as rodadas e rodar de novo os jobs que falharam.
+      actions: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+          # Nada de cache: este job não instala pacotes.
+          package-manager-cache: false
+      - name: Roda de novo o que falhou
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/retry/retry.mjs
