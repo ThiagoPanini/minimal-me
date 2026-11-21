@@ -1,6 +1,7 @@
 # Costura 1: a imagem da Home de pé e o Playwright no contêiner oficial, na mesma rede.
 # Quem sobe é `pnpm test:e2e` (scripts/test-e2e.ts), com um projeto do Compose por
 # worktree e sem porta no host, para vários worktrees rodarem ao mesmo tempo.
+# Com WEB_IMAGE, o compose.e2e.image.yaml troca a build do `web` por essa imagem pronta.
 services:
   web:
     build:
