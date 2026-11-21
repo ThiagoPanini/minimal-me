@@ -43,8 +43,7 @@ Quando o gitleaks acusa um segredo, tire-o do commit e troque a credencial se el
 ## Workflows e ferramentas
 
 - **Permissões**: `permissions: {}` no topo de cada workflow e, em cada job, só o que ele usa, com um comentário que diz o uso de cada permissão de escrita. Um job que só um evento usa roda só nesse evento, para não receber permissão sobrando no outro.
-- **Actions** fixadas pelo SHA completo, com a versão em comentário: `actions/checkout@<sha> # v7.0.1`.
-- **`actions.lock`**: quem edita um workflow roda `gh actions-lock` (extensão `github/gh-actions-lock`) na raiz e inclui o `.github/workflows/actions.lock` no mesmo commit. O `pnpm check` falha quando o lockfile não cobre todos os workflows e todas as actions deles.
+- **Actions** fixadas duas vezes: pelo SHA completo, com a versão em comentário (`actions/checkout@<sha> # v7.0.1`), e no `.github/workflows/actions.lock`. Quem edita um workflow roda `gh actions-lock` (extensão `github/gh-actions-lock`) na raiz e inclui o lockfile no mesmo commit. O `pnpm check` falha com uma action sem SHA ou com um workflow ou uma action fora do lockfile (`scripts/check-action-pins.mjs`): com lockfile, o zizmor deixa de cobrar o SHA.
 - **Expressões** `${{ }}` entram por `env:` ou `with:`, nunca dentro de `run:`.
 - **Ferramentas por imagem** (gitleaks, actionlint e zizmor) ficam no `compose.tools.yaml`, fixadas por etiqueta e digest, e rodam por `node scripts/tool.mjs <ferramenta>`, igual na máquina, nos ganchos e na CI. O digest de uma versão sai de `docker buildx imagetools inspect <imagem>:<versão>`.
 - O zizmor roda com as regras padrão. Uma exceção é um `# zizmor: ignore[<regra>]` na linha, com o motivo num comentário logo acima.

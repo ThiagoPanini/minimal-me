@@ -32,7 +32,7 @@ O servidor de desenvolvimento abre em `http://localhost:3000`. Em produção nã
 
 | Comando | O que faz |
 |---|---|
-| `pnpm check` | Biome em modo CI; actionlint, zizmor e a cobertura do `actions.lock` nos workflows; e a checagem de tipos (`next typegen && tsc --noEmit`). |
+| `pnpm check` | Biome em modo CI; actionlint, zizmor e a fixação das actions por SHA e pelo `actions.lock`; e a checagem de tipos (`next typegen && tsc --noEmit`). |
 | `pnpm test:e2e` | Constrói a imagem da Home, sobe-a no Docker Compose com o contêiner oficial do Playwright e roda os testes contra ela. Precisa do Docker de pé. |
 | `pnpm verify` | Os dois acima, nessa ordem. Rode antes de abrir ou atualizar um PR. |
 
