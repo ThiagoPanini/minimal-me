@@ -12,7 +12,8 @@ O que o produto é está em `docs/brief.md`; o vocabulário, em `GLOSSARY.md`; a
 | `apps/web/design-system/` | A ponte com o sistema de design: lê tokens e fontes de `docs/design/system/` no build, sem copiar nada. |
 | `apps/web/Dockerfile` e `apps/web/nginx/` | A imagem que vai ao ar: o build do Next e o nginx com cache, compressão, 404 e cabeçalhos de segurança. |
 | `apps/web/e2e/` | Os testes Playwright, que rodam contra essa imagem. |
-| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate` e publica a imagem na `main`, o `pr-title` e o `actions.lock`, que fixa as actions de todos os workflows. |
+| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate`, publica a imagem na `main` e a põe no ar; o `pr-title`; o `rollback`, que volta a Home a um commit; e o `actions.lock`, que fixa as actions de todos os workflows. |
+| `scripts/delivery/` | A entrega e o smoke (ver "Como publicar e voltar uma versão"). |
 | `lefthook.yml`, `compose.tools.yaml` e `scripts/` | Os ganchos do git e as ferramentas que rodam de imagem Docker (gitleaks, actionlint e zizmor), iguais na máquina e na CI. |
 | `scripts/author-setup/` | O roteiro da preparação única do Autor (ver "Preparação única do Autor"). |
 | `CODING_STANDARDS.md` | Os padrões que a revisão confere: idioma, web, branches, commits, ganchos e workflows. |
@@ -51,6 +52,41 @@ Todo PR roda a validação inteira, sem filtro de caminho, e o resultado vira do
 No PR, o `image` constrói a imagem e ela é testada sem ir ao registro, sem nenhuma permissão de escrita. Na `main`, o `publish` a constrói uma vez e a publica no GHCR como `ghcr.io/thiagopanini/minimal-me/web:sha-<commit>`, com proveniência, SBOM e atestado, e o e2e roda contra esse digest. Uma rodada nova do mesmo PR cancela a anterior; na `main`, nenhuma rodada é cancelada.
 
 Para testar uma imagem pronta em vez de construir uma, como faz a CI, passe a imagem em `WEB_IMAGE`, como em `WEB_IMAGE=ghcr.io/thiagopanini/minimal-me/web:sha-$(git rev-parse HEAD) pnpm test:e2e`. A imagem precisa ser do commit em que você está, porque um teste confere o commit no `version.json`.
+
+## Como publicar e voltar uma versão
+
+Publicar é mesclar. Na `main`, depois do `gate`, o job `deploy` do `ci` põe no ar o mesmo digest que passou nos testes. Ele roda no environment `production` do GitHub, que guarda o histórico de deploys, cada um com o commit, e faz isto pelo `scripts/delivery/deliver.mjs`:
+
+1. confere o atestado do digest com o `gh attestation verify`, exigindo que ele venha do `ci` da `main` e do commit que vai ao ar;
+2. aponta a tag `production` da imagem no GHCR para esse digest;
+3. chama o `/deploy` do Coolify, que puxa a tag `production` e troca o contêiner;
+4. roda o smoke contra `https://minimalme.dev`: espera o `version.json` mostrar o commit novo, por até 10 minutos, e confere a Home com 200, uma rota inexistente com 404 servindo o `404.html`, um arquivo de `/_next/static/` com cache longo e o cabeçalho `Server` sem versão.
+
+Se o `/deploy` ou o smoke falham, o job devolve `production` ao digest que estava no ar, chama o `/deploy` de novo e termina vermelho, com o que falhou e o que o rollback fez na anotação da rodada. Na primeira entrega não há digest anterior, e o job só termina vermelho.
+
+Para voltar a Home a um commit, rode o workflow `rollback` pela `main` com o SHA completo de um commit que a `main` já publicou:
+
+```sh
+gh workflow run rollback.yml --ref main -f commit=$(git rev-parse <commit>)
+gh run list --workflow rollback.yml --limit 1
+```
+
+O rollback passa pelos mesmos passos, com o digest da imagem `sha-<commit>`, e também volta ao que estava no ar se o smoke falhar. Ele fica até o próximo merge na `main`, que publica de novo. A entrega e o rollback dividem o grupo de concurrency `production`: um por vez, com no máximo um esperando, e nenhum cancelado no meio.
+
+O que a entrega lê do environment `production`, restrito à `main`, sem revisor nem espera:
+
+| Nome | Tipo | O que é |
+|---|---|---|
+| `COOLIFY_TOKEN` | segredo | O token de API do Coolify com a permissão `deploy`, gravado pelo roteiro da preparação única. |
+| `COOLIFY_APP_UUID` | variável | O UUID da aplicação da Home no Coolify, que nasce na operação do primeiro deploy. |
+
+Até os dois existirem, a entrega confere o atestado e termina vermelha dizendo o que falta, sem mexer na tag. Os jobs que instalam dependências nunca veem o token: a entrega e o rollback não instalam pacotes, e o smoke e a entrega usam só o Node e os binários do runner.
+
+O smoke também roda à mão contra qualquer URL, e no `pnpm test:e2e` contra a imagem local:
+
+```sh
+node scripts/delivery/smoke.mjs --url https://minimalme.dev --commit <sha de 40 caracteres>
+```
 
 ## Preparação única do Autor
 
