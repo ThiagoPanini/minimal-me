@@ -47,7 +47,7 @@ export function OpeningIllustration() {
           />
         </div>
       ))}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-3 h-[13%] bg-[linear-gradient(to_bottom,color-mix(in_srgb,var(--ground)_0%,transparent),color-mix(in_srgb,var(--ground)_70%,transparent)_60%,var(--ground))]" />
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-3 h-[13%] bg-[linear-gradient(to_bottom,transparent,color-mix(in_srgb,var(--ground)_70%,transparent)_60%,var(--ground))]" />
       <div className="pointer-events-none absolute inset-0 z-4" style={grainStyle} />
     </div>
   );

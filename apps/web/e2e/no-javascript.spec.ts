@@ -27,7 +27,7 @@ test("sem JavaScript, o texto e as ilustrações aparecem @webkit", async ({ pag
   ];
   for (const text of texts) {
     await expect(text).toBeVisible();
-    expect(await renderedOpacity(text), await text.textContent()).toBe(1);
+    expect(await renderedOpacity(text), (await text.textContent()) ?? "").toBe(1);
   }
 
   // Toda imagem da página, o céu e as marcas inclusive, carregada e à vista.
@@ -38,6 +38,6 @@ test("sem JavaScript, o texto e as ilustrações aparecem @webkit", async ({ pag
     await expect
       .poll(() => image.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0))
       .toBe(true);
-    expect(await renderedOpacity(image), await image.getAttribute("src")).toBe(1);
+    expect(await renderedOpacity(image), (await image.getAttribute("src")) ?? "").toBe(1);
   }
 });
