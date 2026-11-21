@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from "react";
+import { mediaQueries } from "@/app/media";
 import { StatusLine } from "@/components/StatusLine";
 import {
   grade,
@@ -121,7 +122,7 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
               <img
                 src={image.src}
                 srcSet={image.srcSet}
-                sizes="(max-width: 900px) 350px, 35vw"
+                sizes={`${mediaQueries.stacked} 350px, 35vw`}
                 width={image.width}
                 height={image.height}
                 alt={illustration.alt}

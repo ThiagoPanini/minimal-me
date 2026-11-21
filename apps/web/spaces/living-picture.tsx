@@ -1,8 +1,8 @@
 "use client";
 
 import { type RefObject, useEffect, useRef, useState } from "react";
+import { useMedia } from "@/app/use-media";
 import type { SpaceIllustrationKey } from "@/design-system/living-pictures";
-import { useReducedMotion } from "@/motion/reduced-motion";
 import type { SpaceId } from "@/spaces/catalog";
 import { useSlitFocus } from "@/spaces/focus";
 import type { LivingPictureEngine } from "@/spaces/living-picture-engine";
@@ -50,12 +50,12 @@ export function LivingPicture({ id, illustration }: LivingPictureProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<Promise<LivingPictureEngine> | null>(null);
   const { open } = useSlitFocus(id);
-  const reducedMotion = useReducedMotion();
+  const motion = useMedia("motion");
   const visible = useVisible(canvas);
 
   // Cada mudança chega ao laço depois do mesmo começo, na ordem em que aconteceu.
   useEffect(() => {
-    if (reducedMotion) {
+    if (!motion) {
       engine.current?.then((started) => started.still());
       return;
     }
@@ -67,7 +67,7 @@ export function LivingPicture({ id, illustration }: LivingPictureProps) {
         .then(({ startLivingPicture }) => startLivingPicture(element, illustration));
     }
     engine.current.then((started) => started.update({ awake: open, visible }));
-  }, [open, visible, reducedMotion, illustration]);
+  }, [open, visible, motion, illustration]);
 
   return (
     // biome-ignore lint/a11y/noAriaHiddenOnFocusable: o canvas não recebe foco; só desenha sobre a foto, que já tem o texto alternativo.

@@ -8,6 +8,7 @@ import {
   useRef,
   useSyncExternalStore,
 } from "react";
+import { useMedia } from "@/app/use-media";
 import { useToast } from "@/components/Toast";
 import type { SpaceId } from "@/spaces/catalog";
 
@@ -74,15 +75,6 @@ function slitFocusOf(state: FocusState, id: SpaceId): SlitFocus | undefined {
   return state.last === id ? "kept" : undefined;
 }
 
-// Até 900px a fileira empilha (a variante `stacked` de `app/globals.css`).
-const stackedQuery = "(max-width: 900px)";
-
-function subscribeToStacked(onChange: () => void): () => void {
-  const query = window.matchMedia(stackedQuery);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
 const subscribeToNothing = () => () => {};
 
 // Verdadeiro depois da hidratação: só com script a fresta inteira responde ao clique.
@@ -90,14 +82,6 @@ function useHydrated(): boolean {
   return useSyncExternalStore(
     subscribeToNothing,
     () => true,
-    () => false,
-  );
-}
-
-function useStacked(): boolean {
-  return useSyncExternalStore(
-    subscribeToStacked,
-    () => window.matchMedia(stackedQuery).matches,
     () => false,
   );
 }
@@ -129,7 +113,8 @@ export function SpaceFocusProvider({ kept, children }: SpaceFocusProviderProps) 
     touch: null,
     last: kept,
   });
-  const stacked = useStacked();
+  // Até 900px a fileira empilha, e a fresta guardada fica aberta.
+  const stacked = useMedia("stacked");
   return <SpaceFocusContext value={{ state, dispatch, stacked }}>{children}</SpaceFocusContext>;
 }
 

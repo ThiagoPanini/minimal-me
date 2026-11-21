@@ -10,6 +10,7 @@ import {
   useState,
   ViewTransition,
 } from "react";
+import { matchesMedia } from "@/app/use-media";
 
 // O aviso (docs/design/system/components/Toast; módulo 7 da spec #57): uma linha de texto que
 // responde a uma ação sem destino, centrada no pé da tela. Hoje, o "Acessar" de um space que
@@ -32,9 +33,8 @@ const fadeMs = 500;
 // Só com movimento a mudança entra numa transição, que o `<ViewTransition>` do aviso anima;
 // sem ele, ela vale na hora.
 function changeNotice(change: () => void): void {
-  if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
-    startTransition(change);
-  } else change();
+  if (matchesMedia("motion")) startTransition(change);
+  else change();
 }
 
 type Notice = { message: string; key: number; shown: boolean };

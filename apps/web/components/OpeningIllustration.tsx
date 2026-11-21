@@ -1,4 +1,5 @@
 import type { CSSProperties } from "react";
+import { mediaQueries } from "@/app/media";
 import { Mark } from "@/components/Mark";
 import { grainStyle, type OpeningLayer, openingLayers } from "@/design-system/illustrations";
 
@@ -71,7 +72,7 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
           <img
             src={layer.image.src}
             srcSet={layer.image.srcSet}
-            sizes="(max-width: 900px) 150vw, 106vw"
+            sizes={`${mediaQueries.stacked} 150vw, 106vw`}
             width={layer.image.width}
             height={layer.image.height}
             alt={layer.alt}

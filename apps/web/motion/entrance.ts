@@ -12,7 +12,11 @@
 // Se a preferência passar a movimento reduzido com a página aberta, o atributo sai na hora, e
 // tudo fica no estado final até o fim da visita, sem repetir nenhuma entrada.
 
+import { mediaQueries } from "@/app/media";
+
 type EntranceOptions = {
+  // A consulta do movimento (`app/media.ts`), que o script recebe por não importar nada.
+  motionQuery: string;
   // Quanto a abertura espera as camadas, em ms.
   arrivalMs: number;
   // Quanto de um bloco precisa estar na tela para ele entrar, e a margem da tela.
@@ -21,10 +25,10 @@ type EntranceOptions = {
 };
 
 // Autocontida: vai para a página como texto (`entranceScript`), sem nada de fora dela.
-function enterPage({ arrivalMs, threshold, rootMargin }: EntranceOptions): void {
+function enterPage({ motionQuery, arrivalMs, threshold, rootMargin }: EntranceOptions): void {
   const root = document.documentElement;
-  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-  if (reduced.matches || !("IntersectionObserver" in window)) return;
+  const motion = window.matchMedia(motionQuery);
+  if (!motion.matches || !("IntersectionObserver" in window)) return;
   root.dataset.motion = "waiting";
 
   const arrive = () => {
@@ -42,13 +46,13 @@ function enterPage({ arrivalMs, threshold, rootMargin }: EntranceOptions): void 
     { threshold, rootMargin },
   );
   const stop = () => {
-    if (!reduced.matches) return;
-    reduced.removeEventListener("change", stop);
+    if (motion.matches) return;
+    motion.removeEventListener("change", stop);
     window.clearTimeout(timer);
     observer.disconnect();
     delete root.dataset.motion;
   };
-  reduced.addEventListener("change", stop);
+  motion.addEventListener("change", stop);
 
   const start = () => {
     if (!root.dataset.motion) return;
@@ -75,9 +79,10 @@ function enterPage({ arrivalMs, threshold, rootMargin }: EntranceOptions): void 
   } else start();
 }
 
-// Os números do protótipo: a abertura espera até 5s; um bloco entra com 12% dele na tela,
-// descontados 6% do pé dela.
+// A consulta do movimento e os números do protótipo: a abertura espera até 5s; um bloco entra
+// com 12% dele na tela, descontados 6% do pé dela.
 const options: EntranceOptions = {
+  motionQuery: mediaQueries.motion,
   arrivalMs: 5000,
   threshold: 0.12,
   rootMargin: "0px 0px -6% 0px",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useReducedMotion } from "@/motion/reduced-motion";
+import { useMedia } from "@/app/use-media";
 
 // A profundidade da página (módulo 6 da spec #57), como no protótipo: com o ponteiro, as
 // camadas da abertura (`data-opening-layer`) se deslocam, o céu contra ele e as dunas com ele;
@@ -44,10 +44,10 @@ const pointerVertical = 0.66;
 const clamp = (value: number) => Math.min(1, Math.max(0, value));
 
 export function PageDepth({ layers, picture }: PageDepthProps) {
-  const reducedMotion = useReducedMotion();
+  const motion = useMedia("motion");
 
   useEffect(() => {
-    if (reducedMotion) return;
+    if (!motion) return;
     const opening = layers.flatMap(({ id, pointer }) => {
       const element = document.querySelector<HTMLElement>(`[data-opening-layer="${id}"]`);
       return element ? [{ element, pointer }] : [];
@@ -116,7 +116,7 @@ export function PageDepth({ layers, picture }: PageDepthProps) {
       for (const { element } of opening) element.style.removeProperty("transform");
       for (const element of pictures) element.style.removeProperty("translate");
     };
-  }, [reducedMotion, layers, picture]);
+  }, [motion, layers, picture]);
 
   return null;
 }
