@@ -47,8 +47,10 @@ export function SpaceSlitRow({ kept, children }: SpaceSlitRowProps) {
   );
 }
 
-// Quanto tempo a foto leva para acordar ou voltar ao repouso: `wake` diz quanto ela anda a
-// cada segundo, e ela chega ao fim quando falta 0,4% (como no protótipo).
+// Quanto tempo a foto leva para chegar 3% mais perto com o foco, ou para voltar. No protótipo,
+// a cada segundo ela anda a fração `rate` (de `wake`) do que falta e para quando falta 0,4%;
+// a curva `ease-out` acompanha essa aproximação (medido: a 0,5s e a 1s, menos de 0,2% de
+// escala de diferença). Com movimento reduzido, a foto não se aproxima.
 const wakeSeconds = (rate: number) => `${(Math.log(1 / 0.004) / rate).toFixed(2)}s`;
 
 // O recorte por largura, a chave de luz e a aproximação da foto, como variáveis para
