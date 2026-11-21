@@ -160,7 +160,8 @@ async function guideMergeApp(context) {
     }
   }
   if (installationIsOnlyThisRepository(context.state.mergeApp?.installation)) return;
-  if (!app.body.installations_count) {
+  // Logo depois da criação, a API pode ainda não achar o App: conta como não instalado.
+  if (!(app.status === 200 && app.body.installations_count > 0)) {
     openUrl(`https://github.com/apps/${slug}/installations/new`);
     io.step("Escolha Only select repositories, marque só minimal-me e clique em Install.");
     await io.pause("Enter depois de instalar.");
