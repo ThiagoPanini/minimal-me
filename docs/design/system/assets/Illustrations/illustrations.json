@@ -1,5 +1,5 @@
 {
-  "about": "Dados das ilustrações dos spaces, lidos da Home em Frestas II (docs/design/prototype/mvp/index.html). u e v vão de 0 a 1 sobre o arquivo inteiro; x, y, w e h são px do arquivo. glow é a luz atrás da figura, que respira com a foto acordada: radius em fração da largura, alpha no pico, rate em radianos por segundo. O recorte (crop) diz onde a imagem fica presa no quadro, de 0 a 1, e o zoom a partir de 1. Trocar uma ilustração obriga a refazer os dados dela.",
+  "about": "Dados das ilustrações da abertura (opening) e dos spaces (illustrations), lidos da Home em Frestas II (docs/design/prototype/mvp/index.html). u e v vão de 0 a 1 sobre o arquivo inteiro; x, y, w e h são px do arquivo. glow é a luz atrás da figura, que respira com a foto acordada: radius em fração da largura, alpha no pico, rate em radianos por segundo. O recorte (crop) diz onde a imagem fica presa no quadro, de 0 a 1, e o zoom a partir de 1. Trocar uma ilustração obriga a refazer os dados dela.",
   "grade": {
     "rest": "brightness(.86) contrast(.97)",
     "focus": "none"
@@ -20,6 +20,33 @@
     "scroll": 14,
     "pointer": 3,
     "note": "Em px: até 14 com a rolagem e até 3 com o ponteiro."
+  },
+  "opening": {
+    "note": "A abertura da Home: duas camadas do mesmo tamanho, na ordem da lista (o céu atrás, as dunas na frente). Cada camada cobre a imagem da abertura, com uma folga de 3% em cada borda para a profundidade, e fica presa no ponto position (x e y de 0 a 1): wide na tela larga, narrow até 760px de largura. depth.pointer é o deslocamento máximo com o ponteiro, em px; o sinal negativo vai contra o ponteiro. O céu é fundo e leva texto alternativo vazio.",
+    "layers": [
+      {
+        "id": "sky",
+        "file": "sky.webp",
+        "size": [1086, 1128],
+        "alt": "",
+        "position": {
+          "wide": { "x": 0.5, "y": 0.16 },
+          "narrow": { "x": 0.4, "y": 0.1 }
+        },
+        "depth": { "pointer": { "x": -6, "y": -3 } }
+      },
+      {
+        "id": "dunes",
+        "file": "dunes.webp",
+        "size": [1086, 1128],
+        "alt": "Ilustração: uma pessoa sentada nas dunas observa um grande mapa celeste.",
+        "position": {
+          "wide": { "x": 0.4, "y": 1.0 },
+          "narrow": { "x": 0.36, "y": 1.0 }
+        },
+        "depth": { "pointer": { "x": 12, "y": 5 } }
+      }
+    ]
   },
   "illustrations": {
     "frames": {

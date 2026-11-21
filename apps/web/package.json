@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && node design-system/check-css-variables.ts",
-    "check:types": "next typegen && tsc --noEmit",
+    "dev": "node design-system/generate-illustrations.ts && next dev",
+    "build": "node design-system/generate-illustrations.ts && next build && node design-system/check-css-variables.ts",
+    "check:types": "node design-system/generate-illustrations.ts && next typegen && tsc --noEmit",
     "test:e2e": "node scripts/test-e2e.ts"
   },
   "dependencies": {
@@ -14,12 +14,14 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
     "@playwright/test": "^1.65.1",
     "@tailwindcss/postcss": "^4.3.5",
     "@types/node": "^24.19.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "babel-plugin-react-compiler": "^1.0.0",
+    "sharp": "^0.35.5",
     "tailwindcss": "^4.3.5",
     "typescript": "^7.0.2"
   }

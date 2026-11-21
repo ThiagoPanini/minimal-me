@@ -64,7 +64,7 @@ Esta é a versão 2, de 2026-11-20, escrita para a Home em Frestas II (`docs/des
 - Ilustrações novas são originais e seguem essa receita. Não use fotografia de banco, cor nem outro traço.
 - As quatro dos spaces saem no mesmo nível de luz e dividem uma chave só: `brightness(.86) contrast(.97)` em repouso e nenhuma com foco.
 - Recorte com posição e zoom: `x` e `y` de 0 a 1 (onde a imagem fica presa no quadro) e `zoom` a partir de 1, com um valor para a tela larga e outro para a empilhada. Na fresta, a imagem fica presa pelo pé (`y: 1`). Os valores de cada ilustração estão em `assets/Illustrations/illustrations.json`.
-- Esfume as quatro bordas da imagem de um space em 2%. Na abertura, use duas camadas (céu e dunas) e desça para `ground` no pé da imagem.
+- Esfume as quatro bordas da imagem de um space em 2%. Na abertura, use duas camadas (céu e dunas) e desça para `ground` no pé da imagem. A posição de cada camada por largura está em `assets/Illustrations/illustrations.json`, em `opening`.
 - Cubra toda imagem com o grão: `grain.png` em ladrilho de 160px, opacidade .35, em multiplicação.
 - A profundidade é discreta: o céu se desloca até 6px e as dunas até 12px com o ponteiro; a imagem de um space, até 3px com o ponteiro e 14px com a rolagem.
 

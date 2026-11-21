@@ -13,4 +13,5 @@ apps/web/e2e/
 apps/web/test-results/
 apps/web/playwright-report/
 apps/web/next-env.d.ts
+apps/web/design-system/generated/
 apps/web/*.tsbuildinfo
