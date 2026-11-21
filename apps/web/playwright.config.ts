@@ -11,8 +11,8 @@ if (!baseURL) {
 
 const isCI = Boolean(process.env.CI);
 
-// As respostas do nginx não dependem do navegador: rodam só no projeto de 1440.
-const nginxOnly = "nginx.spec.ts";
+// As respostas do nginx e o smoke da entrega não dependem do navegador: rodam só no projeto de 1440.
+const browserless = ["nginx.spec.ts", "smoke.spec.ts"];
 // O Lighthouse emula sozinho a tela de 390px no Chromium: roda só no projeto de 390.
 const lighthouseOnly = "performance.spec.ts";
 
@@ -31,7 +31,7 @@ export default defineConfig({
   projects: [
     {
       name: "chromium-390",
-      testIgnore: nginxOnly,
+      testIgnore: browserless,
       use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 } },
     },
     {
@@ -42,7 +42,7 @@ export default defineConfig({
     {
       // Subconjunto em WebKit: só os testes marcados com @webkit.
       name: "webkit-iphone-13",
-      testIgnore: [nginxOnly, lighthouseOnly],
+      testIgnore: [...browserless, lighthouseOnly],
       grep: /@webkit/,
       use: { ...devices["iPhone 13"] },
     },
