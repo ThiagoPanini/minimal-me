@@ -47,11 +47,16 @@
 }
 
 /*
- * As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`). Os
- * utilitários `max-[900px]:` e `min-[901px]:` do Tailwind não servem: o primeiro é
- * `width < 900px` e o segundo `width >= 901px`, e a 900px exatos nenhum dos dois vale.
- * Até 900px a página empilha (`stacked:`; acima, `not-stacked:`); até 760px, as camadas
- * da abertura usam a posição estreita e a frase do Masthead fica em 14px (`narrow:`).
+ * As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`). As
+ * arbitrárias do Tailwind não servem: `max-[900px]` é `width < 900px`, `min-[901px]` é
+ * `width >= 901px`, e a 900px exatos nenhuma das duas vale; o `pnpm check` as recusa
+ * (`scripts/checks/tailwind-variants.mjs`). Até 900px a página empilha (`stacked:`; acima,
+ * `not-stacked:`); até 760px, as camadas da abertura usam a posição estreita e a frase do
+ * Masthead fica em 14px (`narrow:`). As consultas de contêiner (`@max-[…]:`) são livres.
+ *
+ * Ordem no CSS gerado: a base, as variantes do próprio Tailwind (`hover:`, `motion-safe:`), as
+ * consultas de contêiner e, por fim, as daqui, na ordem em que estão declaradas (`not-stacked:`
+ * sai logo depois da base). Numa disputa da mesma propriedade, vence a que vem depois.
  */
 @custom-variant stacked (@media (max-width: 900px));
 @custom-variant narrow (@media (max-width: 760px));
@@ -63,6 +68,10 @@
  * Aberta: com foco em qualquer largura e, até 900px, também a guardada. Fechada: até 900px,
  * toda fresta sem o atributo. Recuada: a que não está aberta numa fileira em que outra está.
  * `slit-open:` vale na própria fresta; `in-slit-*:`, dentro dela.
+ *
+ * Transição só com movimento: `motion-safe:[transition:…]`. Tirá-la com `motion-reduce:` não
+ * adianta, porque estas variantes vêm depois no CSS e a trazem de volta (o `pnpm check` recusa
+ * o `transition-none` nessa variante).
  */
 @custom-variant slit-open {
   &:where([data-focus="active"]) {
@@ -113,6 +122,11 @@
  * abertura espera as duas camadas, e `opening-arrived:` depois. `unrevealed:` vale num bloco
  * (`data-reveal`) que ainda não entrou na tela, ou dentro dele; `revealed:`, depois que entrou.
  * Declaradas depois das `slit-*`, ganham delas numa disputa da mesma propriedade.
+ *
+ * Bloco novo que entra ao rolar: `data-reveal` no bloco e, nas partes, `unrevealed:opacity-0`
+ * com `revealed:[animation:<keyframe>_<tempo>_var(--ease-out)_backwards]`, usando um dos
+ * keyframes abaixo. O script da entrada observa todo `[data-reveal]` que já está no HTML
+ * exportado; um bloco que só nasce no cliente ficaria invisível com movimento.
  */
 @custom-variant entering {
   @media (prefers-reduced-motion: no-preference) {
