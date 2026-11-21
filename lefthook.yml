@@ -1,0 +1,20 @@
+# Os ganchos do git (seção "Ganchos, comandos e ferramentas" da #57). Eles avisam antes, na
+# máquina; quem decide é a CI. O `pnpm install` os instala pelo postinstall do lefthook.
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+    - name: gitleaks
+      run: node scripts/tool.mjs gitleaks git --pre-commit --redact --staged --no-banner --verbose
+
+commit-msg:
+  jobs:
+    - name: commitlint
+      run: pnpm exec commitlint --edit {1}
+
+pre-push:
+  jobs:
+    - name: check
+      run: pnpm check

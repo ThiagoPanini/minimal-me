@@ -6,13 +6,16 @@
     "node": "24.x"
   },
   "scripts": {
-    "check": "biome ci && pnpm --filter web check:types",
+    "check": "biome ci && pnpm check:workflows && pnpm --filter web check:types",
+    "check:workflows": "node scripts/tool.mjs actionlint && node scripts/tool.mjs zizmor --offline --no-progress --quiet . && node scripts/check-actions-lock.mjs",
     "test:e2e": "pnpm --filter web test:e2e",
     "verify": "pnpm check && pnpm test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.6.8",
     "@commitlint/cli": "^21.2.4",
-    "@commitlint/config-conventional": "^21.2.4"
+    "@commitlint/config-conventional": "^21.2.4",
+    "lefthook": "^2.2.1",
+    "yaml": "^2.9.1"
   }
 }

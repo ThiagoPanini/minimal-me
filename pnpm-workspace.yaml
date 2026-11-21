@@ -3,3 +3,6 @@ packages:
 
 # Os padrões do pnpm 12 já valem: um dia de maturidade, strictDepBuilds e blockExoticSubdeps.
 trustPolicy: no-downgrade
+# Só o lefthook roda script de instalação: o postinstall dele instala os ganchos do git.
+allowBuilds:
+  lefthook: true
