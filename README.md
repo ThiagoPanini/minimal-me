@@ -12,8 +12,10 @@ O que o produto é está em `docs/brief.md`; o vocabulário, em `GLOSSARY.md`; a
 | `apps/web/design-system/` | A ponte com o sistema de design: lê tokens e fontes de `docs/design/system/` no build, sem copiar nada. |
 | `apps/web/Dockerfile` e `apps/web/nginx/` | A imagem que vai ao ar: o build do Next e o nginx com cache, compressão, 404 e cabeçalhos de segurança. |
 | `apps/web/e2e/` | Os testes Playwright, que rodam contra essa imagem. |
-| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate`, publica a imagem na `main` e a põe no ar; o `pr-title`; o `rollback`, que volta a Home a um commit; e o `actions.lock`, que fixa as actions de todos os workflows. |
+| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate`, publica a imagem na `main` e a põe no ar; o `pr-title`; o `rollback`, que volta a Home a um commit; o `auto-merge` e o `retry`, dos PRs do Dependabot; e o `actions.lock`, que fixa as actions de todos os workflows. |
+| `.github/dependabot.yml` | As atualizações de dependências (ver "Como as dependências se atualizam"). |
 | `scripts/delivery/` | A entrega e o smoke (ver "Como publicar e voltar uma versão"). |
+| `scripts/retry/` | A nova tentativa diária do que falhou nos PRs de robô e na `main`. |
 | `lefthook.yml`, `compose.tools.yaml` e `scripts/` | Os ganchos do git e as ferramentas que rodam de imagem Docker (gitleaks, actionlint e zizmor), iguais na máquina e na CI. |
 | `scripts/author-setup/` | O roteiro da preparação única do Autor (ver "Preparação única do Autor"). |
 | `CODING_STANDARDS.md` | Os padrões que a revisão confere: idioma, web, branches, commits, ganchos e workflows. |
@@ -87,6 +89,15 @@ O smoke também roda à mão contra qualquer URL, e no `pnpm test:e2e` contra a 
 ```sh
 node scripts/delivery/smoke.mjs --url https://minimalme.dev --commit <sha de 40 caracteres>
 ```
+
+## Como as dependências se atualizam
+
+Ninguém atualiza dependência à mão. Toda segunda, às 6h de Brasília, o Dependabot abre um PR por ecossistema com as atualizações patch e minor das versões publicadas há pelo menos 3 dias, e um PR para cada major. Os ecossistemas são o npm, as actions dos workflows, as imagens do `apps/web/Dockerfile` e as das ferramentas no `compose.tools.yaml`. As atualizações de segurança chegam sem esperar, uma por PR. Os títulos ficam em inglês, com o prefixo `build(deps)`, como exceção de robô à regra de idioma, e passam no `pr-title` como qualquer outro.
+
+- **Merge automático**: o workflow `auto-merge` liga o auto-merge em squash de todo PR que o Dependabot abre, e o GitHub o mescla quando o `gate` e o `pr-title` passam, inclusive major. Quem liga é o GitHub App do Autor, com o token dele, porque um merge pelo `GITHUB_TOKEN` não dispararia o `ci` da `main` nem a entrega. A exceção é a major do Node, que fica no 24 até o Next suportar o 26: o Dependabot não a pede, nem para a imagem `node` nem para os tipos `@types/node`, e o `auto-merge` não a mescla.
+- **Nova tentativa**: todo dia, às 7h37 de Brasília, o workflow `retry` roda de novo os jobs que falharam na rodada mais recente de cada workflow dos PRs abertos por robô e na ponta da `main`, até três novas tentativas por rodada. Cobre a falha passageira e o PR de segurança barrado pela maturidade de um dia do pnpm. O que continua vermelho fica para a ronda do agente no começo da sessão (`AGENTS.md`). Para rodar à mão: `gh workflow run retry.yml --ref main`.
+
+O `auto-merge` lê o Client ID e a chave privada do App dos segredos do Dependabot `MERGE_APP_CLIENT_ID` e `MERGE_APP_PRIVATE_KEY`, gravados pelo roteiro da preparação única. Até eles existirem, o `auto-merge` termina vermelho ao gerar o token, e os PRs do Dependabot esperam um merge.
 
 ## Preparação única do Autor
 
