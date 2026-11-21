@@ -1,0 +1,65 @@
+# O rollback manual (seção "Entrega" da #57): põe no ar o digest que a `main` publicou para um
+# commit, como `sha-<commit>`, pelo mesmo scripts/delivery/deliver.mjs do job `deploy` do `ci`:
+# confere o atestado, aponta a tag `production`, chama o /deploy do Coolify e roda o smoke; se
+# algo falha, volta ao digest que estava no ar. Roda pela `main`:
+#   gh workflow run rollback.yml --ref main -f commit=<sha de 40 caracteres>
+# Quem edita este arquivo regenera o `actions.lock` com `gh actions-lock`.
+name: rollback
+run-name: Rollback para ${{ inputs.commit }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit:
+        description: SHA completo (40 caracteres) de um commit que a `main` publicou
+        required: true
+        type: string
+
+permissions: {}
+
+env:
+  IMAGE: ghcr.io/thiagopanini/minimal-me/web
+  PRODUCTION_URL: https://minimalme.dev
+
+jobs:
+  # Os mesmos environment, grupo de concurrency, permissões e passos do job `deploy` do `ci`.
+  rollback:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    environment:
+      name: production
+      url: ${{ env.PRODUCTION_URL }}
+    concurrency:
+      group: production
+      cancel-in-progress: false
+    permissions:
+      contents: read
+      # Apontar a tag `production` para o digest do commit.
+      packages: write
+      # Ler o atestado do digest no `gh attestation verify`.
+      attestations: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version-file: package.json
+          # Nada de cache: este job não restaura o que outro job gravou.
+          package-manager-cache: false
+      - name: Entra no GHCR
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: printf '%s' "$GITHUB_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+      - name: Entrega o digest do commit
+        env:
+          COMMIT: ${{ inputs.commit }}
+          GH_TOKEN: ${{ github.token }}
+          COOLIFY_URL: https://vps.panlabs.tech
+          COOLIFY_APP_UUID: ${{ vars.COOLIFY_APP_UUID }}
+          COOLIFY_TOKEN: ${{ secrets.COOLIFY_TOKEN }}
+        run: node scripts/delivery/deliver.mjs --commit "$COMMIT"
+      - name: Sai do GHCR
+        if: always()
+        run: docker logout ghcr.io
