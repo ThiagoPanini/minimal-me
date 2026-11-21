@@ -14,3 +14,7 @@ overrides:
   # chromium-bidi 17.0.2, com proveniência. Sai quando um puppeteer-core novo voltar a pedir
   # um chromium-bidi com proveniência.
   "lighthouse>puppeteer-core": 25.12.0
+  # O chromium-bidi 17.0.2 declara o zod 3, e todo zod abaixo do 4.6.6 tem a GHSA-mrhx-c7xc-m3w5
+  # (alta). O 4.6.7 tem proveniência. O Puppeteer só carrega o chromium-bidi no WebDriver BiDi, e
+  # o Lighthouse fala CDP, então o zod nem roda no teste. Sai junto com a linha de cima.
+  "chromium-bidi>zod": 4.6.7
