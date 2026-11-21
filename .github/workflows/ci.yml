@@ -66,9 +66,11 @@ jobs:
         with:
           fail-on-severity: high
           fail-on-scopes: runtime
-          # Só valem fora do `pull_request`; no PR, a action usa a base e a ponta dele.
-          base-ref: ${{ github.event.before }}
-          head-ref: ${{ github.sha }}
+          # Na `main`, o push compara o commit anterior com o novo. No PR, as duas ficam vazias: a
+          # action só usa a base e a ponta do PR quando nenhuma das duas vem (src/git-refs.ts).
+          # Com elas no PR, ela compararia só o último push, ou quebraria num PR recém-aberto.
+          base-ref: ${{ github.event_name == 'push' && github.event.before || '' }}
+          head-ref: ${{ github.event_name == 'push' && github.sha || '' }}
 
   # PR: a imagem vai para um arquivo e segue ao e2e como artefato, sem push. O cache só é lido.
   image:
