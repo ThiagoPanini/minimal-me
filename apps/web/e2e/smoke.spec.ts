@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { createServer } from "node:http";
 import type { AddressInfo } from "node:net";
 import path from "node:path";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // O smoke da entrega (scripts/delivery/smoke.mjs) contra a imagem que vai ao ar. Depois do deploy,
 // ele roda contra a URL pública (costura 3); aqui ele ganha teste antes do primeiro deploy. Para

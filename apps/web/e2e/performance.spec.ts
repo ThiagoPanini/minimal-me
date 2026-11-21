@@ -1,7 +1,8 @@
 import { createServer } from "node:net";
-import { chromium, expect, test } from "@playwright/test";
+import { chromium } from "@playwright/test";
 import type { Config, Result } from "lighthouse";
 import lighthouse from "lighthouse";
+import { expect, test } from "./fixtures";
 
 // Peso e LCP da primeira visita (spec #57, Testing Decisions): o Lighthouse mede a Home da
 // imagem que vai ao ar, no Chromium do contêiner do Playwright, a 390 × 844 com fator de escala

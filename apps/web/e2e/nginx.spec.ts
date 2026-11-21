@@ -1,5 +1,5 @@
 import type { APIRequestContext } from "@playwright/test";
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures";
 
 // As respostas do nginx da imagem que vai ao ar: status, cache, compressão e cabeçalhos.
 
