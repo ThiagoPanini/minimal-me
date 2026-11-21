@@ -100,7 +100,7 @@ function excerpt(line, index) {
   return `${start > 0 ? "…" : ""}${line.slice(start, end).trim()}${end < line.length ? "…" : ""}`;
 }
 
-/** Cada travessão da prosa de um Markdown, com o arquivo, a linha e o trecho. */
+/** Cada linha de um Markdown com travessão na prosa, com o arquivo, a linha e o trecho dele. */
 export function emDashProblems(file, text) {
   const prose = proseOf(text).replace(interfaceCounter, blank).split("\n");
   const problems = [];
