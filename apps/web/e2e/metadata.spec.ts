@@ -165,3 +165,75 @@ test("a aba mostra o ícone da marca: o anel e o ponto sobre ground @webkit", as
   expect(decoded.corner).toEqual([22, 22, 22, 255]);
   expect(decoded.runs).toEqual(["escuro", "claro", "escuro", "claro"]);
 });
+
+test("o robots.txt libera tudo e aponta para o sitemap.xml", async ({ request }) => {
+  const response = await request.get("/robots.txt");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("text/plain");
+
+  // Cada linha com conteúdo, como diretiva e valor.
+  const directives = (await response.text())
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const [name, ...value] = line.split(":");
+      return [name.trim().toLowerCase(), value.join(":").trim()];
+    });
+  expect(directives).toEqual([
+    ["user-agent", "*"],
+    ["allow", "/"],
+    ["sitemap", `${site}sitemap.xml`],
+  ]);
+});
+
+test("o sitemap.xml lista só a Home, que responde", async ({ request, baseURL }) => {
+  const response = await request.get("/sitemap.xml");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toContain("xml");
+
+  const body = await response.text();
+  expect(body).toContain('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">');
+  const addresses = [...body.matchAll(/<loc>([^<]*)<\/loc>/g)].map(([, address]) => address);
+  expect(addresses.map((address) => new URL(address).href)).toEqual([site]);
+  expect((await request.get(local(addresses[0], baseURL))).status()).toBe(200);
+});
+
+// Os endereços do próprio site que uma página aponta: os links, o canônico, o ícone e os da
+// prévia de compartilhamento.
+function ownAddresses(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const links = document.querySelectorAll("a[href], link[rel='canonical'], link[rel='icon']");
+    const metas = document.querySelectorAll(
+      "meta[property='og:url'], meta[property='og:image'], meta[name='twitter:image']",
+    );
+    return [
+      ...[...links].map((link) => link.getAttribute("href") ?? ""),
+      ...[...metas].map((meta) => meta.getAttribute("content") ?? ""),
+    ];
+  });
+}
+
+for (const { name, route } of [
+  { name: "da Home", route: "/" },
+  { name: "da 404", route: "/esta-rota-nao-existe" },
+]) {
+  test(`os links internos ${name} levam a algum lugar`, async ({ page, baseURL }) => {
+    await page.goto(route);
+    const here = new URL(page.url());
+
+    const addresses = await ownAddresses(page);
+    expect(addresses.length).toBeGreaterThan(0);
+    for (const address of addresses) {
+      const target = new URL(address, here);
+      expect([here.origin, new URL(site).origin], address).toContain(target.origin);
+      if (target.hash && target.pathname === here.pathname) {
+        // Uma âncora na própria página: o alvo existe.
+        await expect(page.locator(`[id="${target.hash.slice(1)}"]`), address).toHaveCount(1);
+      } else {
+        const response = await page.request.get(local(target.href, baseURL));
+        expect(response.status(), address).toBe(200);
+      }
+    }
+  });
+}
