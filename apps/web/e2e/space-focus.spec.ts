@@ -190,3 +190,56 @@ test("com movimento reduzido a fresta abre sem transição e o foco continua val
   expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
   await expectOpen(page, 2);
 });
+
+test("a fresta inteira responde ao clique como o Acessar", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const code = slits(page).nth(2);
+
+  await expect(code).toHaveCSS("cursor", "pointer");
+  await code.getByRole("img").click();
+
+  await expect(page.getByRole("status")).toHaveText(
+    "Em planejamento · Code & Share ainda não está disponível.",
+  );
+  await expectOpen(page, 2);
+});
+
+test.describe("em tela de toque", () => {
+  test.use({ hasTouch: true });
+
+  test("o primeiro toque escolhe a fresta, a rolagem não muda a escolha e o segundo toque mostra o aviso @webkit", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+    const toast = page.getByRole("status");
+    const code = slits(page).nth(2);
+
+    await code.tap();
+    await expectOpen(page, 2);
+    await expect(toast).toHaveText("");
+
+    await page.evaluate(() => window.scrollBy(0, 160));
+    await expectOpen(page, 2);
+
+    await code.tap();
+    await expect(toast).toHaveText("Em planejamento · Code & Share ainda não está disponível.");
+    await expectOpen(page, 2);
+  });
+
+  test("até 900px, a fresta aberta já está escolhida, e um toque nela mostra o aviso @webkit", async ({
+    page,
+  }) => {
+    test.skip(!isStacked(page), "a fresta guardada só fica aberta até 900px");
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    await page.goto("/");
+
+    await slits(page).nth(0).tap();
+
+    await expect(page.getByRole("status")).toHaveText(
+      "Em desenvolvimento · Frames & Songs ainda não está disponível.",
+    );
+    await expectOpen(page, 0);
+  });
+});

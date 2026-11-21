@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, type ReactNode, use, useReducer, useSyncExternalStore } from "react";
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useReducer,
+  useRef,
+  useSyncExternalStore,
+} from "react";
 import { useToast } from "@/components/Toast";
 import type { SpaceId } from "@/spaces/catalog";
 
@@ -26,7 +33,7 @@ type FocusState = {
 };
 
 type FocusAction = {
-  type: "pointer-enter" | "pointer-leave" | "keyboard-focus" | "keyboard-blur";
+  type: "pointer-enter" | "pointer-leave" | "keyboard-focus" | "keyboard-blur" | "touch-choose";
   id: SpaceId;
 };
 
@@ -50,6 +57,12 @@ function nextState(state: FocusState, action: FocusAction): FocusState {
     case "keyboard-blur":
       if (state.keyboard === id) next.keyboard = null;
       break;
+    // O toque escolhe a fresta, e ela fica escolhida até outro toque (a rolagem não muda nada).
+    case "touch-choose":
+      next.touch = id;
+      next.pointer = null;
+      next.keyboard = null;
+      break;
   }
   next.last = focusedId(next) ?? state.last;
   return next;
@@ -68,6 +81,17 @@ function subscribeToStacked(onChange: () => void): () => void {
   const query = window.matchMedia(stackedQuery);
   query.addEventListener("change", onChange);
   return () => query.removeEventListener("change", onChange);
+}
+
+const subscribeToNothing = () => () => {};
+
+// Verdadeiro depois da hidratação: só com script a fresta inteira responde ao clique.
+function useHydrated(): boolean {
+  return useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
 }
 
 function useStacked(): boolean {
@@ -127,19 +151,23 @@ type FocusableSlitProps = {
 };
 
 // O item da fileira que recebe o foco: o cursor (mouse ou caneta) ao entrar e sair, o foco
-// de teclado visível no "Acessar" e o toque, que escolhe. A fresta inteira responde como o
-// link: no Marco 1, com o aviso, sem sair do lugar.
+// de teclado visível no "Acessar" e o toque. A fresta inteira responde como o link (no Marco
+// 1, com o aviso, sem sair do lugar), menos ao toque numa fresta fechada, que só a escolhe:
+// o segundo toque é que responde.
 export function FocusableSlit({ id, anchor, notice, className, children }: FocusableSlitProps) {
   const { dispatch } = useSpaceFocus();
-  const { focus } = useSlitFocus(id);
+  const { focus, open } = useSlitFocus(id);
   const showToast = useToast();
+  const hydrated = useHydrated();
+  // O tipo do último ponteiro que apertou a fresta, para saber se o clique veio de um toque.
+  const pressedWith = useRef<string | null>(null);
   return (
     // biome-ignore lint/a11y/useKeyWithClickEvents: o teclado aciona o "Acessar", e o clique dele sobe até a fresta.
     <li
       id={anchor}
       data-space={id}
       data-focus={focus}
-      className={className}
+      className={hydrated ? `${className} cursor-pointer` : className}
       onPointerEnter={(event) => {
         if (event.pointerType !== "touch") dispatch({ type: "pointer-enter", id });
       }}
@@ -151,9 +179,16 @@ export function FocusableSlit({ id, anchor, notice, className, children }: Focus
         if (event.target.matches(":focus-visible")) dispatch({ type: "keyboard-focus", id });
       }}
       onBlur={() => dispatch({ type: "keyboard-blur", id })}
+      onPointerDown={(event) => {
+        pressedWith.current = event.pointerType;
+      }}
       onClick={(event) => {
+        // O clique do teclado no "Acessar" não tem ponteiro (`detail` 0).
+        const touched = pressedWith.current === "touch" && event.detail > 0;
+        pressedWith.current = null;
         event.preventDefault();
-        showToast(notice);
+        if (touched && !open) dispatch({ type: "touch-choose", id });
+        else showToast(notice);
       }}
     >
       {children}
