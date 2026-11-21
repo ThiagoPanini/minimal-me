@@ -77,7 +77,7 @@ As decisões da Home estão em [Critérios de aceite da home](https://github.com
 - Stack e convenções herdadas dos projetos de referência do Autor; desvios exigem justificativa explícita.
 - Web em Next e API interna em Python, que segue a skill `panlabs-python-standards` (`docs/adr/0002-backend-em-python.md`). A Home do Marco 1 não tem backend; a API, o banco e a guarda das fotos ficam para Frames & Songs, depois do MVP.
 - Entrada do Autor por chave de acesso (`docs/adr/0003-entrada-do-autor.md`); fotos no Cloudflare R2 (`docs/adr/0004-guarda-das-fotos.md`). Os dois ADRs, como o 0002, estão a rever no grilling de Frames & Songs.
-- Código em inglês, prosa em português: componentes, tokens, identificadores e arquivos de código têm nome em inglês; documentos, tickets, commits e textos da interface ficam em português do Brasil. A exceção é space, termo do domínio em inglês. A regra está em `AGENTS.md`.
+- Código em inglês, prosa em português: componentes, tokens, identificadores e arquivos de código têm nome em inglês; documentos, tickets, commits e textos da interface ficam em português do Brasil. A exceção é space, termo do domínio em inglês. A regra está em `CODING_STANDARDS.md`.
 - Domínio próprio (`docs/adr/0001-dominio-proprio.md`), VPS Hostinger com Coolify e Cloudflare na frente. Sempre que possível, a configuração passa pelos MCPs de Hostinger, Coolify e Cloudflare, e não por passos manuais no painel.
 - Documentação do produto, se vier a existir, segue o `panlabs-docs` (Docusaurus no GitHub Pages).
 

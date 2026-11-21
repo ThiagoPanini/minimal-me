@@ -12,12 +12,14 @@ O que o produto é está em `docs/brief.md`; o vocabulário, em `GLOSSARY.md`; a
 | `apps/web/design-system/` | A ponte com o sistema de design: lê tokens e fontes de `docs/design/system/` no build, sem copiar nada. |
 | `apps/web/Dockerfile` e `apps/web/nginx/` | A imagem que vai ao ar: o build do Next e o nginx com cache, compressão, 404 e cabeçalhos de segurança. |
 | `apps/web/e2e/` | Os testes Playwright, que rodam contra essa imagem. |
-| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate` e publica a imagem na `main`, e o `pr-title`. |
+| `.github/workflows/` | A esteira: o `ci`, que vira o check `gate` e publica a imagem na `main`, o `pr-title` e o `actions.lock`, que fixa as actions de todos os workflows. |
+| `lefthook.yml`, `compose.tools.yaml` e `scripts/` | Os ganchos do git e as ferramentas que rodam de imagem Docker (gitleaks, actionlint e zizmor), iguais na máquina e na CI. |
+| `CODING_STANDARDS.md` | Os padrões que a revisão confere: idioma, web, branches, commits, ganchos e workflows. |
 | `docs/` | Brief, ADRs, sistema de design e o protótipo do MVP. |
 
 ## Como rodar
 
-A máquina só precisa de Node 24, pnpm e Docker. A versão do pnpm vem do campo `packageManager` do `package.json`: um pnpm 11 ou mais novo troca sozinho para ela. As demais ferramentas são pacotes do projeto.
+A máquina só precisa de Node 24, pnpm e Docker. A versão do pnpm vem do campo `packageManager` do `package.json`: um pnpm 11 ou mais novo troca sozinho para ela. As demais ferramentas são pacotes do projeto ou imagens Docker fixadas por digest no `compose.tools.yaml`. O `pnpm install` também instala os ganchos do git, descritos em `CODING_STANDARDS.md`.
 
 ```sh
 pnpm install
@@ -30,7 +32,7 @@ O servidor de desenvolvimento abre em `http://localhost:3000`. Em produção nã
 
 | Comando | O que faz |
 |---|---|
-| `pnpm check` | Biome em modo CI e a checagem de tipos (`next typegen && tsc --noEmit`). |
+| `pnpm check` | Biome em modo CI; actionlint, zizmor e a cobertura do `actions.lock` nos workflows; e a checagem de tipos (`next typegen && tsc --noEmit`). |
 | `pnpm test:e2e` | Constrói a imagem da Home, sobe-a no Docker Compose com o contêiner oficial do Playwright e roda os testes contra ela. Precisa do Docker de pé. |
 | `pnpm verify` | Os dois acima, nessa ordem. Rode antes de abrir ou atualizar um PR. |
 
@@ -42,10 +44,10 @@ Todo PR roda a validação inteira, sem filtro de caminho, e o resultado vira do
 
 | Check | O que exige |
 |---|---|
-| `gate` | `success` em todos os jobs do workflow `ci`: `quality`, que roda o `pnpm check`; `image`, que constrói a imagem da Home; e `e2e`, que roda o `pnpm test:e2e` contra essa imagem. Um job que falha, é pulado ou é cancelado deixa o `gate` vermelho. |
+| `gate` | `success` nos mesmos três jobs do workflow `ci`, no PR e na `main`: `quality`, que roda o `pnpm check` e o gitleaks nos commits do PR; `dependency-review`, que falha com vulnerabilidade alta ou crítica trazida pelo PR, no escopo `runtime`; e `e2e`, que roda o `pnpm test:e2e` contra a imagem. O `e2e` só roda depois do job que constrói a imagem do evento: `image` no PR e `publish` na `main`. Um job que falha, é pulado ou é cancelado deixa o `gate` vermelho. |
 | `pr-title` | O título do PR em Conventional Commits, conferido pelo commitlint com o `commitlint.config.mjs`. No squash, o título vira o assunto do commit na `main`. |
 
-No PR, a imagem é construída e testada sem ir ao registro. Na `main`, ela é construída uma vez e publicada no GHCR como `ghcr.io/thiagopanini/minimal-me/web:sha-<commit>`, com proveniência, SBOM e atestado, e o e2e roda contra esse digest. Uma rodada nova do mesmo PR cancela a anterior; na `main`, nenhuma rodada é cancelada.
+No PR, o `image` constrói a imagem e ela é testada sem ir ao registro, sem nenhuma permissão de escrita. Na `main`, o `publish` a constrói uma vez e a publica no GHCR como `ghcr.io/thiagopanini/minimal-me/web:sha-<commit>`, com proveniência, SBOM e atestado, e o e2e roda contra esse digest. Uma rodada nova do mesmo PR cancela a anterior; na `main`, nenhuma rodada é cancelada.
 
 Para testar uma imagem pronta em vez de construir uma, como faz a CI, passe a imagem em `WEB_IMAGE`, como em `WEB_IMAGE=ghcr.io/thiagopanini/minimal-me/web:sha-$(git rev-parse HEAD) pnpm test:e2e`. A imagem precisa ser do commit em que você está, porque um teste confere o commit no `version.json`.
 

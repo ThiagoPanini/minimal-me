@@ -12,7 +12,7 @@ Esta é a versão 2, de 2026-11-20, escrita para a Home em Frestas II (`docs/des
 - Mantenha tudo reto (`square`). O círculo (`circle`) é só da marca e do ponto do status.
 - Mova pouco e com função: uma abertura, uma revelação ao rolar e a resposta ao foco. Uma imagem só se move enquanto tem o foco.
 - Trate todo space do mesmo jeito. O status se lê pelo ponto e pela palavra, nunca pela imagem, pela luz ou pelo texto.
-- Nomeie em inglês tudo o que é código (tokens, estilos de texto, componentes, classes, pastas e arquivos) e escreva em português tudo o que é texto (guias, notas de uso e a interface). A exceção é space: ver `AGENTS.md`.
+- Nomeie em inglês tudo o que é código (tokens, estilos de texto, componentes, classes, pastas e arquivos) e escreva em português tudo o que é texto (guias, notas de uso e a interface). A exceção é space: ver `CODING_STANDARDS.md`.
 
 ## Conteúdo
 

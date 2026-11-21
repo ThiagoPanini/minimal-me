@@ -64,7 +64,7 @@ Para republicar o Design System depois de mudar `system/`:
 
 ## Nomes
 
-Tudo o que é código tem nome em inglês: tokens, estilos de texto, componentes, classes, pastas e arquivos do sistema. Guias, notas de uso e textos da interface ficam em português, com a exceção de space (ver `AGENTS.md`).
+Tudo o que é código tem nome em inglês: tokens, estilos de texto, componentes, classes, pastas e arquivos do sistema. Guias, notas de uso e textos da interface ficam em português, com a exceção de space (ver `CODING_STANDARDS.md`).
 
 O protótipo do MVP já segue essa regra. Os protótipos antigos, recuperáveis pelo commit de linhagem, têm variáveis e arquivos em português. A correspondência com o sistema:
 

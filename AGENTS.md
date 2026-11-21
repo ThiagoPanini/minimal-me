@@ -18,14 +18,9 @@ The Python API follows the `panlabs-python-standards` skill: load it before crea
 
 ## Conventions
 
-### Language
+Coding standards (language, web, branches, commits, hooks and workflows) live in `CODING_STANDARDS.md`:
 
-Name everything that is code in English; write all prose in Brazilian Portuguese.
-
-- **English**: every identifier (components, design tokens, variables, functions, types, CSS classes, test names) and the files and directories that hold code or design-system assets.
-- **Portuguese**: documentation, issues, PR bodies, commit messages, interface copy, and the usage notes that describe a token or a component.
-- **Domain terms**: `GLOSSARY.md` gives each term's English form under "Em código". Use that form in identifiers and the Portuguese term in prose.
-- **Exception**: "space" (plural "spaces") is the domain term in prose, and "Spaces" is the section label in the interface. Both stay in English, like the spaces' own names (Frames & Songs, Music & Feeling, Code & Share, Write & Learn). Everything else in prose and interface copy stays in Portuguese.
+@CODING_STANDARDS.md
 
 ### Infrastructure facts
 
@@ -39,3 +34,5 @@ Every change reaches `main` as a squash of its PR, and the PR title becomes the 
 2. Push the branch and open the PR with `gh pr create`, titled in Conventional Commits, in Portuguese (`tipo(escopo): assunto`).
 3. Queue the merge with `gh pr merge --auto --squash` and nothing else: never pass `--subject`, so the PR title stays the subject.
 4. Follow `gh pr checks --watch` until `gate` and `pr-title` finish. A red check is fixed with a new commit on the branch, and a bad title by editing the PR title.
+
+The git hooks run on every commit and push: fix what they report with a new change. Never pass `--no-verify`; the CI runs the same checks, so a skipped hook only moves the failure to the PR.
