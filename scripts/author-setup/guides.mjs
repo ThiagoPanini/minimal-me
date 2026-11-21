@@ -92,6 +92,11 @@ async function replacePrivateKey(context, slug, clientId) {
   io.say("O App existe, mas os segredos do Dependabot faltam, e a chave dele não aparece de novo.");
   openUrl(`https://github.com/settings/apps/${slug}`);
   io.step("Em Private keys, clique em Generate a private key; o navegador baixa um arquivo .pem.");
+  if (!clientId) {
+    // O token do `gh` não lê o App privado, então o Client ID vem da mesma página.
+    clientId = await io.ask("Cole o Client ID, que aparece no alto da página do App:");
+    if (!clientId) return undefined;
+  }
   const file = await io.ask(
     "Caminho do .pem baixado (no WSL, a pasta Downloads do Windows fica em /mnt/c/Users/<você>/Downloads):",
   );
@@ -138,9 +143,11 @@ async function confirmInstallation(context, slug, credentials) {
 async function guideMergeApp(context) {
   const { io, github, openUrl, mergeApp, saveState } = context;
   let slug = context.state.mergeApp?.slug;
-  let app = slug ? await github.get(`/apps/${slug}`) : undefined;
   let credentials;
-  if (app?.status !== 200) {
+  // O App que o roteiro criou não se cria de novo pelo 404 de `/apps/<slug>`: ele nasce
+  // privado, e o token OAuth do `gh` não lê App privado. Para recomeçar do zero, apague o
+  // `mergeApp` do estado guardado na máquina.
+  if (!slug) {
     io.say(
       "O navegador abre um formulário do GitHub já preenchido: o App minimal-me-merge, privado, sem webhook, com escrita em conteúdo, PRs e workflows.",
     );
@@ -149,18 +156,19 @@ async function guideMergeApp(context) {
     slug = conversion.slug;
     await saveState({ mergeApp: { slug } });
     credentials = await storeAppCredentials(context, conversion);
-    app = await github.get(`/apps/${slug}`);
-  } else {
+  }
+  const app = await github.get(`/apps/${slug}`);
+  if (!credentials) {
     const names = secretNamesOf((await github.get(dependabotSecretsPath)).body);
     if (
       !names.includes(secretNames.mergeAppClientId) ||
       !names.includes(secretNames.mergeAppPrivateKey)
     ) {
-      credentials = await replacePrivateKey(context, slug, app.body.client_id);
+      credentials = await replacePrivateKey(context, slug, app.body?.client_id);
     }
   }
   if (installationIsOnlyThisRepository(context.state.mergeApp?.installation)) return;
-  // Logo depois da criação, a API pode ainda não achar o App: conta como não instalado.
+  // Com 404 (App privado, ou recém-criado), não se sabe se ele está instalado: abre a instalação.
   if (!(app.status === 200 && app.body.installations_count > 0)) {
     openUrl(`https://github.com/apps/${slug}/installations/new`);
     io.step("Escolha Only select repositories, marque só minimal-me e clique em Install.");

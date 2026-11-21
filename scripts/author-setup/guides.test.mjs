@@ -126,6 +126,49 @@ describe("guided steps", () => {
     }
   });
 
+  test("an App already created is not created again when the gh token cannot read it", async () => {
+    const terminal = fakeTerminal({ confirms: [true] });
+    const { context, secrets, opened } = fakeGuideContext({
+      terminal,
+      state: { mergeApp: { slug: "minimal-me-merge-app" } },
+      responses: {
+        "/apps/minimal-me-merge-app": { status: 404, body: null },
+        "/repos/ThiagoPanini/minimal-me/dependabot/secrets?per_page=100": {
+          status: 200,
+          body: { secrets: [{ name: "MERGE_APP_CLIENT_ID" }, { name: "MERGE_APP_PRIVATE_KEY" }] },
+        },
+      },
+      mergeApp: {
+        create: async () => assert.fail("o roteiro criou outro App"),
+        verifyInstallation: async () => assert.fail("sem a chave, quem confere é o Autor"),
+      },
+    });
+    await guides["merge-app"](context);
+    assert.deepEqual(secrets, []);
+    assert.ok(opened.includes("https://github.com/apps/minimal-me-merge-app/installations/new"));
+    assert.equal(context.state.mergeApp.slug, "minimal-me-merge-app");
+    assert.equal(context.state.mergeApp.installation.checkedBy, "author");
+  });
+
+  test("without the secrets of a private App, asks for the Client ID on the App page", async () => {
+    const terminal = fakeTerminal({ answers: ["Iv23-client-id-de-teste", ""] });
+    const { context, secrets, output } = fakeGuideContext({
+      terminal,
+      state: { mergeApp: { slug: "minimal-me-merge-app" } },
+      responses: {
+        "/apps/minimal-me-merge-app": { status: 404, body: null },
+        "/repos/ThiagoPanini/minimal-me/dependabot/secrets?per_page=100": {
+          status: 200,
+          body: { secrets: [] },
+        },
+      },
+      mergeApp: { create: async () => assert.fail("o roteiro criou outro App") },
+    });
+    await guides["merge-app"](context);
+    assert.match(printed(output), /Cole o Client ID/);
+    assert.deepEqual(secrets, []);
+  });
+
   test("an installation on all repositories does not pass the check", async () => {
     const { context, output } = fakeGuideContext({
       responses: {

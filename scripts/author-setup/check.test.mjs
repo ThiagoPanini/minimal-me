@@ -192,12 +192,24 @@ describe("check mode", () => {
     assert.match(result.text, /Falta: a permissão `workflows: write` no App/);
   });
 
-  test("with the App deleted on GitHub, says it no longer exists", async () => {
+  test("with the private App hidden from the gh token, trusts the checked installation", async () => {
     const { context } = fakeContext({
       responses: { "/apps/minimal-me-merge": { status: 404, body: null } },
     });
     const result = await runCheck(context);
-    assert.match(result.text, /Falta: o App `minimal-me-merge`, que não existe mais no GitHub/);
+    assert.equal(result.pendingCount, 0);
+    assert.match(result.text, /Nada falta/);
+  });
+
+  test("with the private App hidden and no installation check, asks for the check", async () => {
+    const { context } = fakeContext({
+      state: { mergeApp: { slug: "minimal-me-merge" } },
+      responses: { "/apps/minimal-me-merge": { status: 404, body: null } },
+    });
+    const result = await runCheck(context);
+    assert.equal(result.pendingCount, 1);
+    const falta = result.text.split("\n").filter((line) => line.includes("Falta:"));
+    assert.deepEqual(falta, ["   Falta: conferir que a instalação é só deste repositório."]);
   });
 
   test("before the first publication from `main`, the package waits for the agent", async () => {
