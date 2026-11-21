@@ -3,9 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build && node design-system/check-css-variables.ts",
-    "check:types": "next typegen && tsc --noEmit",
+    "dev": "node design-system/generate-illustrations.ts && next dev",
+    "build": "node design-system/generate-illustrations.ts && next build && node design-system/check-css-variables.ts",
+    "check:types": "node design-system/generate-illustrations.ts && next typegen && tsc --noEmit",
     "test:e2e": "node scripts/test-e2e.ts"
   },
   "dependencies": {
