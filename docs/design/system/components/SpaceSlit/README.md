@@ -47,7 +47,7 @@ A fresta de um space na Home: uma abertura na fileira dos quatro, com a ilustra�
 ## Foto viva
 
 - Cada ilustração tem um movimento feito do que está pintado nela: os enquadramentos de Frames & Songs, os arcos de som de Music & Feeling, as luzes dos servidores de Code & Share e as folhas de Write & Learn. Em todas, a luz atrás da figura respira. Os dados estão em `assets/Illustrations/illustrations.json`.
-- A foto acorda quando o space ganha o foco e volta ao repouso quando o perde, em cerca de um segundo. Em repouso nada é desenhado sobre a imagem. Só a fresta com foco se move.
+- A foto acorda quando o space ganha o foco e volta ao repouso quando o perde, em cerca de um segundo. Em repouso nada é desenhado sobre a imagem. Só a fresta com foco se move: até 900px, a fresta guardada fica aberta sem foco, e a foto dela, parada.
 - Com movimento reduzido, nada se move: a fresta abre sem transição, a foto não acorda e o foco continua valendo.
 - A prévia aqui é estática: os movimentos estão no script do protótipo (`docs/design/prototype/mvp/`) e, portados dele, na Home (`apps/web/spaces/living-picture-motions.ts`).
 

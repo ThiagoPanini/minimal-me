@@ -119,7 +119,8 @@ export function SpaceFocusProvider({ kept, children }: SpaceFocusProviderProps) 
 }
 
 // O estado de foco de uma fresta: `focus` é o que ela leva em `data-focus`; `open` diz se ela
-// está aberta agora (com foco, ou guardada até 900px), que é quando a foto viva acorda.
+// está aberta agora (com foco, ou guardada até 900px). A foto viva acorda só com o foco
+// (`active`): aberta e guardada, ela fica parada.
 export function useSlitFocus(id: SpaceId): { focus: SlitFocus | undefined; open: boolean } {
   const { state, stacked } = useSpaceFocus();
   const focus = slitFocusOf(state, id);

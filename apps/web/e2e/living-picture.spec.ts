@@ -4,16 +4,12 @@ import path from "node:path";
 import type { Locator, Page, Response } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
-// A foto viva (módulo 5 da spec #57 e "Foto viva" no guia da SpaceSlit): a ilustração da
-// fresta aberta acorda, com um movimento feito do que está pintado nela, desenhado sobre a
-// imagem. Em repouso nada é desenhado; só a fresta aberta se move; com movimento reduzido,
-// nenhuma foto viva roda.
+// A foto viva (módulo 5 da spec #57 e "Foto viva" no guia da SpaceSlit): a ilustração do space
+// com foco acorda, com um movimento feito do que está pintado nela, desenhado sobre a imagem.
+// Em repouso nada é desenhado; só a fresta com foco se move, e até 900px a fresta guardada,
+// aberta sem foco, fica parada; com movimento reduzido, nenhuma foto viva roda.
 
 const names = ["Frames & Songs", "Music & Feeling", "Code & Share", "Write & Learn"];
-
-function isStacked(page: Page): boolean {
-  return (page.viewportSize()?.width ?? 0) <= 900;
-}
 
 function slits(page: Page): Locator {
   return page.getByRole("main").getByRole("region", { name: "Spaces" }).getByRole("listitem");
@@ -65,9 +61,11 @@ test("com o foco, só a foto do space se move, e a que perde o foco volta ao rep
   const items = slits(page);
   await items.first().scrollIntoViewIfNeeded();
 
-  // Na tela larga nenhuma fresta está aberta, e nada é desenhado; até 900px, a guardada
-  // (Frames & Songs) está aberta e acorda.
-  await expect.poll(() => drawnPictures(page)).toEqual(only(isStacked(page) ? 0 : -1));
+  // Sem foco nada é desenhado: na tela larga nenhuma fresta está aberta e, até 900px, a
+  // guardada (Frames & Songs) está aberta, mas parada. O tempo de a foto acordar, se fosse
+  // acordar, passa antes da conferência.
+  await page.waitForTimeout(1500);
+  expect(await drawnPictures(page)).toEqual(only(-1));
 
   for (const [index, name] of names.entries()) {
     await items.nth(index).hover();
@@ -75,11 +73,10 @@ test("com o foco, só a foto do space se move, e a que perde o foco volta ao rep
     await expectMoving(page, items.nth(index), name);
   }
 
-  // Na tela larga, com o cursor fora da fileira, as quatro voltam ao repouso.
-  if (!isStacked(page)) {
-    await page.mouse.move(1, 1);
-    await expect.poll(() => drawnPictures(page)).toEqual(only(-1));
-  }
+  // Com o cursor fora da fileira, as quatro voltam ao repouso, inclusive, até 900px, a última
+  // com foco, que fica guardada aberta.
+  await page.mouse.move(1, 1);
+  await expect.poll(() => drawnPictures(page)).toEqual(only(-1));
 });
 
 test.describe("em tela de toque", () => {
@@ -94,9 +91,9 @@ test.describe("em tela de toque", () => {
     await page.goto("/");
     const items = slits(page);
     await items.first().scrollIntoViewIfNeeded();
-    // Até 900px Frames & Songs já está aberta; na tela larga, o toque a escolhe.
-    if (!isStacked(page)) await items.first().tap();
-    await expect.poll(() => drawnPictures(page)).toEqual(only(0));
+    // Music & Feeling está fechada em qualquer largura: o toque a escolhe, e ela acorda.
+    await items.nth(1).tap();
+    await expect.poll(() => drawnPictures(page)).toEqual(only(1));
 
     await items.nth(3).tap();
     await expect.poll(() => drawnPictures(page)).toEqual(only(3));
@@ -208,14 +205,16 @@ test("em repouso ou fora da vista, o laço para e nenhum quadro é pedido", asyn
   const write = slits(page).nth(3);
   await write.scrollIntoViewIfNeeded();
 
-  // Na tela larga, com o cursor fora da fileira, as fotos ficam em repouso.
-  if (!isStacked(page)) {
-    await write.hover();
-    await expect.poll(() => drawnPictures(page)).toEqual(only(3));
-    await page.mouse.move(1, 1);
-    await expect.poll(() => drawnPictures(page)).toEqual(only(-1));
-    await expectNoFrames("em repouso");
-  }
+  // Sem foco, as fotos ficam em repouso, inclusive, até 900px, a da fresta guardada aberta.
+  await expectNoFrames("em repouso, antes do foco");
+
+  // Com o cursor fora da fileira, a foto que tinha o foco volta ao repouso; até 900px, a fresta
+  // dela fica guardada aberta, parada.
+  await write.hover();
+  await expect.poll(() => drawnPictures(page)).toEqual(only(3));
+  await page.mouse.move(1, 1);
+  await expect.poll(() => drawnPictures(page)).toEqual(only(-1));
+  await expectNoFrames("em repouso, depois do foco");
 
   // Acordada, ela pede quadros; fora da vista, não se move.
   await write.hover();

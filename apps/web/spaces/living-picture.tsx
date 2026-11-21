@@ -9,9 +9,10 @@ import type { LivingPictureEngine } from "@/spaces/living-picture-engine";
 
 // A foto viva de um space (módulo 5 da spec #57): um canvas sobre a foto, no mesmo quadro, em
 // que a ilustração acorda com um movimento feito do que está pintado nela e com a luz que
-// respira. Acorda quando a fresta abre (com foco ou, até 900px, guardada) e está à vista, e
-// volta ao repouso, sem nada desenhado, em cerca de um segundo. Com movimento reduzido nada
-// roda, inclusive se a preferência mudar com a página aberta.
+// respira. Acorda só quando o space tem o foco e a foto está à vista, e volta ao repouso, sem
+// nada desenhado, em cerca de um segundo. Até 900px, a fresta guardada fica aberta, mas sem o
+// foco a foto dela fica parada: nada se move em repouso. Com movimento reduzido nada roda,
+// inclusive se a preferência mudar com a página aberta.
 //
 // Aqui fica só o que decide quando acordar. O desenho e o laço (`living-picture-engine.ts`)
 // são pedidos na primeira vez que uma foto acorda, depois de a página carregar, para não
@@ -49,7 +50,7 @@ type LivingPictureProps = {
 export function LivingPicture({ id, illustration }: LivingPictureProps) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const engine = useRef<Promise<LivingPictureEngine> | null>(null);
-  const { open } = useSlitFocus(id);
+  const awake = useSlitFocus(id).focus === "active";
   const motion = useMedia("motion");
   const visible = useVisible(canvas);
 
@@ -61,13 +62,13 @@ export function LivingPicture({ id, illustration }: LivingPictureProps) {
     }
     if (!engine.current) {
       const element = canvas.current;
-      if (!(open && visible && element)) return;
+      if (!(awake && visible && element)) return;
       engine.current = pageLoaded()
         .then(() => import("@/spaces/living-picture-engine"))
         .then(({ startLivingPicture }) => startLivingPicture(element, illustration));
     }
-    engine.current.then((started) => started.update({ awake: open, visible }));
-  }, [open, visible, motion, illustration]);
+    engine.current.then((started) => started.update({ awake, visible }));
+  }, [awake, visible, motion, illustration]);
 
   return (
     // biome-ignore lint/a11y/noAriaHiddenOnFocusable: o canvas não recebe foco; só desenha sobre a foto, que já tem o texto alternativo.
