@@ -1,3 +1,4 @@
+import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 import { renderedOpacity } from "./rendering";
 
@@ -33,31 +34,53 @@ test("o Acessar de cada space mostra o aviso com o Status e o nome, anunciado po
   expect(new URL(page.url()).hash).toBe("");
 });
 
+// Com o relógio parado, o tempo só anda por `runFor`. O React desenha o que um temporizador
+// mudou numa mensagem posta depois dele: três voltas de mensagem garantem o desenho.
+async function runFor(page: Page, milliseconds: number): Promise<void> {
+  await page.clock.runFor(milliseconds);
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const channel = new MessageChannel();
+        let hops = 0;
+        channel.port1.onmessage = () => {
+          hops += 1;
+          if (hops === 3) resolve();
+          else channel.port2.postMessage(null);
+        };
+        channel.port2.postMessage(null);
+      }),
+  );
+}
+
 test("o aviso fica 2,6s à vista e sai da página quando some, e acionar de novo reinicia o tempo", async ({
   page,
 }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.clock.install();
+  await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
   await page.goto("/");
+  await page.clock.pauseAt(new Date("2026-11-20T10:01:00Z"));
   const toast = page.getByRole("status");
   const access = page.getByRole("link", { name: "Acessar Frames & Songs" });
   const shown = () => renderedOpacity(toast);
 
   await access.press("Enter");
-  await page.clock.runFor(2000);
-  await expect.poll(shown).toBe(1);
+  await runFor(page, 2599);
+  expect(await shown()).toBe(1);
 
-  // De novo aos 2s: o tempo recomeça, e aos 4s o aviso continua à vista.
+  // De novo, 1ms antes de sumir: o tempo recomeça.
   await access.press("Enter");
-  await page.clock.runFor(2000);
-  await expect.poll(shown).toBe(1);
-  await page.clock.runFor(700);
-  await expect.poll(shown).toBe(0);
+  await runFor(page, 2599);
+  expect(await shown()).toBe(1);
+  await runFor(page, 1);
+  expect(await shown()).toBe(0);
   // Com movimento reduzido, some sem transição.
   expect(await toast.evaluate((node) => node.getAnimations().length)).toBe(0);
 
-  // Depois de sumir, o aviso sai da página, e o leitor de tela não o encontra mais.
-  await page.clock.runFor(500);
+  // Meio segundo depois de sumir, o aviso sai da página, e o leitor de tela não o encontra mais.
+  await runFor(page, 499);
+  await expect(toast).not.toHaveText("");
+  await runFor(page, 1);
   await expect(toast).toHaveText("");
 });
 
