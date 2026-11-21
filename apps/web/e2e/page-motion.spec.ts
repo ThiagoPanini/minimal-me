@@ -86,14 +86,26 @@ async function settle(page: Page): Promise<void> {
 // O maior brilho, de 0 a 255, que um texto deixa na tela: a área dele capturada como está e
 // com o texto transparente, comparadas px a px. Zero quando nada dele aparece.
 async function drawnBy(page: Page, text: Locator): Promise<number> {
+  await text.scrollIntoViewIfNeeded();
   const box = await text.boundingBox();
-  if (!box) throw new Error("texto sem caixa na tela");
-  // A área do texto e a de baixo dele, por onde as palavras sobem.
-  const clip = { x: box.x, y: box.y, width: box.width, height: box.height * 2 };
-  const pixels = async () =>
-    sharp(await page.screenshot({ clip, animations: "allow" }))
+  const viewport = page.viewportSize();
+  if (!box || !viewport) throw new Error("texto sem caixa na tela");
+  // A área do texto e a de baixo dele, por onde as palavras sobem, dentro da tela.
+  const clip = {
+    x: box.x,
+    y: box.y,
+    width: box.width,
+    height: Math.min(box.height * 2, viewport.height - box.y),
+  };
+  // Cada captura espera dois quadros, para mostrar a página como ela está agora.
+  const pixels = async () => {
+    await page.evaluate(
+      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    );
+    return sharp(await page.screenshot({ clip, animations: "allow" }))
       .raw()
       .toBuffer();
+  };
   const shown = await pixels();
   await text.evaluate((node: HTMLElement) => node.style.setProperty("color", "transparent"));
   const background = await pixels();
@@ -340,4 +352,78 @@ test("ao rolar, cada bloco entra uma vez: o fio cresce, as fotos se revelam como
     // Até 900px, as fechadas recuam para 60% da luz diante da guardada.
     expect([1, 0.6]).toContain(Math.round(opacity * 100) / 100);
   }
+});
+
+// Tudo à vista, sem rolar: o nome, a abertura, o cabeçalho dos Spaces, as fotos e o texto das
+// frestas e o rodapé.
+async function expectFinalState(page: Page): Promise<void> {
+  const name = page.getByRole("heading", { level: 1, name: "Minimal Me" });
+  expect(await drawnBy(page, name), "o nome desenhado").toBeGreaterThan(100);
+  const { sky, dunes } = openingLayers(page);
+  const section = page.getByRole("region", { name: "Spaces" });
+  const footer = page.getByRole("contentinfo");
+  for (const element of [
+    sky,
+    dunes,
+    page.getByText("hub pessoal e minimalista"),
+    page.getByRole("link", { name: "Minimal Me, início" }),
+    section.getByRole("heading", { level: 2, name: "Spaces" }),
+    section.getByText("01 — 04"),
+    footer.getByText("Minimal Me", { exact: true }),
+    footer.getByRole("link", { name: "voltar ao início ↑" }),
+  ]) {
+    expect(await renderedOpacity(element)).toBe(1);
+  }
+  const slits = section.getByRole("listitem");
+  for (const [index, name] of spaceNames.entries()) {
+    const slit = slits.nth(index);
+    const opacity = await renderedOpacity(slit.getByRole("img"));
+    expect([1, 0.6], name).toContain(Math.round(opacity * 100) / 100);
+    expect(await renderedOpacity(slit.getByText(`0${index + 1}`, { exact: true })), name).toBe(1);
+  }
+}
+
+test("com movimento reduzido, tudo aparece no estado final, sem nenhuma animação, nem com foco", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  const animations = () => page.evaluate(() => document.getAnimations().length);
+
+  await expectFinalState(page);
+  expect(await animations()).toBe(0);
+
+  // Rolando a página e com o foco numa fresta, pelo cursor e pelo teclado.
+  const slits = page.getByRole("region", { name: "Spaces" }).getByRole("listitem");
+  await slits.nth(2).hover();
+  await expect(
+    slits.nth(2).getByText("O que eu ando construindo", { exact: false }).filter({ visible: true }),
+  ).toBeVisible();
+  expect(await animations()).toBe(0);
+  await page.getByRole("link", { name: "Acessar Write & Learn" }).focus();
+  await page.keyboard.press("Shift+Tab");
+  await page.keyboard.press("Tab");
+  await page.getByRole("contentinfo").scrollIntoViewIfNeeded();
+  expect(await animations()).toBe(0);
+});
+
+test("se a preferência passa a movimento reduzido no meio da entrada, tudo vai na hora ao estado final, e nada entra de novo quando ela volta", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const clock = await animationClock(page);
+  await clock.stop();
+  await page.goto("/");
+  expect(await runningEntrances(page)).toBeGreaterThan(0);
+
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  expect(await page.evaluate(() => document.getAnimations().length)).toBe(0);
+  await expectFinalState(page);
+
+  await clock.run();
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.getByRole("contentinfo").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  expect(await runningEntrances(page)).toBe(0);
+  await expectFinalState(page);
 });
