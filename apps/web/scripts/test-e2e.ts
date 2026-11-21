@@ -1,5 +1,7 @@
 // `pnpm test:e2e`: constrói a imagem da Home, sobe-a no Docker Compose com o contêiner
 // do Playwright e roda os testes contra ela. Argumentos extras vão para o `playwright test`.
+// Com WEB_IMAGE definida, testa essa imagem pronta em vez de construir uma: é o que a CI faz
+// com a imagem do PR e, na `main`, com o digest publicado no GHCR.
 import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
@@ -7,7 +9,11 @@ import path from "node:path";
 
 const webDir = path.resolve(import.meta.dirname, "..");
 const repoRoot = path.resolve(webDir, "../..");
-const composeFile = path.join(webDir, "compose.e2e.yaml");
+const webImage = process.env.WEB_IMAGE;
+const composeFiles = [
+  path.join(webDir, "compose.e2e.yaml"),
+  ...(webImage ? [path.join(webDir, "compose.e2e.image.yaml")] : []),
+];
 
 const docker = spawnSync("docker", ["info", "--format", "{{.ServerVersion}}"], {
   stdio: "ignore",
@@ -40,7 +46,13 @@ const env = {
 function compose(...args: string[]): number {
   const result = spawnSync(
     "docker",
-    ["compose", "--project-name", projectName, "--file", composeFile, ...args],
+    [
+      "compose",
+      "--project-name",
+      projectName,
+      ...composeFiles.flatMap((file) => ["--file", file]),
+      ...args,
+    ],
     { stdio: "inherit", env },
   );
   return result.status ?? 1;
@@ -52,7 +64,7 @@ process.on("SIGTERM", () => {});
 
 let status = 1;
 try {
-  status = compose("build", "web");
+  status = webImage ? 0 : compose("build", "web");
   if (status === 0) {
     status = compose("run", "--rm", "--quiet-pull", "playwright", ...process.argv.slice(2));
   }

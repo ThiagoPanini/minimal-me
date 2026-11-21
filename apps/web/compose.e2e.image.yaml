@@ -1,0 +1,7 @@
+# Sobreposição do compose.e2e.yaml para testar uma imagem pronta em vez de construí-la:
+# na CI, a imagem do PR carregada pelo job `image` ou, na `main`, o digest publicado no GHCR.
+# `pnpm test:e2e` a usa quando WEB_IMAGE está definida.
+services:
+  web:
+    image: ${WEB_IMAGE:?}
+    build: !reset null

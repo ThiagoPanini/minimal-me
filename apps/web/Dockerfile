@@ -3,6 +3,8 @@
 # Contexto de build: a raiz do repositório (a web lê `docs/design/system/`).
 
 FROM node:24.22.3-trixie-slim@sha256:af02d57b57719b9657a45199a79264a9437940cd55b3c7b3fc99615654f124a0 AS build
+# Na `main`, a SBOM da imagem publicada cobre também este estágio, com as dependências da build.
+ARG BUILDKIT_SBOM_SCAN_STAGE=true
 WORKDIR /repo
 ENV NEXT_TELEMETRY_DISABLED=1
 

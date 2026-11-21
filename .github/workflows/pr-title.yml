@@ -1,0 +1,36 @@
+# O título do PR vira o assunto do commit da `main` no squash, então segue Conventional Commits
+# (seção "Esteira" da #57). O commitlint usa o commitlint.config.mjs da raiz.
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: package.json
+      - name: Instala o pnpm fixado em packageManager
+        run: npm install --global "$(node -p "require('./package.json').packageManager")"
+      - name: Instala só as dependências da raiz
+        run: pnpm install --frozen-lockfile --filter minimal-me
+      # O título chega por variável de ambiente, nunca interpolado no script.
+      - name: Valida o título com o commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: printf '%s\n' "$PR_TITLE" | pnpm exec commitlint --verbose

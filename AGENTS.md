@@ -30,3 +30,12 @@ Name everything that is code in English; write all prose in Brazilian Portuguese
 ### Infrastructure facts
 
 Before stating a Cloudflare or Coolify fact in a resolution or an ADR, check it in the docs through the MCP (`docs` for Cloudflare, `search_docs` for Coolify). Both are deferred tools: load them with ToolSearch first.
+
+## Agent cycle
+
+Every change reaches `main` as a squash of its PR, and the PR title becomes the commit subject on `main`. The `gate` and `pr-title` checks decide; `README.md` ("Como a CI valida") says what each one runs.
+
+1. Run `pnpm verify` and get it green on the branch.
+2. Push the branch and open the PR with `gh pr create`, titled in Conventional Commits, in Portuguese (`tipo(escopo): assunto`).
+3. Queue the merge with `gh pr merge --auto --squash` and nothing else: never pass `--subject`, so the PR title stays the subject.
+4. Follow `gh pr checks --watch` until `gate` and `pr-title` finish. A red check is fixed with a new commit on the branch, and a bad title by editing the PR title.
