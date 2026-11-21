@@ -25,7 +25,7 @@ export default function NotFound() {
             <h1 className="font-normal font-sans text-[11px] text-mist uppercase leading-[1.4] tracking-[.3em]">
               página não encontrada
             </h1>
-            <p className="max-w-[34ch] text-pretty font-light font-mono text-[length:clamp(14px,1.1vw,16px)] text-body leading-[1.62] max-[760px]:text-[14px]">
+            <p className="max-w-[34ch] text-pretty font-light font-mono text-[length:clamp(14px,1.1vw,16px)] text-body leading-[1.62] narrow:text-[14px]">
               Este endereço não leva a nenhum lugar do Minimal Me.
             </p>
             <a

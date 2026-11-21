@@ -23,7 +23,7 @@ const pages = {
   home: {
     layers: openingLayers,
     markHref: "#top",
-    height: "max-[900px]:h-[min(66svh,720px)] max-[900px]:min-h-[360px] max-[900px]:flex-none",
+    height: "stacked:h-[min(66svh,720px)] stacked:min-h-[360px] stacked:flex-none",
   },
   "not-found": {
     layers: openingLayers.filter(({ id }) => id === "sky"),
@@ -64,7 +64,7 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
             fetchPriority="high"
             decoding="async"
             style={positionStyle(layer)}
-            className="block size-full max-w-none object-cover object-(--position-wide) max-[760px]:object-(--position-narrow)"
+            className="block size-full max-w-none object-cover object-(--position-wide) narrow:object-(--position-narrow)"
           />
         </div>
       ))}

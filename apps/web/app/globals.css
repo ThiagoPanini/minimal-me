@@ -46,8 +46,15 @@
   }
 }
 
-/* Até 900px a fileira de spaces empilha, como no protótipo (`max-width: 900px`). */
+/*
+ * As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`). Os
+ * utilitários `max-[900px]:` e `min-[901px]:` do Tailwind não servem: o primeiro é
+ * `width < 900px` e o segundo `width >= 901px`, e a 900px exatos nenhum dos dois vale.
+ * Até 900px a página empilha (`stacked:`; acima, `not-stacked:`); até 760px, as camadas
+ * da abertura usam a posição estreita e a frase do Masthead fica em 14px (`narrow:`).
+ */
 @custom-variant stacked (@media (max-width: 900px));
+@custom-variant narrow (@media (max-width: 760px));
 
 /*
  * O estado de cada fresta da fileira de spaces (SpaceSlit), no atributo `data-focus` do item:

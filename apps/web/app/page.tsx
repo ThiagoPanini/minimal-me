@@ -5,6 +5,7 @@ import { Masthead } from "@/components/Masthead";
 import { OpeningIllustration } from "@/components/OpeningIllustration";
 import { SectionHeader } from "@/components/SectionHeader";
 import { SpaceSlit, SpaceSlitRow } from "@/components/SpaceSlit";
+import { Toast, ToastProvider } from "@/components/Toast";
 import { spaceCount, spaces } from "@/spaces/catalog";
 
 // A frase da abertura, que é também a descrição da Home para buscadores e na prévia de
@@ -27,11 +28,8 @@ export const metadata: Metadata = {
 
 export default function Home() {
   return (
-    <>
-      <header
-        id="top"
-        className="flex h-svh min-h-[600px] flex-col max-[900px]:h-auto max-[900px]:min-h-0"
-      >
+    <ToastProvider>
+      <header id="top" className="flex h-svh min-h-[600px] flex-col stacked:h-auto stacked:min-h-0">
         <OpeningIllustration page="home" />
         <Masthead kicker="hub pessoal e minimalista" tagline={tagline} />
       </header>
@@ -42,15 +40,16 @@ export default function Home() {
         >
           <div className="page-inner">
             <SectionHeader id="spaces-title" label="Spaces" count={spaceCount} />
-            <SpaceSlitRow>
-              {spaces.map((space, index) => (
-                <SpaceSlit key={space.id} space={space} kept={index === 0} />
+            <SpaceSlitRow kept={spaces[0].id}>
+              {spaces.map((space) => (
+                <SpaceSlit key={space.id} space={space} />
               ))}
             </SpaceSlitRow>
           </div>
         </section>
       </main>
       <Footer year={2026} />
-    </>
+      <Toast />
+    </ToastProvider>
   );
 }

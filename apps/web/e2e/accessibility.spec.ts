@@ -6,7 +6,7 @@ import { expect, test } from "./fixtures";
 const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"];
 
 // O axe numa página aberta: as violações falham o teste.
-async function checkAxe(page: Page, testInfo: TestInfo): Promise<void> {
+async function expectNoAxeViolations(page: Page, testInfo: TestInfo): Promise<void> {
   const results = await new AxeBuilder({ page }).withTags(wcagTags).analyze();
 
   for (const { id, help, nodes } of results.incomplete) {
@@ -33,9 +33,25 @@ const pages = [
 for (const { name, route } of pages) {
   test(`${name} passa no axe, com WCAG A e AA até 2.2`, async ({ page }, testInfo) => {
     await page.goto(route);
-    await checkAxe(page, testInfo);
+    await expectNoAxeViolations(page, testInfo);
   });
 }
+
+test("com uma fresta aberta pelo teclado e o aviso à vista, a Home passa no axe", async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("/");
+  // A marca e depois o "Acessar" de Music & Feeling.
+  for (let link = 0; link < 3; link++) await page.keyboard.press("Tab");
+  await expect(page.getByRole("link", { name: "Acessar Music & Feeling" })).toBeFocused();
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("status")).toHaveText(
+    "Em planejamento · Music & Feeling ainda não está disponível.",
+  );
+
+  await expectNoAxeViolations(page, testInfo);
+});
 
 // A descrição de um space como o leitor de tela a ouve: a inteira na tela larga e, até 900px,
 // só a primeira frase.
@@ -44,7 +60,8 @@ function description(page: Page, ...sentences: string[]): string {
 }
 
 // A árvore de acessibilidade da Home, inteira (`deep-equal`): quem muda o que a Home mostra
-// atualiza a árvore aqui. O `alert` vazio no fim é o anúncio de troca de rota do Next.
+// atualiza a árvore aqui. O `status` vazio é o aviso (Toast), à espera de uma mensagem; o
+// `alert` vazio no fim é o anúncio de troca de rota do Next.
 test("a árvore ARIA da Home @webkit", async ({ page }) => {
   await page.goto("/");
 
@@ -96,6 +113,7 @@ test("a árvore ARIA da Home @webkit", async ({ page }) => {
         - text: © 2026
         - link "voltar ao início ↑":
           - /url: "#top"
+    - status
     - alert
   `);
 });

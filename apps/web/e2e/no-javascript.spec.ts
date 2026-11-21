@@ -71,6 +71,8 @@ test("sem JavaScript, o Acessar fica na própria fresta @webkit", async ({ page 
   await page.goto("/");
   const slit = page.getByRole("main").getByRole("listitem").first();
 
+  // Só o link responde ao clique, e a fresta não promete o contrário.
+  await expect(slit).toHaveCSS("cursor", "auto");
   await slit.getByRole("link", { name: "Acessar Frames & Songs" }).click();
 
   expect(await slit.evaluate((item) => item.matches(":target"))).toBe(true);

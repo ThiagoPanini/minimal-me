@@ -5,6 +5,20 @@ function scrollY(page: Page): () => Promise<number> {
   return () => page.evaluate(() => window.scrollY);
 }
 
+// Espera a rolagem parar fora do topo. Com movimento, a rolagem que o foco faz é suave, e um
+// Enter no meio dela deixa o Chromium no fim da página em vez de levar ao topo.
+async function scrollSettled(page: Page): Promise<void> {
+  let previous = -1;
+  await expect
+    .poll(async () => {
+      const current = await scrollY(page)();
+      const settled = current > 0 && current === previous;
+      previous = current;
+      return settled;
+    })
+    .toBe(true);
+}
+
 // A espessura de um contorno como o navegador a desenha: arredondada para baixo em pixels
 // do dispositivo (1,5px vira 1px numa tela de densidade 1).
 async function outlineWidth(page: Page, width: number): Promise<string> {
@@ -48,7 +62,7 @@ test("pela tabulação, voltar ao início e a marca recebem foco visível e leva
   await expect(backToTop).toHaveCSS("outline-width", await outlineWidth(page, 1.5));
   await expect(backToTop).toHaveCSS("outline-color", "rgb(201, 201, 196)");
   await expect(backToTop).toHaveCSS("outline-offset", "3px");
-  await expect.poll(scrollY(page)).toBeGreaterThan(0);
+  await scrollSettled(page);
   await page.keyboard.press("Enter");
   await expect.poll(scrollY(page)).toBe(0);
 
