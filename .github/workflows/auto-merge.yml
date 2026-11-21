@@ -1,0 +1,62 @@
+# O merge automático dos PRs do Dependabot (seção "Dependências" da #57): liga o auto-merge do PR,
+# e o GitHub o mescla em squash quando os checks obrigatórios (`gate` e `pr-title`) passam,
+# inclusive major. A exceção é a major do Node, que fica no 24 até o Next suportar o 26: o
+# `.github/dependabot.yml` já não a pede, e este workflow não a mescla se um PR dela aparecer.
+# Quem liga o auto-merge é o GitHub App do Autor, com o token dele: um merge feito com o
+# GITHUB_TOKEN chegaria à `main` sem disparar o `ci` do push e, com ele, a entrega. O Client ID e
+# a chave privada do App são segredos do Dependabot, que só as rodadas disparadas por ele recebem.
+# Quem edita este arquivo regenera o `actions.lock` com `gh actions-lock`.
+name: auto-merge
+
+# Só na abertura e na reabertura: o auto-merge ligado continua valendo nos rebases do Dependabot
+# e nos commits de outra pessoa no PR, e uma rodada disparada por outra pessoa não recebe os
+# segredos do Dependabot.
+on:
+  pull_request:
+    types: [opened, reopened]
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  auto-merge:
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Lê o que o PR atualiza
+        id: metadata
+        uses: dependabot/fetch-metadata@v3.1.0
+      - name: Confere se o PR é a major do Node
+        id: policy
+        env:
+          UPDATED_DEPENDENCIES: ${{ steps.metadata.outputs.updated-dependencies-json }}
+        run: |
+          node_major=$(jq '[.[] | select((.dependencyName == "node" or .dependencyName == "@types/node") and .updateType == "version-update:semver-major")] | length > 0' <<<"$UPDATED_DEPENDENCIES")
+          echo "node-major=$node_major" >>"$GITHUB_OUTPUT"
+          if [ "$node_major" = true ]; then
+            echo "::notice::A major do Node fica no 24 até o Next suportar o 26: este PR não entra no merge automático."
+          fi
+      - name: Gera o token do App
+        if: steps.policy.outputs.node-major == 'false'
+        id: app-token
+        uses: actions/create-github-app-token@v3.3.0
+        with:
+          client-id: ${{ secrets.MERGE_APP_CLIENT_ID }}
+          private-key: ${{ secrets.MERGE_APP_PRIVATE_KEY }}
+          # O merge em si, e os PRs do ecossistema GitHub Actions mudam `.github/workflows/`.
+          permission-contents: write
+          permission-pull-requests: write
+          permission-workflows: write
+      - name: Liga o auto-merge em squash
+        if: steps.policy.outputs.node-major == 'false'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"
