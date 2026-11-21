@@ -48,6 +48,7 @@ Specs here are built by `/implement-spec`: every ticket lands on one integration
 - **Shared files**: tickets that edit the same file get a blocking edge; every other edge is a real dependency.
 - **Seams**: each ticket names its test seam.
 - **Leaves**: a ticket that may stop for the Author's decision blocks nothing.
+- **Tools**: a ticket that brings a CLI or extension the agent has not run in this repo names it, and the slicing session runs it once in the agent's permission mode (or from a Docker image pinned by digest), reading what it writes. A tool that stays blocked becomes a step of the Author's one-time setup, and its ticket blocks nothing.
 
 ## Wayfinding operations
 
