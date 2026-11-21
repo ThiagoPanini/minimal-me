@@ -1,9 +1,9 @@
-// `node scripts/check-action-pins.mjs`: confere, sem rede, que toda action dos workflows está
-// fixada duas vezes: pelo SHA completo no próprio `uses:` e no `.github/workflows/actions.lock`,
-// que precisa cobrir todos os workflows e todas as actions deles, como o
-// `gh actions-lock --verify-local`. O zizmor não cobra o SHA quando há lockfile, e a política
-// "Require lockfile" do GitHub recusa um workflow fora dele; a procedência de cada entrada o
-// GitHub confere no início de cada job.
+// `node scripts/check-action-pins.mjs`: confere, sem rede e sem o `gh`, que toda action dos
+// workflows está fixada na forma do `gh actions-lock`: o `uses:` cita a etiqueta semver completa
+// (`owner/repo@v1.2.3`), e o `.github/workflows/actions.lock` cobre todos os workflows e todas as
+// actions deles, com o commit de cada uma, como o `gh actions-lock --verify-local`. O lockfile
+// atende à política de fixação por SHA do GitHub, que confere a procedência de cada entrada no
+// início de cada job.
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { parse } from "yaml";
@@ -11,23 +11,21 @@ import { parse } from "yaml";
 const root = path.resolve(import.meta.dirname, "..");
 const workflowsDir = path.join(root, ".github/workflows");
 const lockPath = path.join(workflowsDir, "actions.lock");
-const relock = "Rode `gh actions-lock` na raiz e inclua o actions.lock no commit.";
-const fullSha = /@[0-9a-f]{40}$/;
+const fullSemver = /@v?\d+\.\d+\.\d+$/;
+const lockedCommit = /^sha1-[0-9a-f]{40}$/;
 
-const shaProblems = [];
+const refProblems = [];
 const lockProblems = [];
 
-/** As actions de um workflow, como escritas no `uses:` dos passos. */
+/** As actions de outros repositórios num workflow, como escritas no `uses:` dos passos. */
 function actionsUsedBy(file) {
   const workflow = parse(readFileSync(path.join(workflowsDir, file), "utf8")) ?? {};
   const uses = new Set();
   for (const job of Object.values(workflow.jobs ?? {})) {
     for (const step of job?.steps ?? []) {
       const ref = step?.uses;
-      // Action local (`./`) e imagem (`docker://`) não entram no lockfile.
-      if (typeof ref === "string" && !ref.startsWith("./") && !ref.startsWith("docker://")) {
-        uses.add(ref);
-      }
+      // Action do próprio repositório (`./` ou `$/`) e imagem (`docker://`) ficam fora do lockfile.
+      if (typeof ref === "string" && !/^(\.\/|\$\/|docker:\/\/)/.test(ref)) uses.add(ref);
     }
   }
   return uses;
@@ -43,7 +41,7 @@ for (const file of workflowFiles) {
   const key = `.github/workflows/${file}`;
   const used = actionsUsedBy(file);
   for (const ref of used) {
-    if (!fullSha.test(ref)) shaProblems.push(`${key} usa ${ref} sem o SHA completo.`);
+    if (!fullSemver.test(ref)) refProblems.push(`${key} usa ${ref}.`);
   }
   if (!lock) continue;
   const locked = lockedWorkflows[key];
@@ -52,8 +50,9 @@ for (const file of workflowFiles) {
     continue;
   }
   for (const ref of used) {
-    if (!locked.includes(ref))
+    if (!locked.includes(ref)) {
       lockProblems.push(`${key} usa ${ref}, que não está no actions.lock.`);
+    }
   }
   for (const ref of locked) {
     if (!used.has(ref)) lockProblems.push(`${key} não usa mais ${ref}, que segue no actions.lock.`);
@@ -72,26 +71,27 @@ for (const dependency of Object.values(dependencies)) {
   for (const ref of dependency?.uses ?? []) listed.add(ref);
 }
 for (const ref of listed) {
-  if (!dependencies[ref]?.commit)
-    lockProblems.push(`${ref} não tem entrada com commit no actions.lock.`);
+  if (!lockedCommit.test(dependencies[ref]?.commit ?? "")) {
+    lockProblems.push(`${ref} não tem entrada com o commit no actions.lock.`);
+  }
 }
 
 const report = [];
-if (shaProblems.length > 0) {
+if (refProblems.length > 0) {
   report.push(
-    "Actions sem SHA:",
-    ...shaProblems.map((problem) => `- ${problem}`),
-    "Fixe cada uma pelo commit completo da versão, com a versão em comentário: `owner/repo@<sha> # v1.2.3`.",
+    "Actions sem a etiqueta semver completa:",
+    ...refProblems.map((problem) => `- ${problem}`),
+    "Cite a etiqueta da versão (`owner/repo@v1.2.3`); o commit fica no actions.lock.",
   );
 }
-if (lockProblems.length > 0) {
-  report.push(
-    "O actions.lock não cobre os workflows:",
-    ...lockProblems.map((problem) => `- ${problem}`),
-    relock,
-  );
-}
-if (report.length > 0) {
+if (refProblems.length > 0 || lockProblems.length > 0) {
+  if (lockProblems.length > 0) {
+    report.push(
+      "O actions.lock não cobre os workflows:",
+      ...lockProblems.map((problem) => `- ${problem}`),
+    );
+  }
+  report.push("Rode `gh actions-lock` na raiz e inclua o actions.lock no commit.");
   console.error(report.join("\n"));
   process.exit(1);
 }
