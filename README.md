@@ -16,6 +16,7 @@ O que o produto é está em `docs/brief.md`; o vocabulário, em `GLOSSARY.md`; a
 | `scripts/delivery/` | A entrega e o smoke (ver "Como publicar e voltar uma versão"). |
 | `lefthook.yml`, `compose.tools.yaml` e `scripts/` | Os ganchos do git e as ferramentas que rodam de imagem Docker (gitleaks, actionlint e zizmor), iguais na máquina e na CI. |
 | `scripts/author-setup/` | O roteiro da preparação única do Autor (ver "Preparação única do Autor"). |
+| `scripts/checks/` | Os checks dos arquivos do sistema de design e dos Markdown, que rodam no `pnpm check` (ver "Como verificar"). |
 | `CODING_STANDARDS.md` | Os padrões que a revisão confere: idioma, web, branches, commits, ganchos e workflows. |
 | `docs/` | Brief, ADRs, sistema de design e o protótipo do MVP. |
 
@@ -34,9 +35,11 @@ O servidor de desenvolvimento abre em `http://localhost:3000`. Em produção nã
 
 | Comando | O que faz |
 |---|---|
-| `pnpm check` | Biome em modo CI; actionlint, zizmor e a fixação das actions pelo `actions.lock`; os testes dos scripts da raiz (`pnpm test:scripts`); e a checagem de tipos (`next typegen && tsc --noEmit`). |
+| `pnpm check` | Biome em modo CI; actionlint, zizmor e a fixação das actions pelo `actions.lock`; os testes dos scripts da raiz e os checks de `scripts/checks/` (`pnpm test:scripts`); e a checagem de tipos (`next typegen && tsc --noEmit`). |
 | `pnpm test:e2e` | Constrói a imagem da Home, sobe-a no Docker Compose com o contêiner oficial do Playwright e roda os testes contra ela. Precisa do Docker de pé. |
 | `pnpm verify` | Os dois acima, nessa ordem. Rode antes de abrir ou atualizar um PR. |
+
+Os checks de `scripts/checks/` conferem que o `tokens.json` abre, com nomes em minúsculas e sem repetição; que toda `var(--x)` das prévias de `docs/design/system/components/` é um token, uma família de `type.families` ou uma propriedade declarada na própria prévia; que todo caminho `docs/...` citado num Markdown existe (menos na Linhagem de `docs/design/README.md`; um arquivo que só existe num commit antigo se cita como `<commit>:docs/...`); e que a prosa dos Markdown que o git guarda não tem travessão fora de código, a não ser no contador da interface, como "01 — 04". A falha diz o arquivo e o problema.
 
 No `pnpm test:e2e`, o Playwright roda em Chromium a 390 e a 1440 de largura e, num subconjunto, em WebKit com o iPhone 13. No mesmo contêiner, o Lighthouse mede a primeira visita a 390px, com fator de escala 3 e Slow 4G simulado: o peso trava em 1.000.000 bytes transferidos, e a mediana do LCP em cinco rodadas só aparece na saída. A regressão visual compara a Home e a 404 às capturas de referência de `apps/web/e2e/visual.spec.ts-snapshots/`, que só se refazem no contêiner (ver `CODING_STANDARDS.md`). Cada worktree sobe o próprio projeto do Compose, sem porta no host, então vários worktrees testam ao mesmo tempo. Argumentos extras vão para o `playwright test`, como em `pnpm test:e2e --grep 404`.
 
