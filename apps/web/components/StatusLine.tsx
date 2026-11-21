@@ -9,6 +9,8 @@ import type { SpaceStatus } from "@/spaces/catalog";
 const dotByStatus: Record<SpaceStatus, string> = {
   available: "bg-current",
   "in-development": "bg-current motion-safe:animate-status-pulse",
+  // O anel é a propriedade crua: o `shadow-[…]` do Tailwind empilha quatro sombras
+  // transparentes antes da sua.
   planned: "[box-shadow:inset_0_0_0_1px_currentColor]",
 };
 

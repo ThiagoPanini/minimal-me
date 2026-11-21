@@ -110,6 +110,9 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
       <div className="absolute inset-0 -z-2" style={pictureVariables(illustration)}>
         <div className="slit-feather absolute inset-0 overflow-hidden motion-safe:[transition:opacity_.8s_var(--ease)] in-slit-receded:opacity-60 unrevealed:opacity-0 revealed:[animation:develop_1.6s_var(--ease-out)_calc(var(--reveal-delay)_+_.05s)_backwards]">
           <div className="absolute inset-0 filter-(--grade-rest) motion-safe:[transition:filter_1.2s_var(--ease)] in-slit-open:filter-(--grade-focus)">
+            {/* A aproximação do foco é a propriedade `scale`, e a profundidade (motion/depth.tsx)
+                escreve `translate` no mesmo elemento: o Tailwind 4 as separa do `transform`, e
+                as duas não brigam. */}
             <div
               data-picture-depth
               className="absolute inset-[-3%] motion-safe:[transition:scale_var(--wake-out)_var(--ease-out)] motion-safe:in-slit-open:scale-(--wake-scale) motion-safe:in-slit-open:[transition:scale_var(--wake-in)_var(--ease-out)]"

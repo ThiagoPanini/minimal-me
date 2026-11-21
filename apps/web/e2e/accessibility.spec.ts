@@ -61,7 +61,8 @@ function description(page: Page, ...sentences: string[]): string {
 
 // A árvore de acessibilidade da Home, inteira (`deep-equal`): quem muda o que a Home mostra
 // atualiza a árvore aqui. O `status` vazio é o aviso (Toast), à espera de uma mensagem; o
-// `alert` vazio no fim é o anúncio de troca de rota do Next.
+// `alert` vazio no fim é o anúncio de troca de rota do Next. No YAML, nome com ":" vai entre
+// aspas simples.
 test("a árvore ARIA da Home @webkit", async ({ page }) => {
   await page.goto("/");
 

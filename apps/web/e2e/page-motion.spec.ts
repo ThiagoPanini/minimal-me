@@ -60,7 +60,7 @@ function entrancesOf(element: Locator, { rule = false } = {}): Promise<Entrance[
 }
 
 // O relógio das animações CSS, pelo protocolo do Chromium: parado em 0, cada entrada fica no
-// primeiro quadro até o teste soltá-lo.
+// primeiro quadro até o teste soltá-lo. Ele continua parado depois de um `goto`.
 async function animationClock(
   page: Page,
 ): Promise<{ stop: () => Promise<void>; run: () => Promise<void> }> {
@@ -502,7 +502,8 @@ test("as fotos dos spaces ganham profundidade: até 14px com a rolagem e até 3p
   const slit = page.getByRole("region", { name: "Spaces" }).getByRole("listitem").nth(2);
   const picture = slit.getByRole("img");
   const offset = async () => shift(await positionOf(slit), await positionOf(picture));
-  // Rola e espera o evento de rolagem chegar à página, antes de andar o relógio.
+  // Rola e espera o evento de rolagem chegar à página, antes de andar o relógio: com o relógio
+  // parado, o `scroll` só chega no quadro real seguinte, e o `runFor` sem ele não vê a rolagem.
   const scrollTo = async (top: number) => {
     await page.evaluate(
       (top) =>

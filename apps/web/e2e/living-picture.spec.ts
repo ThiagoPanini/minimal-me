@@ -83,6 +83,8 @@ test("com o foco, só a foto do space se move, e a que perde o foco volta ao rep
 });
 
 test.describe("em tela de toque", () => {
+  // O `tap()` no Chromium só funciona com `hasTouch`; no WebKit do iPhone 13, o toque já chega
+  // como `pointerType` `touch`.
   test.use({ hasTouch: true });
 
   test("a foto da fresta tocada acorda, e a da que estava aberta volta ao repouso @webkit", async ({

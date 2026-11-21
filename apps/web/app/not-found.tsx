@@ -8,6 +8,9 @@ import { OpeningIllustration } from "@/components/OpeningIllustration";
 // `kicker` (o título da página), a frase em `tagline` e o link de volta em `link`, com o traço;
 // por fim, o rodapé só com o ano, porque a página é curta. Tudo cabe numa tela: o céu fica com
 // a altura que o texto e o rodapé deixam.
+//
+// O Next põe esta página no payload de toda página, não só no `404.html`: nada de componente
+// de cliente aqui.
 
 export const metadata: Metadata = {
   title: "Página não encontrada",

@@ -7,8 +7,9 @@ import { grain, openingLayers } from "@/design-system/illustrations";
 // A imagem de compartilhamento, gerada no build: a abertura recortada em 1200 × 630, com o céu
 // e as dunas presos no ponto da tela larga, como a Home os mostra, e o grão por cima. O
 // `next/og` compõe as camadas a partir das cópias em PNG que o passo das ilustrações grava,
-// porque ele não desenha WebP. O PNG que ele devolve passa de 900 KB; a imagem sai em JPEG,
-// com cerca de 100 KB, para a prévia não esbarrar no limite de tamanho de quem a mostra.
+// porque ele não desenha WebP: com WebP a imagem sai em branco, sem erro. O PNG que ele
+// devolve passa de 900 KB; a imagem sai em JPEG, com cerca de 100 KB, para a prévia não
+// esbarrar no limite de tamanho de quem a mostra.
 
 // O export estático pede que a rota diga que é gerada uma vez, no build.
 export const dynamic = "force-static";

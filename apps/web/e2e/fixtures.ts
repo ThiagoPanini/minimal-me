@@ -3,6 +3,10 @@ import { test as base, expect } from "@playwright/test";
 // Toda página aberta num teste termina sem erro de console, violação de CSP incluída. A única
 // exceção é o aviso do navegador de que o próprio documento veio com status 404, quando o teste
 // abre de propósito uma rota que não existe: o status é o que a 404 promete, e o teste o confere.
+//
+// Com movimento, o que está abaixo da dobra fica transparente até a página rolar até ele
+// (`motion/entrance.ts`): um teste que mede layout ou texto à vista sem rolar emula
+// `reducedMotion: "reduce"`.
 export const test = base.extend({
   page: async ({ page }, use) => {
     const errors: { text: string; url: string }[] = [];

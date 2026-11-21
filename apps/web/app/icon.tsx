@@ -16,6 +16,7 @@ export const contentType = "image/png";
 const markFile = path.join(process.cwd(), "../../docs/design/system/assets/Brand/mark-light.svg");
 const markSize = (size.width * 26) / 32;
 // Do tokens.json direto: a ponte dos tokens carrega as fontes, que uma rota de imagem não lê.
+// Importar `design-system/tokens.ts` numa rota de imagem quebra o build com "reading 'style'".
 const ground = designTokens.color.tokens.find(({ name }) => name === "ground")?.value;
 
 export default async function MarkIcon() {

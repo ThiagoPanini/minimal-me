@@ -29,6 +29,7 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    // As rotas tipadas: o `exclude` não pode tirar o `.next`, senão elas param de checar.
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

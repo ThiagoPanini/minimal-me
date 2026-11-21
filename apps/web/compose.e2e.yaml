@@ -20,7 +20,8 @@ services:
     user: ${HOST_UID:?}:${HOST_GID:?}
     init: true
     ipc: host
-    # O repositório montado no mesmo caminho da máquina, com o node_modules dela.
+    # O repositório montado no mesmo caminho da máquina, com o node_modules dela: os testes
+    # leem `docs/` direto, pelo mesmo caminho.
     volumes:
       - ${REPO_ROOT:?}:${REPO_ROOT:?}
     working_dir: ${REPO_ROOT:?}/apps/web

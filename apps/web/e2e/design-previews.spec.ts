@@ -14,7 +14,9 @@ const origin = "http://design-system.test";
 
 // As prévias chamam as imagens por `/_blob/<id>`, os assets do artefato do Design System no
 // claude.ai (ver "No Claude Design" em `docs/design/README.md`). Cada id é um arquivo de
-// `assets/`, conferido pelo SHA-256 do índice de assets do artefato em 2026-11-21.
+// `assets/`, conferido pelo SHA-256 do índice de assets do artefato em 2026-11-21. Uma prévia
+// com um id novo pede a linha dele aqui, senão o teste falha dizendo o id; o índice
+// (`Artifact` `list`, `scope: "assets"`) dá o SHA-256 que acha o arquivo.
 const blobs: Record<string, string> = {
   c2007a56233c7752ec6375195a5e8ff3: "Texture/grain.png",
   "929a0016c2932a47c509bca9aef60ec7": "Illustrations/frames.webp",
