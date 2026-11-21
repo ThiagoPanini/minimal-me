@@ -66,9 +66,11 @@ jobs:
         with:
           fail-on-severity: high
           fail-on-scopes: runtime
-          # Só valem fora do `pull_request`; no PR, a action usa a base e a ponta dele.
-          base-ref: ${{ github.event.before }}
-          head-ref: ${{ github.sha }}
+          # Na `main`, o push compara o commit anterior com o novo. No PR, as duas ficam vazias: a
+          # action só usa a base e a ponta do PR quando nenhuma das duas vem (src/git-refs.ts).
+          # Com elas no PR, ela compararia só o último push, ou quebraria num PR recém-aberto.
+          base-ref: ${{ github.event_name == 'push' && github.event.before || '' }}
+          head-ref: ${{ github.event_name == 'push' && github.sha || '' }}
 
   # PR: a imagem vai para um arquivo e segue ao e2e como artefato, sem push. O cache só é lido.
   image:
@@ -237,10 +239,12 @@ jobs:
   # `production` para ele, chama o /deploy do Coolify e roda o smoke contra a URL pública; se algo
   # falha depois de a tag mudar, devolve `production` ao digest anterior, chama o /deploy de novo e
   # termina vermelho. Este job não instala dependências: é o único que vê o token. O rollback
-  # manual é o workflow `rollback`, que passa pelo mesmo script.
+  # manual é o workflow `rollback`, que passa pelo mesmo script. O `if:` confere o resultado de
+  # cada `needs`: sem função de status, o `success()` implícito olha a cadeia inteira, e o
+  # `image`, pulado no push, pulava a entrega junto.
   deploy:
     needs: [publish, gate]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ !cancelled() && needs.publish.result == 'success' && needs.gate.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment:
