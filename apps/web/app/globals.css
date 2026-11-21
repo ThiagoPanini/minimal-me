@@ -226,7 +226,9 @@
  * As transições de vista (`<ViewTransition>` do React). Só entra numa transição quem a pede:
  * a página inteira não é capturada, e continua à vista e respondendo ao cursor e ao toque. O
  * aviso (Toast) aparece e some por opacidade em 0,5s: o quadro velho dele se funde no novo,
- * sem crescer nem se mover. Com movimento reduzido, a transição em curso termina na hora.
+ * sem crescer nem se mover. Como toda animação da página, a fusão vale só com movimento: sem
+ * ele, nenhum quadro do aviso anima, e a transição em curso quando a preferência muda termina
+ * na hora.
  */
 :root {
   view-transition-name: none;
@@ -236,20 +238,19 @@
   pointer-events: none;
 }
 
-::view-transition-group(.toast-fade) {
+::view-transition-group(.toast-fade),
+::view-transition-old(.toast-fade),
+::view-transition-new(.toast-fade) {
   animation-name: none;
 }
 
-::view-transition-old(.toast-fade),
-::view-transition-new(.toast-fade) {
-  animation-duration: 0.5s;
-  animation-timing-function: var(--ease);
-}
-
-@media (prefers-reduced-motion: reduce) {
+/* Com movimento, os dois quadros voltam à fusão do navegador (`revert`), em 0,5s e com `ease`. */
+@media (prefers-reduced-motion: no-preference) {
   ::view-transition-old(.toast-fade),
   ::view-transition-new(.toast-fade) {
-    animation: none;
+    animation-name: revert;
+    animation-duration: 0.5s;
+    animation-timing-function: var(--ease);
   }
 }
 

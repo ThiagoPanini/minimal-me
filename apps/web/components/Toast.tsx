@@ -29,10 +29,12 @@ import {
 const shownMs = 2600;
 const fadeMs = 500;
 
-// Com movimento, a mudança entra numa transição, que o `<ViewTransition>` do aviso anima.
+// Só com movimento a mudança entra numa transição, que o `<ViewTransition>` do aviso anima;
+// sem ele, ela vale na hora.
 function changeNotice(change: () => void): void {
-  if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) change();
-  else startTransition(change);
+  if (window.matchMedia("(prefers-reduced-motion: no-preference)").matches) {
+    startTransition(change);
+  } else change();
 }
 
 type Notice = { message: string; key: number; shown: boolean };
