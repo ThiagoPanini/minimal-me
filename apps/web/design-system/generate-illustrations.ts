@@ -3,6 +3,8 @@
 // `design-system/generated/` (fora do git) e escreve `generated/illustrations.ts`,
 // que importa cada largura. O Next dá hash ao nome de cada arquivo importado e o
 // serve em `/_next/static/media/`; a maior largura é o próprio arquivo do sistema.
+// As camadas da abertura ganham também uma cópia em PNG, no tamanho original, em
+// `generated/opening/`: o `next/og` da imagem de compartilhamento não desenha WebP.
 // Faltar uma ilustração que a Home usa quebra o build aqui.
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
@@ -14,6 +16,7 @@ const systemDir = path.resolve(
 );
 const generatedDir = path.resolve(import.meta.dirname, "generated");
 const variantsDir = path.join(generatedDir, "illustrations");
+const openingDir = path.join(generatedDir, "opening");
 
 // As larguras menores que o arquivo original; a original entra sempre.
 const variantWidths = [480, 768];
@@ -45,6 +48,7 @@ if (missing.length > 0) {
 
 rmSync(generatedDir, { recursive: true, force: true });
 mkdirSync(variantsDir, { recursive: true });
+mkdirSync(openingDir, { recursive: true });
 
 const identifier = (id: string, width: number) => `${id.replace(/\W/g, "_")}${width}`;
 const imports: string[] = [];
@@ -74,6 +78,12 @@ for (const { id, file, size } of shown) {
   );
   names.push(identifier(id, width));
   entries.push(`  ${JSON.stringify(id)}: [${names.join(", ")}],`);
+}
+
+for (const { id, file } of data.opening.layers) {
+  await sharp(path.join(systemDir, file))
+    .png()
+    .toFile(path.join(openingDir, `${id}.png`));
 }
 
 writeFileSync(

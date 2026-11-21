@@ -125,11 +125,15 @@ export const grade: { rest: string; focus: string } = illustrationsData.grade;
 export const wake: { scale: number; rateIn: number; rateOut: number } = illustrationsData.wake;
 export const depth: { scroll: number; pointer: number } = illustrationsData.depth;
 
-// O grão que cobre toda imagem: o ladrilho de `assets/Texture`, com o tamanho, a opacidade
-// e a mistura de `illustrations.json`.
+// O grão que cobre toda imagem, como `illustrations.json` o descreve: o arquivo do ladrilho
+// (relativo a `assets/Illustrations`), o tamanho, a opacidade e a mistura.
+export const grain: { file: string; tile: string; opacity: number; blend: string } =
+  illustrationsData.grain;
+
+// O grão como estilo: o ladrilho de `assets/Texture`, servido pela Home.
 export const grainStyle: CSSProperties = {
   backgroundImage: `url(${grainTile.src})`,
-  backgroundSize: `${illustrationsData.grain.tile} ${illustrationsData.grain.tile}`,
-  opacity: illustrationsData.grain.opacity,
-  mixBlendMode: illustrationsData.grain.blend as CSSProperties["mixBlendMode"],
+  backgroundSize: `${grain.tile} ${grain.tile}`,
+  opacity: grain.opacity,
+  mixBlendMode: grain.blend as CSSProperties["mixBlendMode"],
 };
