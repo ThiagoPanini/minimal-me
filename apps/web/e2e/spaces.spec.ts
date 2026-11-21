@@ -111,6 +111,8 @@ test("até 900px, a fileira continua uma fileira, com Frames & Songs aberta a ci
   page,
 }) => {
   test.skip(!isStacked(page), "a fileira empilhada só existe até 900px");
+  // Sem movimento, a fileira já está no estado final, sem esperar a vez de entrar na tela.
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");
 
   const boxes = await slitBoxes(page);

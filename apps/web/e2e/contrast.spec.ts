@@ -102,8 +102,9 @@ async function focusWithKeyboard(page: Page, { name }: Space): Promise<void> {
 
 for (const { width, height, project } of widths) {
   const stacked = width <= 900;
-  // Até 900px, o nome do Masthead sobe sobre o pé escuro das dunas.
-  const masthead = stacked ? ['"Minimal Me"'] : [];
+  // Até 900px, o nome do Masthead sobe sobre o pé escuro das dunas, uma palavra de cada vez
+  // na entrada da página.
+  const masthead = stacked ? ['"Minimal"', '"Me"'] : [];
 
   test.describe(`a ${width}px`, () => {
     test.use({ viewport: { width, height } });

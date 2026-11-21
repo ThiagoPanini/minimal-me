@@ -1,6 +1,9 @@
 // A linha que abre uma seção (docs/design/system/components/SectionHeader): o rótulo à
 // esquerda, como título de nível 2, a contagem à direita e um fio de 1px em `hairline` abaixo,
 // a `section-rule-gap` do texto, de margem a margem. Sem contagem, o lado direito fica vazio.
+//
+// Com movimento, ela entra uma vez, quando chega à tela (motion/entrance.ts): o fio cresce da
+// esquerda em 1,2s, o rótulo aparece, e a contagem 0,25s depois.
 
 type SectionHeaderProps = {
   // O `id` do título, para a seção se nomear por ele.
@@ -11,15 +14,18 @@ type SectionHeaderProps = {
 
 export function SectionHeader({ id, label, count }: SectionHeaderProps) {
   return (
-    <header className="relative mb-[clamp(30px,3.2vw,48px)] flex items-baseline justify-between gap-6 pb-(--section-rule-gap) after:absolute after:inset-x-0 after:bottom-0 after:h-px after:bg-hairline">
+    <header
+      data-reveal
+      className="relative mb-[clamp(30px,3.2vw,48px)] flex items-baseline justify-between gap-6 pb-(--section-rule-gap) after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:bg-hairline unrevealed:after:[scale:0_1] revealed:after:[animation:grow-x_1.2s_var(--ease-out)_backwards]"
+    >
       <h2
         id={id}
-        className="m-0 font-normal font-sans text-[12px] text-light uppercase leading-[1.4] tracking-[.34em]"
+        className="m-0 font-normal font-sans text-[12px] text-light uppercase leading-[1.4] tracking-[.34em] unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_backwards]"
       >
         {label}
       </h2>
       {count && (
-        <span className="font-mono font-normal text-[11px] text-mist tabular-nums leading-[1.4] tracking-[.16em]">
+        <span className="font-mono font-normal text-[11px] text-mist tabular-nums leading-[1.4] tracking-[.16em] unrevealed:opacity-0 revealed:[animation:fade-in_.9s_var(--ease)_.25s_backwards]">
           {count}
         </span>
       )}

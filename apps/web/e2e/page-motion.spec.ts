@@ -21,24 +21,42 @@ type Entrance = {
   from: Record<string, string>;
 };
 
-// As animações de entrada de um elemento (o pulso do ponto, em laço, fica de fora).
-function entrancesOf(element: Locator): Promise<Entrance[]> {
-  return element.evaluate((node) =>
-    node
-      .getAnimations()
-      .filter((animation) => animation.effect?.getTiming().iterations !== Infinity)
+// As entradas que movem um elemento: as animações dele e as dos elementos que o contêm (o
+// pulso do ponto, em laço, fica de fora). Com `rule`, as do fio de um bloco, desenhado num
+// pseudo-elemento dentro dele.
+function entrancesOf(element: Locator, { rule = false } = {}): Promise<Entrance[]> {
+  return element.evaluate((node, rule) => {
+    const animations: Animation[] = [];
+    if (rule) {
+      animations.push(
+        ...node
+          .getAnimations({ subtree: true })
+          .filter((animation) => (animation.effect as KeyframeEffect).pseudoElement),
+      );
+    } else {
+      for (let current: Element | null = node; current; current = current.parentElement) {
+        animations.push(...current.getAnimations());
+      }
+    }
+    return animations
+      .filter(
+        (animation) =>
+          animation instanceof CSSAnimation &&
+          animation.effect?.getTiming().iterations !== Infinity,
+      )
       .map((animation) => {
         const effect = animation.effect as KeyframeEffect;
         const { duration, delay } = effect.getTiming();
         const [{ easing, offset, composite, computedOffset, ...from }] = effect.getKeyframes();
+        // Em ms inteiros: 0,12s + 0,05s não dá 170 exatos em ponto flutuante.
         return {
-          duration: Number(duration),
-          delay: Number(delay),
+          duration: Math.round(Number(duration)),
+          delay: Math.round(Number(delay)),
           easing: String(easing),
           from: from as Record<string, string>,
         };
-      }),
-  );
+      });
+  }, rule);
 }
 
 // O relógio das animações CSS, pelo protocolo do Chromium: parado em 0, cada entrada fica no
@@ -220,4 +238,106 @@ test("a abertura aparece mesmo se uma camada não chegar em 5s", async ({ page }
   await settle(page);
   expect(await renderedOpacity(sky)).toBe(1);
   releaseDunes();
+});
+
+// Quantas entradas rodam na página (o pulso do ponto, em laço, fica de fora).
+function runningEntrances(page: Page): Promise<number> {
+  return page.evaluate(
+    () =>
+      document
+        .getAnimations()
+        .filter(
+          (animation) =>
+            animation instanceof CSSAnimation &&
+            animation.effect?.getTiming().iterations !== Infinity,
+        ).length,
+  );
+}
+
+const spaceNames = ["Frames & Songs", "Music & Feeling", "Code & Share", "Write & Learn"];
+
+test("ao rolar, cada bloco entra uma vez: o fio cresce, as fotos se revelam como uma cópia no banho e os textos sobem, uma fresta depois da outra", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  const clock = await animationClock(page);
+  await clock.stop();
+  await page.goto("/");
+  const section = page.getByRole("region", { name: "Spaces" });
+  const footer = page.getByRole("contentinfo");
+  const footerTexts = [
+    footer.getByText("Minimal Me", { exact: true }),
+    footer.getByRole("link", { name: "voltar ao início ↑" }),
+  ];
+
+  // Fora da tela, o rodapé espera a vez dele.
+  for (const text of footerTexts) expect(await renderedOpacity(text)).toBe(0);
+
+  // O cabeçalho da seção: o rótulo e a contagem aparecem, e o fio cresce da esquerda.
+  const label = section.getByRole("heading", { level: 2, name: "Spaces" });
+  await label.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() => entrancesOf(label))
+    .toEqual([{ duration: 900, delay: 0, easing: ease, from: { opacity: "0" } }]);
+  expect(await entrancesOf(section.getByText("01 — 04"))).toEqual([
+    { duration: 900, delay: 250, easing: ease, from: { opacity: "0" } },
+  ]);
+  expect(await entrancesOf(label.locator(".."), { rule: true })).toEqual([
+    { duration: 1200, delay: 0, easing: easeOut, from: { scale: "0 1" } },
+  ]);
+
+  // As frestas, 120ms uma depois da outra: a foto se revela em 1,6s, e o topo e o pé sobem
+  // 12px, 0,4s depois de a foto começar.
+  const slits = section.getByRole("listitem");
+  await slits.first().scrollIntoViewIfNeeded();
+  for (const [index, name] of spaceNames.entries()) {
+    const slit = slits.nth(index);
+    const delay = index * 120;
+    await expect
+      .poll(() => entrancesOf(slit.getByRole("img")), { message: name })
+      .toEqual([
+        {
+          duration: 1600,
+          delay: delay + 50,
+          easing: easeOut,
+          from: { opacity: "0", filter: "contrast(0.35) brightness(1.6)" },
+        },
+      ]);
+    const rise = [
+      {
+        duration: 900,
+        delay: delay + 400,
+        easing: easeOut,
+        from: { opacity: "0", translate: "0px 12px" },
+      },
+    ];
+    expect(await entrancesOf(slit.getByRole("heading", { level: 3, name })), name).toEqual(rise);
+    expect(await entrancesOf(slit.getByRole("link")), name).toEqual(rise);
+  }
+
+  // O rodapé: o fio cresce, e o texto aparece 0,3s depois.
+  await footer.scrollIntoViewIfNeeded();
+  for (const text of footerTexts) {
+    await expect
+      .poll(() => entrancesOf(text))
+      .toEqual([{ duration: 1000, delay: 300, easing: ease, from: { opacity: "0" } }]);
+  }
+  expect(await entrancesOf(footer, { rule: true })).toEqual([
+    { duration: 1200, delay: 0, easing: easeOut, from: { scale: "0 1" } },
+  ]);
+
+  // Uma vez só: de volta ao topo e de novo embaixo, nada entra outra vez, e tudo fica à vista.
+  await clock.run();
+  await settle(page);
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+  await slits.first().scrollIntoViewIfNeeded();
+  await footer.scrollIntoViewIfNeeded();
+  await page.waitForTimeout(300);
+  expect(await runningEntrances(page)).toBe(0);
+  for (const text of [label, ...footerTexts]) expect(await renderedOpacity(text)).toBe(1);
+  for (const index of spaceNames.keys()) {
+    const opacity = await renderedOpacity(slits.nth(index).getByRole("img"));
+    // Até 900px, as fechadas recuam para 60% da luz diante da guardada.
+    expect([1, 0.6]).toContain(Math.round(opacity * 100) / 100);
+  }
 });

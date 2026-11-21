@@ -26,6 +26,11 @@ import { LivingPicture } from "@/spaces/living-picture";
 //
 // Abrir e fechar tem transições (`motion-safe:`): com movimento reduzido, a fresta abre sem
 // transição, inclusive se a preferência mudar com a página aberta.
+//
+// Com movimento, a fileira entra uma vez, quando chega à tela (motion/entrance.ts): uma fresta
+// 120ms depois da outra (`--reveal-delay`), a foto se revela como uma cópia no banho em 1,6s,
+// e o topo e o pé sobem 12px, 0,4s depois; o pé de uma fresta fechada sobe e continua
+// invisível.
 
 type SpaceSlitRowProps = {
   // A fresta guardada no começo, aberta até 900px.
@@ -37,7 +42,7 @@ type SpaceSlitRowProps = {
 // a largura de uma fresta fechada (`--slit-unit`) e quantas vezes a aberta é maior que ela.
 export function SpaceSlitRow({ kept, children }: SpaceSlitRowProps) {
   return (
-    <div className="@container">
+    <div data-reveal className="@container">
       <ol
         data-spaces
         className="flex h-[clamp(280px,calc((100cqw_-_3*var(--slit-gap))/3),62svh)] gap-(--slit-gap) [--slit-gap:clamp(var(--gap-min),2vw,var(--gap-max))] [--slit-open-grow:1.9] [--slit-pad:clamp(var(--slit-inset-min),1.5vw,var(--slit-inset-max))] [--slit-unit:calc((100cqw_-_3*var(--slit-gap))/4.9)] stacked:h-[clamp(280px,50svh,440px)] stacked:[--slit-gap:8px] stacked:[--slit-open-grow:5] stacked:[--slit-pad:var(--slit-inset-min)] stacked:[--slit-unit:calc((100cqw_-_3*var(--slit-gap))/8)]"
@@ -84,9 +89,9 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
       id={space.id}
       anchor={space.anchor}
       notice={space.notice}
-      className="relative isolate h-full min-w-0 shrink grow basis-0 overflow-hidden has-[a:focus-visible]:outline-1 has-[a:focus-visible]:outline-mist has-[a:focus-visible]:-outline-offset-1 motion-safe:[transition:flex-grow_.9s_var(--ease)] slit-open:grow-(--slit-open-grow)"
+      className="relative isolate h-full min-w-0 shrink grow basis-0 overflow-hidden has-[a:focus-visible]:outline-1 has-[a:focus-visible]:outline-mist has-[a:focus-visible]:-outline-offset-1 motion-safe:[transition:flex-grow_.9s_var(--ease)] slit-open:grow-(--slit-open-grow) [--reveal-delay:0s] nth-2:[--reveal-delay:.12s] nth-3:[--reveal-delay:.24s] nth-4:[--reveal-delay:.36s]"
     >
-      <div className="absolute top-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:left-0 in-slit-closed:w-(--slit-unit)">
+      <div className="absolute top-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:left-0 in-slit-closed:w-(--slit-unit) unrevealed:opacity-0 revealed:[animation:fade-up_.9s_var(--ease-out)_calc(var(--reveal-delay)_+_.4s)_backwards]">
         <p className="flex items-center gap-[14px] whitespace-nowrap @max-[1240px]:flex-col @max-[1240px]:items-start @max-[1240px]:gap-[9px] stacked:gap-[10px] in-slit-closed:gap-[9px]">
           <span className="font-mono font-normal text-[11px] text-mist tabular-nums leading-none tracking-[.16em]">
             {space.number}
@@ -103,7 +108,7 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
       </div>
 
       <div className="absolute inset-0 -z-2" style={pictureVariables(illustration)}>
-        <div className="slit-feather absolute inset-0 overflow-hidden motion-safe:[transition:opacity_.8s_var(--ease)] in-slit-receded:opacity-60">
+        <div className="slit-feather absolute inset-0 overflow-hidden motion-safe:[transition:opacity_.8s_var(--ease)] in-slit-receded:opacity-60 unrevealed:opacity-0 revealed:[animation:develop_1.6s_var(--ease-out)_calc(var(--reveal-delay)_+_.05s)_backwards]">
           <div className="absolute inset-0 filter-(--grade-rest) motion-safe:[transition:filter_1.2s_var(--ease)] in-slit-open:filter-(--grade-focus)">
             <div className="absolute inset-[-3%] motion-safe:[transition:scale_var(--wake-out)_var(--ease-out)] motion-safe:in-slit-open:scale-(--wake-scale) motion-safe:in-slit-open:[transition:scale_var(--wake-in)_var(--ease-out)]">
               {/* biome-ignore lint/performance/noImgElement: export estático; as larguras responsivas vêm de design-system/generate-illustrations.ts. */}
@@ -127,7 +132,7 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
         <div className="slit-veil-focus pointer-events-none absolute inset-0 z-2 opacity-0 motion-safe:[transition:opacity_.7s_var(--ease)] in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.9s_var(--ease)_.15s]" />
       </div>
 
-      <div className="absolute bottom-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)*1.9_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:pointer-events-none in-slit-closed:opacity-0">
+      <div className="absolute bottom-(--slit-pad) left-(--slit-pad) z-1 w-[calc(var(--slit-unit)*1.9_-_2*var(--slit-pad))] stacked:w-[calc(var(--slit-unit)*5_-_2*var(--slit-pad))] in-slit-closed:pointer-events-none in-slit-closed:opacity-0 unrevealed:opacity-0 revealed:[animation:fade-up_.9s_var(--ease-out)_calc(var(--reveal-delay)_+_.4s)_backwards]">
         <span className="block h-px w-6 bg-mist opacity-0 motion-safe:[transition:width_.5s_var(--ease),opacity_.4s_var(--ease)] in-slit-open:w-full in-slit-open:opacity-55 motion-safe:in-slit-open:[transition:width_1.1s_var(--ease-out)_.2s,opacity_.5s_var(--ease)_.2s]" />
         <p className="translate-y-2 text-pretty pt-4 font-light font-mono text-[14px] text-body leading-[1.72] opacity-0 motion-safe:[transition:opacity_.4s_var(--ease),translate_.5s_var(--ease)] @max-[1120px]:hidden motion-reduce:translate-y-0 in-slit-open:translate-y-0 in-slit-open:opacity-100 motion-safe:in-slit-open:[transition:opacity_.7s_var(--ease)_.38s,translate_.9s_var(--ease-out)_.38s]">
           {space.description}
