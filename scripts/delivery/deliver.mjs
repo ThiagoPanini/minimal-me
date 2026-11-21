@@ -12,7 +12,7 @@ import { createAttestation, createCoolify, createRegistry } from "./ports.mjs";
 import { smoke } from "./smoke.mjs";
 
 /** A tag que o Coolify puxa a cada /deploy. */
-export const productionTag = "production";
+const productionTag = "production";
 
 /**
  * @typedef {object} Ports
