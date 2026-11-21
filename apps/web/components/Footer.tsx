@@ -4,7 +4,7 @@ import { Mark } from "@/components/Mark";
 // colunas 1 a 8 e a linha de crédito a partir da coluna 9. Até 900px, um bloco abaixo do outro.
 // A linha de crédito leva o ano e o "voltar ao início ↑"; numa página curta, como a 404, só o ano.
 // O nome fica em `label` com a entrelinha 1 do guia, da prévia e do protótipo; com a do estilo
-// (1,4), ele desce 1px em algumas larguras.
+// (1,4), ele sai 1px do lugar em algumas larguras.
 //
 // Com movimento, na Home, ele entra uma vez, quando chega à tela (motion/entrance.ts): o fio
 // cresce da esquerda em 1,2s, e o texto aparece 0,3s depois.
