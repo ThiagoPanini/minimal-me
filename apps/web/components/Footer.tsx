@@ -18,7 +18,7 @@ export function Footer({ year, backToTop = true }: FooterProps) {
       data-reveal
       className="pb-[calc(clamp(30px,3.6vw,52px)+env(safe-area-inset-bottom,0px))]"
     >
-      <div className="page-inner page-grid relative items-center gap-y-4 pt-[clamp(26px,3vw,40px)] before:absolute before:inset-x-0 before:top-0 before:h-px before:origin-left before:bg-hairline unrevealed:before:[scale:0_1] revealed:before:[animation:grow-x_1.2s_var(--ease-out)_backwards]">
+      <div className="page-inner page-grid hairline-rule items-center gap-y-4 pt-[clamp(26px,3vw,40px)] after:top-0">
         <p className="col-span-12 flex items-center gap-[14px] font-normal font-sans text-[12px] uppercase leading-none tracking-[.34em] not-stacked:col-span-8 unrevealed:opacity-0 revealed:[animation:fade-in_1s_var(--ease)_.3s_backwards]">
           <Mark background="ground" />
           <span>Minimal Me</span>

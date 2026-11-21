@@ -148,12 +148,9 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
           {space.lead}
         </p>
         <div className="flex items-end pt-[18px] stacked:pt-[14px]">
-          <a
-            href={`#${space.anchor}`}
-            className="inline-flex items-center gap-3 font-mono font-normal text-[11px] text-light uppercase leading-[1.4] tracking-[.16em] no-underline focus-visible:outline-none"
-          >
+          <a href={`#${space.anchor}`} className="action-link focus-visible:outline-none">
             Acessar<span className="sr-only"> {space.name}</span>
-            <span className="block h-px w-[22px] bg-current motion-safe:[transition:width_.6s_var(--ease-out)] in-slit-open:w-10" />
+            <span aria-hidden="true" className="link-dash in-slit-open:w-10" />
           </a>
         </div>
       </div>

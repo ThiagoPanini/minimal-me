@@ -33,12 +33,12 @@ export default function NotFound() {
             </p>
             <a
               href="/"
-              className="group relative mt-[clamp(12px,1.6vw,20px)] inline-flex items-center gap-3 font-mono font-normal text-[11px] text-light uppercase leading-[1.4] tracking-[.16em] no-underline after:absolute after:-inset-2.5"
+              className="action-link group relative mt-[clamp(12px,1.6vw,20px)] after:absolute after:-inset-2.5"
             >
               voltar ao início
               <span
                 aria-hidden="true"
-                className="block h-px w-[22px] bg-current group-hover:w-10 group-focus-visible:w-10 motion-safe:transition-[width] motion-safe:duration-600 motion-safe:ease-(--ease-out)"
+                className="link-dash group-hover:w-10 group-focus-visible:w-10"
               />
             </a>
           </div>

@@ -288,6 +288,26 @@
   column-gap: var(--grid-gap);
 }
 
+/* O fio de 1px em `hairline`, de margem a margem do bloco, que abre o rodapé e fecha o
+   cabeçalho de uma seção (Footer e SectionHeader). Fica num pseudo-elemento, e quem usa diz a
+   borda: `after:top-0` ou `after:bottom-0`. Com movimento, cresce da esquerda em 1,2s quando o
+   bloco entra na tela (`data-reveal`, motion/entrance.ts). */
+@utility hairline-rule {
+  @apply relative after:absolute after:inset-x-0 after:h-px after:origin-left after:bg-hairline unrevealed:after:[scale:0_1] revealed:after:[animation:grow-x_1.2s_var(--ease-out)_backwards];
+}
+
+/* O link de ação, como o "Acessar" de um space e o "voltar ao início" da 404, seguido de um
+   traço de 22px na cor dele (`link-dash`). O traço cresce para 40px quando o link responde, e
+   quem usa diz quando: `in-slit-open:w-10` na fresta aberta, `group-hover:w-10` e
+   `group-focus-visible:w-10` no cursor e no teclado. */
+@utility action-link {
+  @apply inline-flex items-center gap-3 font-mono font-normal text-[11px] text-light uppercase leading-[1.4] tracking-[.16em] no-underline;
+}
+
+@utility link-dash {
+  @apply block h-px w-[22px] bg-current motion-safe:[transition:width_.6s_var(--ease-out)];
+}
+
 /* A foto de uma fresta com as quatro bordas esfumadas em 2%. */
 @utility slit-feather {
   mask-image:

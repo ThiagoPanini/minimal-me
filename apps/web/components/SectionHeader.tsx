@@ -16,7 +16,7 @@ export function SectionHeader({ id, label, count }: SectionHeaderProps) {
   return (
     <header
       data-reveal
-      className="relative mb-[clamp(30px,3.2vw,48px)] flex items-baseline justify-between gap-6 pb-(--section-rule-gap) after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:bg-hairline unrevealed:after:[scale:0_1] revealed:after:[animation:grow-x_1.2s_var(--ease-out)_backwards]"
+      className="hairline-rule mb-[clamp(30px,3.2vw,48px)] flex items-baseline justify-between gap-6 pb-(--section-rule-gap) after:bottom-0"
     >
       <h2
         id={id}
