@@ -31,6 +31,71 @@
   --radius-circle: var(--circle);
 
   --ease-*: initial;
+
+  --animate-*: initial;
+  /* O pulso do ponto de "Em desenvolvimento" (StatusLine): 2,6s, `ease-io`, em laço. */
+  --animate-status-pulse: status-pulse 2.6s var(--ease-io) infinite;
+  @keyframes status-pulse {
+    0%,
+    100% {
+      opacity: 0.28;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+/* Até 900px a fileira de spaces empilha, como no protótipo (`max-width: 900px`). */
+@custom-variant stacked (@media (max-width: 900px));
+
+/*
+ * O estado de cada fresta da fileira de spaces (SpaceSlit), no atributo `data-focus` do item:
+ * `active` é a fresta com foco; `kept` é a que fica aberta até 900px enquanto nenhuma outra
+ * tem foco (no começo, a primeira, já no HTML exportado). No máximo uma fresta leva o atributo.
+ * Aberta: com foco em qualquer largura e, até 900px, também a guardada. Fechada: até 900px,
+ * toda fresta sem o atributo. Recuada: a que não está aberta numa fileira em que outra está.
+ * `slit-open:` vale na própria fresta; `in-slit-*:`, dentro dela.
+ */
+@custom-variant slit-open {
+  &:where([data-focus="active"]) {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    &:where([data-focus="kept"]) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-open {
+  :where([data-space][data-focus="active"]) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space][data-focus="kept"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-closed {
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-receded {
+  :where([data-spaces]:has([data-focus="active"]) > [data-space]:not([data-focus="active"])) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
 }
 
 /* As famílias têm no sistema o mesmo nome que teriam no tema do Tailwind
@@ -65,6 +130,66 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gap);
+}
+
+/* A foto de uma fresta com as quatro bordas esfumadas em 2%. */
+@utility slit-feather {
+  mask-image:
+    linear-gradient(to right, transparent, black 2%, black 98%, transparent),
+    linear-gradient(to bottom, transparent, black 2%, black 98%, transparent);
+  mask-composite: intersect;
+}
+
+/* O recorte da foto numa fresta (`illustrations.json`): presa no ponto (x, y) e com o zoom,
+   pelos valores da fileira larga e, até 900px, da empilhada. Quem usa declara as seis
+   variáveis `--crop-wide-*` e `--crop-stacked-*`. */
+@utility slit-crop {
+  --crop-x: var(--crop-wide-x);
+  --crop-y: var(--crop-wide-y);
+  --crop-zoom: var(--crop-wide-zoom);
+  @media (max-width: 900px) {
+    --crop-x: var(--crop-stacked-x);
+    --crop-y: var(--crop-stacked-y);
+    --crop-zoom: var(--crop-stacked-zoom);
+  }
+  position: absolute;
+  left: calc((1 - var(--crop-zoom)) * var(--crop-x) * 100%);
+  top: calc((1 - var(--crop-zoom)) * var(--crop-y) * 100%);
+  width: calc(var(--crop-zoom) * 100%);
+  height: calc(var(--crop-zoom) * 100%);
+  max-width: none;
+  object-fit: cover;
+  object-position: calc(var(--crop-x) * 100%) calc(var(--crop-y) * 100%);
+}
+
+/* Os véus de uma fresta, em `ground`. O do topo fica sempre sob o número, o Status e o nome. */
+@utility slit-veil-top {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ground) 62%, transparent) 0,
+    color-mix(in srgb, var(--ground) 30%, transparent) 18%,
+    transparent 38%
+  );
+}
+
+/* O véu do foco escurece a duna, sob a descrição, e reforça o topo, onde a foto clareia ao
+   perder a chave de repouso. */
+@utility slit-veil-focus {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ground) 49%, transparent) 0,
+      color-mix(in srgb, var(--ground) 80%, transparent) 8.5%,
+      color-mix(in srgb, var(--ground) 52%, transparent) 21.5%,
+      transparent 30.5%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--ground) 90%, transparent) 0,
+      color-mix(in srgb, var(--ground) 76%, transparent) 23%,
+      color-mix(in srgb, var(--ground) 67%, transparent) 39%,
+      transparent 60%
+    );
 }
 
 @layer base {

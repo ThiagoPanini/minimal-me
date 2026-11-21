@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
+import type { Page } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
 // WCAG A e AA até a 2.2. Os resultados incompletos só informam, como anotação do teste.
@@ -24,6 +25,12 @@ test("a Home passa no axe, com WCAG A e AA até 2.2", async ({ page }, testInfo)
   ).toEqual([]);
 });
 
+// A descrição de um space como o leitor de tela a ouve: a inteira na tela larga e, até 900px,
+// só a primeira frase.
+function description(page: Page, ...sentences: string[]): string {
+  return (page.viewportSize()?.width ?? 0) <= 900 ? sentences[0] : sentences.join(" ");
+}
+
 // A árvore de acessibilidade da Home, inteira (`deep-equal`): quem muda o que a Home mostra
 // atualiza a árvore aqui. O `alert` vazio no fim é o anúncio de troca de rota do Next.
 test("a árvore ARIA da Home @webkit", async ({ page }) => {
@@ -38,6 +45,39 @@ test("a árvore ARIA da Home @webkit", async ({ page }) => {
       - heading "Minimal Me" [level=1]
       - paragraph: hub pessoal e minimalista
       - paragraph: Uma dinâmica simples e moderna para consumir e gerar conteúdo.
+    - main:
+      - region "Spaces":
+        - heading "Spaces" [level=2]
+        - text: 01 — 04
+        - list:
+          - listitem:
+            - paragraph: 01 Em desenvolvimento
+            - heading "Frames & Songs" [level=3]
+            - 'img "Ilustração: no alto de uma duna, uma pessoa agachada fotografa com tripé o sol que nasce atrás das montanhas."'
+            - paragraph: ${description(page, "Meus momentos, em fotos e vídeos.", "Posts em carrossel, cada um com a música que ficou daquele momento.")}
+            - link "Acessar Frames & Songs":
+              - /url: "#frames-and-songs"
+          - listitem:
+            - paragraph: 02 Em planejamento
+            - heading "Music & Feeling" [level=3]
+            - 'img "Ilustração: no alto de uma duna, ao lado de um amplificador, uma pessoa sentada toca guitarra diante do sol que nasce."'
+            - paragraph: ${description(page, "Eu tocando, de perto.", "Vídeos curtos de pequenos trechos de canções, no violão e na guitarra, guardados pelo que me fazem sentir.")}
+            - link "Acessar Music & Feeling":
+              - /url: "#music-and-feeling"
+          - listitem:
+            - paragraph: 03 Em planejamento
+            - heading "Code & Share" [level=3]
+            - 'img "Ilustração: de costas, uma pessoa programa numa mesa com dois monitores, entre duas fileiras de servidores."'
+            - paragraph: ${description(page, "O que eu ando construindo, sem atualizar nada à mão.", "Repositórios, commits e o uso de cada ferramenta de IA chegam sozinhos do meu ambiente de desenvolvimento.")}
+            - link "Acessar Code & Share":
+              - /url: "#code-and-share"
+          - listitem:
+            - paragraph: 04 Em planejamento
+            - heading "Write & Learn" [level=3]
+            - 'img "Ilustração: no alto de uma duna, uma pessoa sentada lê um livro enquanto folhas de papel flutuam ao redor."'
+            - paragraph: ${description(page, "Um agente de IA que escreve por conta própria.", "Parte do que me interessa, sugere temas e publica textos para que eu e quem me visita aprendamos juntos.")}
+            - link "Acessar Write & Learn":
+              - /url: "#write-and-learn"
     - contentinfo:
       - paragraph: Minimal Me
       - paragraph:
