@@ -9,7 +9,7 @@ A identidade visual do Minimal Me nasce da Home v2.3, prototipada pelo Autor no 
 | `system/README.md` | O guia do sistema, versão 2, escrito para a Home em Frestas II: princípios, conteúdo, cor, tipografia, grade, imagem, status de um space, movimento e acessibilidade. Comece por ele. |
 | `system/tokens.json` | Cores, estilos de texto, espaços, raios e curvas, com o uso de cada um. |
 | `system/components/` | Sete componentes da Home, cada um com guia (`README.md`) e prévia (`preview.html`), mais a capa do sistema (`Cover`). Os dos spaces são `SpaceSlit` (a fresta) e `StatusLine` (o status). |
-| `system/fonts/` | Jost e IBM Plex Mono, pesos 300 e 400, em woff2: a combinação "Atual", que a Home em Frestas II mantém. As duas famílias usam a licença SIL OFL. |
+| `system/fonts/` | Jost e IBM Plex Mono, pesos 300 e 400, em woff2: a combinação "Atual", que a Home em Frestas II mantém. As duas famílias usam a licença SIL OFL, cujo texto está em `OFL.txt`. |
 | `system/assets/` | A marca em SVG, as ilustrações da abertura e dos spaces, o grão e as notas de uso de cada grupo. `Illustrations/illustrations.json` traz o texto alternativo, o recorte e os dados das fotos vivas de cada ilustração de space. |
 | `prototype/mvp/` | O protótipo do MVP: a Home em Frestas II, só ela, com os Tweaks congelados no valor em vigor. `index.html` abre num navegador e lê as fontes e as imagens de `system/`. |
 | `o-que-muda-no-sistema-da-home.md` | O que a Home em Frestas II pediu do sistema, item a item, com motivo e lugar. Foi a fonte do ticket [Sistema de design v2: a Home com spaces](https://github.com/ThiagoPanini/minimal-me/issues/40), aplicado na versão 2 em 2026-11-20; fica como registro do porquê. |
@@ -95,5 +95,5 @@ No protótipo do MVP, as classes têm nomes curtos da comparação. A correspond
 ## Pendências para a implementação
 
 - Os efeitos vivos em canvas (as folhas de Write & Learn, as luzes de Code & Share, os arcos de som de Music & Feeling, o enquadramento e o disparo de Frames & Songs) e o alinhamento do bloco de texto pela altura das maiúsculas existem só no script do protótipo. Os dados de cada efeito estão em `system/assets/Illustrations/illustrations.json`; o desenho, no script. Trocar uma ilustração obriga a refazer os dados dela.
-- Como servir as fontes em produção é decisão de [Base técnica do Marco 1](https://github.com/ThiagoPanini/minimal-me/issues/17). No protótipo, `index.html` lê os woff2 de `system/fonts/`.
+- As fontes vão ao ar pela própria Home, como decidiu [Base técnica do Marco 1](https://github.com/ThiagoPanini/minimal-me/issues/17): `apps/web/design-system/fonts.ts` lê os woff2 de `system/fonts/` por `next/font/local` no build, e o export os serve com hash no nome, sem pedido a terceiros e sem cópia no repositório. Faltar um arquivo que a Home usa quebra o build. O texto da SIL OFL está em `system/fonts/OFL.txt`. No protótipo, `index.html` continua lendo os woff2 de `system/fonts/`.
 - No protótipo, a página rola dentro de um `main` fixo; a spec do Marco 1 diz como ela rola em produção.
