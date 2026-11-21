@@ -48,16 +48,47 @@ export function writeCommand(certificate) {
 
 const minimumYears = 14;
 
+const pemBlock = /-----BEGIN ([A-Z0-9 ]+)-----([\s\S]*?)-----END \1-----/;
+
+/**
+ * Acha o bloco PEM no texto colado e o refaz com linhas de 64 caracteres. O terminal pode pôr
+ * as marcas de colagem (`ESC [200~` e `ESC [201~`) em volta do bloco e o `\r` do Windows em
+ * cada linha, ou juntar o bloco numa linha só: do miolo fica só o que é base64.
+ * @returns {{ label: string, pem: string } | undefined}
+ */
+export function readPemBlock(pasted) {
+  const match = pemBlock.exec(pasted);
+  if (!match) return undefined;
+  const [, label, body] = match;
+  const lines = body.replace(/[^A-Za-z0-9+/=]/g, "").match(/.{1,64}/g) ?? [];
+  return { label, pem: `-----BEGIN ${label}-----\n${lines.join("\n")}\n-----END ${label}-----\n` };
+}
+
+function wrongBlock(label) {
+  if (label.includes("PRIVATE KEY")) {
+    return "o texto colado é uma chave privada, não o certificado. Ela não foi gravada; copie, na Cloudflare, o Origin Certificate";
+  }
+  if (label.includes("CERTIFICATE REQUEST")) {
+    return "o texto colado é o CSR, não o certificado. O CSR vai para a Cloudflare; cole aqui o Origin Certificate que ela devolve";
+  }
+  return "o texto colado não é um certificado PEM";
+}
+
 /**
  * Confere um Origin Certificate colado pelo Autor: emitido pela Origin CA da Cloudflare, para
- * os dois nomes da zona e com a validade de 15 anos que a spec pede.
- * @returns {{ ok: true, validTo: string, fingerprint256: string }
+ * os dois nomes da zona e com a validade de 15 anos que a spec pede. Devolve o certificado
+ * limpo do que o terminal acrescentou à colagem.
+ * @returns {{ ok: true, certificate: string, validTo: string, fingerprint256: string }
  *   | { ok: false, problems: string[] }}
  */
-export function inspectCertificate(pem, now) {
+export function inspectCertificate(pasted, now) {
+  const block = readPemBlock(pasted);
+  if (block?.label !== "CERTIFICATE") {
+    return { ok: false, problems: [wrongBlock(block?.label ?? "")] };
+  }
   let certificate;
   try {
-    certificate = new X509Certificate(pem);
+    certificate = new X509Certificate(block.pem);
   } catch {
     return { ok: false, problems: ["o texto colado não é um certificado PEM"] };
   }
@@ -80,5 +111,10 @@ export function inspectCertificate(pem, now) {
     );
   }
   if (problems.length > 0) return { ok: false, problems };
-  return { ok: true, validTo: validTo.toISOString(), fingerprint256: certificate.fingerprint256 };
+  return {
+    ok: true,
+    certificate: block.pem,
+    validTo: validTo.toISOString(),
+    fingerprint256: certificate.fingerprint256,
+  };
 }

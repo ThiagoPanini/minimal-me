@@ -231,17 +231,17 @@ async function requestCertificate(context) {
     `Em Hostnames, deixe ${hostnames.join(" e ")}; em Certificate Validity, 15 years; clique em Create.`,
   );
   io.step("Com Key Format em PEM, copie o Origin Certificate.");
-  const certificate = await io.askBlock(
+  const pasted = await io.askBlock(
     "Cole o certificado (ele é público) e termine com a linha END CERTIFICATE:",
   );
-  const inspection = inspectCertificate(certificate, now);
+  const inspection = inspectCertificate(pasted, now);
   if (!inspection.ok) {
     for (const problem of inspection.problems) io.warn(`${problem}.`);
     return false;
   }
   await saveState({
     originCertificate: {
-      certificate,
+      certificate: inspection.certificate,
       validTo: inspection.validTo,
       fingerprint256: inspection.fingerprint256,
       checkedAt: now.toISOString(),
