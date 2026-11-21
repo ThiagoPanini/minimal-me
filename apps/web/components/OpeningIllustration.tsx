@@ -4,8 +4,11 @@ import { grainStyle, type OpeningLayer, openingLayers } from "@/design-system/il
 
 // A ilustração da abertura: o céu e as dunas em duas camadas, a descida para `ground`
 // no pé, o grão por cima e a marca em `ink` no canto superior esquerdo, como link para
-// o topo. Ocupa a altura da tela que o Masthead deixa; até 900px, uma altura própria.
-// Os dados de cada camada (posição e texto alternativo) vêm de `illustrations.json`.
+// o início. Os dados de cada camada (posição e texto alternativo) vêm de `illustrations.json`.
+//
+// Na Home, a abertura ocupa a altura da tela que o Masthead deixa (até 900px, uma altura
+// própria), e a marca leva ao topo. Na 404, só o céu, sem as dunas e sem a figura: a abertura
+// ocupa a altura que a página deixa em qualquer largura, e a marca leva à Home.
 
 const percent = ({ x, y }: { x: number; y: number }) => `${x * 100}% ${y * 100}%`;
 
@@ -16,13 +19,31 @@ function positionStyle({ position }: OpeningLayer): CSSProperties {
   } as CSSProperties;
 }
 
-export function OpeningIllustration() {
+const pages = {
+  home: {
+    layers: openingLayers,
+    markHref: "#top",
+    height: "max-[900px]:h-[min(66svh,720px)] max-[900px]:min-h-[360px] max-[900px]:flex-none",
+  },
+  "not-found": {
+    layers: openingLayers.filter(({ id }) => id === "sky"),
+    markHref: "/",
+    height: "",
+  },
+} as const;
+
+type OpeningIllustrationProps = {
+  page: keyof typeof pages;
+};
+
+export function OpeningIllustration({ page }: OpeningIllustrationProps) {
+  const { layers, markHref, height } = pages[page];
   return (
-    <div className="relative min-h-[300px] flex-auto overflow-hidden bg-sky max-[900px]:h-[min(66svh,720px)] max-[900px]:min-h-[360px] max-[900px]:flex-none">
+    <div className={`relative min-h-[300px] flex-auto overflow-hidden bg-sky ${height}`}>
       <div className="absolute inset-x-0 top-0 z-5 pt-[calc(clamp(18px,3.2vw,40px)+env(safe-area-inset-top,0px))]">
         <div className="page-inner">
           <a
-            href="#top"
+            href={markHref}
             aria-label="Minimal Me, início"
             className="inline-flex focus-visible:outline-2 focus-visible:outline-ink focus-visible:outline-offset-4"
           >
@@ -30,7 +51,7 @@ export function OpeningIllustration() {
           </a>
         </div>
       </div>
-      {openingLayers.map((layer) => (
+      {layers.map((layer) => (
         <div key={layer.id} className="absolute inset-[-3%]">
           {/* biome-ignore lint/performance/noImgElement: export estático; as larguras responsivas vêm de design-system/generate-illustrations.ts. */}
           <img

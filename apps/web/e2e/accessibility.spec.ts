@@ -1,13 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
-import type { Page } from "@playwright/test";
+import type { Page, TestInfo } from "@playwright/test";
 import { expect, test } from "./fixtures";
 
 // WCAG A e AA até a 2.2. Os resultados incompletos só informam, como anotação do teste.
 const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"];
 
-test("a Home passa no axe, com WCAG A e AA até 2.2", async ({ page }, testInfo) => {
-  await page.goto("/");
-
+// O axe numa página aberta: as violações falham o teste.
+async function checkAxe(page: Page, testInfo: TestInfo): Promise<void> {
   const results = await new AxeBuilder({ page }).withTags(wcagTags).analyze();
 
   for (const { id, help, nodes } of results.incomplete) {
@@ -23,7 +22,20 @@ test("a Home passa no axe, com WCAG A e AA até 2.2", async ({ page }, testInfo)
       targets: nodes.map(({ target }) => target.join(" ")),
     })),
   ).toEqual([]);
-});
+}
+
+// As páginas da Home: ela mesma e a 404, que o nginx serve a qualquer rota que não existe.
+const pages = [
+  { name: "a Home", route: "/" },
+  { name: "a 404", route: "/esta-rota-nao-existe" },
+];
+
+for (const { name, route } of pages) {
+  test(`${name} passa no axe, com WCAG A e AA até 2.2`, async ({ page }, testInfo) => {
+    await page.goto(route);
+    await checkAxe(page, testInfo);
+  });
+}
 
 // A descrição de um space como o leitor de tela a ouve: a inteira na tela larga e, até 900px,
 // só a primeira frase.
@@ -84,6 +96,28 @@ test("a árvore ARIA da Home @webkit", async ({ page }) => {
         - text: © 2026
         - link "voltar ao início ↑":
           - /url: "#top"
+    - alert
+  `);
+});
+
+// A árvore de acessibilidade da 404, inteira: a marca no céu, o texto com o caminho de volta e
+// o rodapé só com o ano.
+test("a árvore ARIA da 404 @webkit", async ({ page }) => {
+  await page.goto("/esta-rota-nao-existe");
+
+  await expect(page.locator("body")).toMatchAriaSnapshot(`
+    - /children: deep-equal
+    - banner:
+      - link "Minimal Me, início":
+        - /url: /
+    - main:
+      - heading "página não encontrada" [level=1]
+      - paragraph: Este endereço não leva a nenhum lugar do Minimal Me.
+      - link "voltar ao início":
+        - /url: /
+    - contentinfo:
+      - paragraph: Minimal Me
+      - paragraph: © 2026
     - alert
   `);
 });

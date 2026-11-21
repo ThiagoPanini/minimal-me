@@ -3,8 +3,9 @@ import type { ReactNode } from "react";
 import { rootTokensCss } from "@/design-system/tokens";
 import "./globals.css";
 
+// O título de cada página termina no nome: a 404 é "Página não encontrada · Minimal Me".
 export const metadata: Metadata = {
-  title: "Minimal Me",
+  title: { default: "Minimal Me", template: "%s · Minimal Me" },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

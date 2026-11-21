@@ -77,6 +77,17 @@ test("as camadas da abertura vêm do sistema de design, em larguras responsivas 
   ]);
 });
 
+test("a 404 mostra só o céu da abertura, sem as dunas e sem a figura", async ({
+  page,
+  baseURL,
+}) => {
+  await page.goto("/esta-rota-nao-existe");
+
+  expect(await servedIllustrations(page, baseURL, page.locator("body"))).toEqual([
+    { file: "sky.webp", alt: "", loading: null },
+  ]);
+});
+
 test("as ilustrações dos spaces vêm do sistema de design, com o texto alternativo de illustrations.json e carga preguiçosa", async ({
   page,
   baseURL,

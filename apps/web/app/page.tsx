@@ -12,7 +12,7 @@ export default function Home() {
         id="top"
         className="flex h-svh min-h-[600px] flex-col max-[900px]:h-auto max-[900px]:min-h-0"
       >
-        <OpeningIllustration />
+        <OpeningIllustration page="home" />
         <Masthead
           kicker="hub pessoal e minimalista"
           tagline="Uma dinâmica simples e moderna para consumir e gerar conteúdo."
