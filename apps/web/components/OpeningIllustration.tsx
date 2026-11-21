@@ -18,7 +18,7 @@ function positionStyle({ position }: OpeningLayer): CSSProperties {
 
 export function OpeningIllustration() {
   return (
-    <div className="relative min-h-[300px] flex-auto overflow-hidden bg-sky max-[900px]:h-[min(66svh,720px)] max-[900px]:min-h-[360px] max-[900px]:flex-none">
+    <div className="relative min-h-[300px] flex-auto overflow-hidden bg-sky stacked:h-[min(66svh,720px)] stacked:min-h-[360px] stacked:flex-none">
       <div className="absolute inset-x-0 top-0 z-5 pt-[calc(clamp(18px,3.2vw,40px)+env(safe-area-inset-top,0px))]">
         <div className="page-inner">
           <a
@@ -43,7 +43,7 @@ export function OpeningIllustration() {
             fetchPriority="high"
             decoding="async"
             style={positionStyle(layer)}
-            className="block size-full max-w-none object-cover object-(--position-wide) max-[760px]:object-(--position-narrow)"
+            className="block size-full max-w-none object-cover object-(--position-wide) narrow:object-(--position-narrow)"
           />
         </div>
       ))}

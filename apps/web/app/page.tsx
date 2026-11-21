@@ -8,10 +8,7 @@ import { spaceCount, spaces } from "@/spaces/catalog";
 export default function Home() {
   return (
     <>
-      <header
-        id="top"
-        className="flex h-svh min-h-[600px] flex-col max-[900px]:h-auto max-[900px]:min-h-0"
-      >
+      <header id="top" className="flex h-svh min-h-[600px] flex-col stacked:h-auto stacked:min-h-0">
         <OpeningIllustration />
         <Masthead
           kicker="hub pessoal e minimalista"
