@@ -51,6 +51,8 @@ export function createRegistry({ image, run = runCommand }) {
     digestOf,
     async point(tag, digest) {
       const reference = `${image}:${tag}`;
+      // A tag passa a apontar para o mesmo digest: sem `--prefer-index=false`, um manifesto
+      // simples ganharia um índice novo, com outro digest.
       const result = await run("docker", [
         "buildx",
         "imagetools",

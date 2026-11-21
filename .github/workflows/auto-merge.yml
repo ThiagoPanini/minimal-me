@@ -23,6 +23,8 @@ concurrency:
 
 jobs:
   auto-merge:
+    # Pelo autor do PR, não por `github.actor` (quem disparou a rodada), que o zizmor recusa
+    # (`bot-conditions`).
     if: github.event.pull_request.user.login == 'dependabot[bot]'
     runs-on: ubuntu-24.04
     timeout-minutes: 5

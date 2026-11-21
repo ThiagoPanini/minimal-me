@@ -213,7 +213,8 @@ jobs:
 
   # O check obrigatório. Roda sempre e só passa com `success` em todos os jobs que lista, os
   # mesmos nos dois eventos: falha, pulo ou cancelamento de qualquer um o deixa vermelho. A
-  # imagem entra pelo e2e, que só roda depois do `image` (PR) ou do `publish` (`main`).
+  # imagem entra pelo e2e, que só roda depois do `image` (PR) ou do `publish` (`main`). Um job
+  # novo da validação roda nos dois eventos e entra no `needs` daqui.
   gate:
     if: always()
     needs: [quality, dependency-review, e2e]
