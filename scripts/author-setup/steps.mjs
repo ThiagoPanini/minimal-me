@@ -99,20 +99,21 @@ async function checkMergeApp({ github, state }) {
   if (!slug) {
     items.push("criar o App pelo formulário já preenchido do roteiro");
   } else {
+    // O App nasce privado, e o token OAuth do `gh` não lê App privado: `/apps/<slug>` responde
+    // 404 mesmo com ele instalado. Com 200 (um token pessoal no `gh`), as permissões e a contagem
+    // de instalações se conferem ao vivo; com 404, vale a instalação que o roteiro conferiu.
     const app = await read(github, `/apps/${slug}`, [200, 404]);
-    if (app.status === 404) {
-      items.push(`o App ${code(slug)}, que não existe mais no GitHub`);
-    } else {
+    if (app.status === 200) {
       for (const [permission, level] of Object.entries(mergeAppPermissions)) {
         if (app.body.permissions?.[permission] !== level) {
           items.push(`a permissão ${code(`${permission}: ${level}`)} no App`);
         }
       }
-      if (!app.body.installations_count) {
-        items.push("instalar o App só neste repositório");
-      } else if (!installationIsOnlyThisRepository(state.mergeApp.installation)) {
-        items.push("conferir que a instalação é só deste repositório");
-      }
+    }
+    if (app.status === 200 && !app.body.installations_count) {
+      items.push("instalar o App só neste repositório");
+    } else if (!installationIsOnlyThisRepository(state.mergeApp.installation)) {
+      items.push("conferir que a instalação é só deste repositório");
     }
   }
   const secrets = await read(github, dependabotSecretsPath);
