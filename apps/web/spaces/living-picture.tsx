@@ -1,7 +1,8 @@
 "use client";
 
-import { type RefObject, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { type RefObject, useEffect, useRef, useState } from "react";
 import type { SpaceIllustrationKey } from "@/design-system/living-pictures";
+import { useReducedMotion } from "@/motion/reduced-motion";
 import type { SpaceId } from "@/spaces/catalog";
 import { useSlitFocus } from "@/spaces/focus";
 import type { LivingPictureEngine } from "@/spaces/living-picture-engine";
@@ -15,23 +16,6 @@ import type { LivingPictureEngine } from "@/spaces/living-picture-engine";
 // Aqui fica só o que decide quando acordar. O desenho e o laço (`living-picture-engine.ts`)
 // são pedidos na primeira vez que uma foto acorda, depois de a página carregar, para não
 // atrasar a primeira pintura; o atlas das folhas de Write & Learn, só quando ela acorda.
-
-const reducedMotionQuery = "(prefers-reduced-motion: reduce)";
-
-function subscribeToReducedMotion(onChange: () => void): () => void {
-  const query = window.matchMedia(reducedMotionQuery);
-  query.addEventListener("change", onChange);
-  return () => query.removeEventListener("change", onChange);
-}
-
-// Antes da hidratação, conta como reduzido: nada roda sem o script.
-function useReducedMotion(): boolean {
-  return useSyncExternalStore(
-    subscribeToReducedMotion,
-    () => window.matchMedia(reducedMotionQuery).matches,
-    () => true,
-  );
-}
 
 // A foto conta como à vista quando ao menos um décimo dela está na tela.
 const visibleShare = 0.1;

@@ -53,12 +53,14 @@ export type OpeningLayer = {
   alt: string;
   // Onde a camada fica presa, de 0 a 1: na tela larga e até 760px.
   position: { wide: Point; narrow: Point };
+  // O deslocamento máximo com o ponteiro, em px; negativo vai contra o ponteiro.
+  depth: { pointer: Point };
   image: ResponsiveImage;
 };
 
 // As camadas da abertura, de trás para a frente: o céu e as dunas.
 export const openingLayers: OpeningLayer[] = illustrationsData.opening.layers.map(
-  ({ id, alt, position }) => ({ id, alt, position, image: responsiveImage(id) }),
+  ({ id, alt, position, depth }) => ({ id, alt, position, depth, image: responsiveImage(id) }),
 );
 
 // Onde a imagem fica presa no quadro, de 0 a 1 (`y: 1` a prende pelo pé), e o zoom, a partir de 1.

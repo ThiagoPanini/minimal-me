@@ -188,7 +188,8 @@ test("em repouso ou fora da vista, o laço para e nenhum quadro é pedido", asyn
   });
   const frameRequests = () =>
     page.evaluate(() => (window as unknown as { frameRequests: number }).frameRequests);
-  // O laço parou: logo passa um segundo inteiro sem nenhum quadro pedido.
+  // O laço parou: logo passa um segundo inteiro sem nenhum quadro pedido. A profundidade da
+  // página (motion/depth.tsx) ainda segue o ponteiro por uns 3s depois que ele para.
   const expectNoFrames = (message: string) =>
     expect
       .poll(
@@ -197,7 +198,7 @@ test("em repouso ou fora da vista, o laço para e nenhum quadro é pedido", asyn
           await page.waitForTimeout(1000);
           return (await frameRequests()) - before;
         },
-        { message, timeout: 4000 },
+        { message, timeout: 8000 },
       )
       .toBe(0);
   await page.emulateMedia({ reducedMotion: "no-preference" });

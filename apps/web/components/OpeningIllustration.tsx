@@ -12,7 +12,8 @@ import { grainStyle, type OpeningLayer, openingLayers } from "@/design-system/il
 //
 // Com movimento, na Home, a ilustração espera as duas camadas (`data-opening-layer`), por no
 // máximo 5s, e entra como no protótipo (motion/entrance.ts): o céu se aproxima em 2,4s, e as
-// dunas sobem em 1,9s, 150ms depois; a marca aparece por último.
+// dunas sobem em 1,9s, 150ms depois; a marca aparece por último. Com o ponteiro, cada camada
+// se desloca (motion/depth.tsx), presa a 50% 90% quando chega 2% mais perto.
 
 const layerEntrances: Record<string, string> = {
   sky: "opening-arrived:[animation:sky-in_2.4s_var(--ease-out)_backwards]",
@@ -61,7 +62,11 @@ export function OpeningIllustration({ page }: OpeningIllustrationProps) {
         </div>
       </div>
       {layers.map((layer) => (
-        <div key={layer.id} data-opening-layer={layer.id} className="absolute inset-[-3%]">
+        <div
+          key={layer.id}
+          data-opening-layer={layer.id}
+          className="absolute inset-[-3%] origin-[50%_90%]"
+        >
           {/* biome-ignore lint/performance/noImgElement: export estático; as larguras responsivas vêm de design-system/generate-illustrations.ts. */}
           <img
             src={layer.image.src}

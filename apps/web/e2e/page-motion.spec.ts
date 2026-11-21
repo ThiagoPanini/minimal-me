@@ -427,3 +427,188 @@ test("se a preferência passa a movimento reduzido no meio da entrada, tudo vai 
   expect(await runningEntrances(page)).toBe(0);
   await expectFinalState(page);
 });
+
+// Com o relógio da página parado, o tempo (e cada quadro) só anda por `runFor`; antes, três
+// voltas de mensagem deixam o React terminar o que mudou.
+async function runFor(page: Page, milliseconds: number): Promise<void> {
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) => {
+        const channel = new MessageChannel();
+        let hops = 0;
+        channel.port1.onmessage = () => {
+          hops += 1;
+          if (hops === 3) resolve();
+          else channel.port2.postMessage(null);
+        };
+        channel.port2.postMessage(null);
+      }),
+  );
+  await page.clock.runFor(milliseconds);
+}
+
+// A página com movimento, depois da entrada da abertura, com o relógio parado.
+async function openStill(page: Page): Promise<void> {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
+  await page.goto("/");
+  await settle(page);
+  await page.clock.pauseAt(new Date("2026-11-20T10:01:00Z"));
+  await runFor(page, 100);
+}
+
+type Point = { x: number; y: number };
+
+async function positionOf(element: Locator): Promise<Point> {
+  const box = await element.boundingBox();
+  if (!box) throw new Error("elemento sem caixa na tela");
+  return { x: box.x, y: box.y };
+}
+
+function shift(from: Point, to: Point): Point {
+  return { x: to.x - from.x, y: to.y - from.y };
+}
+
+// O ponteiro num canto da tela, até a profundidade assentar.
+async function pointTo(page: Page, corner: "top-left" | "bottom-right"): Promise<void> {
+  const viewport = page.viewportSize();
+  if (!viewport) throw new Error("sem tela");
+  if (corner === "top-left") await page.mouse.move(1, 1);
+  else await page.mouse.move(viewport.width - 1, viewport.height - 1);
+  await runFor(page, 4000);
+}
+
+test("com o ponteiro, a abertura ganha profundidade: o céu vai até 6px e 3px contra ele, e as dunas até 12px e 5px com ele", async ({
+  page,
+}) => {
+  await openStill(page);
+  const { sky, dunes } = openingLayers(page);
+  const before = { sky: await positionOf(sky), dunes: await positionOf(dunes) };
+
+  // O ponteiro no canto de baixo, à direita: quase no máximo, nas duas direções.
+  await pointTo(page, "bottom-right");
+  const skyShift = shift(before.sky, await positionOf(sky));
+  const dunesShift = shift(before.dunes, await positionOf(dunes));
+  expect(skyShift.x).toBeCloseTo(-6, 0);
+  expect(skyShift.y).toBeCloseTo(-3, 0);
+  expect(dunesShift.x).toBeCloseTo(12, 0);
+  expect(dunesShift.y).toBeCloseTo(5, 0);
+});
+
+test("as fotos dos spaces ganham profundidade: até 14px com a rolagem e até 3px com o ponteiro", async ({
+  page,
+}) => {
+  await openStill(page);
+  const slit = page.getByRole("region", { name: "Spaces" }).getByRole("listitem").nth(2);
+  const picture = slit.getByRole("img");
+  const offset = async () => shift(await positionOf(slit), await positionOf(picture));
+  // Rola e espera o evento de rolagem chegar à página, antes de andar o relógio.
+  const scrollTo = async (top: number) => {
+    await page.evaluate(
+      (top) =>
+        new Promise<void>((resolve) => {
+          window.addEventListener("scroll", () => resolve(), { once: true });
+          window.scrollTo({ top, behavior: "instant" });
+        }),
+      top,
+    );
+    await runFor(page, 100);
+  };
+  const viewport = page.viewportSize();
+  const box = await slit.boundingBox();
+  if (!viewport || !box) throw new Error("sem tela ou sem fresta");
+  const top = box.y + (await page.evaluate(() => window.scrollY));
+
+  // A rolagem leva a foto por 14px: ela desce 7px quando a fresta entra pelo pé da tela, fica
+  // no lugar com a fresta no meio da tela e subiria 7px com ela saindo pelo topo (a página
+  // acaba antes disso).
+  await scrollTo(top - viewport.height + 1);
+  const entering = await offset();
+  await scrollTo(top - (viewport.height - box.height) / 2);
+  const centered = await offset();
+  expect(entering.y - centered.y).toBeCloseTo(7, 0);
+
+  // Com a fresta no meio da tela, o ponteiro de um canto ao outro, fora da fileira: a foto vai
+  // 3px para cada lado, contra ele, e 2px para cima e para baixo.
+  await pointTo(page, "top-left");
+  const fromTopLeft = await offset();
+  await pointTo(page, "bottom-right");
+  const pointerShift = shift(fromTopLeft, await offset());
+  expect(pointerShift.x / 2).toBeCloseTo(-3, 0);
+  expect(pointerShift.y / 2).toBeCloseTo(-2, 0);
+});
+
+test("com movimento reduzido nada ganha profundidade, e a troca da preferência vale na hora", async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.install({ time: new Date("2026-11-20T10:00:00Z") });
+  await page.goto("/");
+  await page.clock.pauseAt(new Date("2026-11-20T10:01:00Z"));
+  const { dunes } = openingLayers(page);
+  const slit = page.getByRole("region", { name: "Spaces" }).getByRole("listitem").nth(2);
+  const pictureOffset = async () =>
+    shift(await positionOf(slit), await positionOf(slit.getByRole("img")));
+  const still = { dunes: await positionOf(dunes), picture: await pictureOffset() };
+
+  await pointTo(page, "bottom-right");
+  expect(await positionOf(dunes)).toEqual(still.dunes);
+  expect(await pictureOffset()).toEqual(still.picture);
+
+  // Sem a redução, a profundidade volta (a camada chega 2% mais perto), e as dunas seguem o
+  // ponteiro; com ela de novo, voltam na hora ao lugar.
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await expect
+    .poll(async () => {
+      await runFor(page, 50);
+      return positionOf(dunes);
+    })
+    .not.toEqual(still.dunes);
+  const rest = await positionOf(dunes);
+  await pointTo(page, "top-left");
+  expect(shift(rest, await positionOf(dunes)).x).toBeCloseTo(-12, 0);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect.poll(() => positionOf(dunes), { timeout: 400 }).toEqual(still.dunes);
+  expect(await pictureOffset()).toEqual(still.picture);
+});
+
+test("em repouso, o laço da página para, e nenhum quadro é pedido", async ({ page }) => {
+  await page.addInitScript(() => {
+    const request = window.requestAnimationFrame.bind(window);
+    const counter = window as unknown as { frameRequests: number };
+    counter.frameRequests = 0;
+    window.requestAnimationFrame = (callback) => {
+      counter.frameRequests += 1;
+      return request(callback);
+    };
+  });
+  const frameRequests = () =>
+    page.evaluate(() => (window as unknown as { frameRequests: number }).frameRequests);
+  // O laço parou: logo passa um segundo inteiro sem nenhum quadro pedido.
+  const expectNoFrames = (message: string) =>
+    expect
+      .poll(
+        async () => {
+          const before = await frameRequests();
+          await page.waitForTimeout(1000);
+          return (await frameRequests()) - before;
+        },
+        { message, timeout: 8000 },
+      )
+      .toBe(0);
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/");
+  await settle(page);
+  await expectNoFrames("depois da entrada");
+
+  // Seguindo o ponteiro, a página pede quadros; quando o alcança, para.
+  await page.mouse.move(8, 8);
+  const following = await frameRequests();
+  await page.waitForTimeout(300);
+  expect(await frameRequests(), "seguindo o ponteiro").toBeGreaterThan(following);
+  await expectNoFrames("depois de alcançar o ponteiro");
+
+  // A rolagem pede um quadro de cada vez (pouca, para nenhuma foto viva acordar).
+  await page.evaluate(() => window.scrollBy({ top: 20, behavior: "instant" }));
+  await expectNoFrames("depois da rolagem");
+});
