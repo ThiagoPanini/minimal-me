@@ -13,4 +13,4 @@ As quatro dos spaces são uma série: o personagem pequeno no alto de uma duna, 
 
 Cubra sempre com o grão (`assets/Texture`). Não recolora, não espelhe e não use a ilustração de um space em outro. Se uma ilustração for trocada, refaça os dados dela em `illustrations.json` e, em Write & Learn, o atlas: as fotos vivas são feitas do que está pintado.
 
-As três ilustrações dos cards da Home v2.3 saíram na versão 2 do sistema; estão no commit `1551e5b`, em `docs/design/prototype/home-v2.3/img/`.
+As três ilustrações dos cards da Home v2.3 saíram na versão 2 do sistema; estão no commit `1551e5b`: `git show 1551e5b:docs/design/prototype/home-v2.3/img/`.
