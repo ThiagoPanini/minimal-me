@@ -63,7 +63,9 @@ async function read(github, path, accepted = [200]) {
   return expectStatus(await github.get(path), path, accepted);
 }
 
-const secretNamesOf = (body) => (body?.secrets ?? []).map((secret) => secret.name);
+export const dependabotSecretsPath = `/repos/${repository}/dependabot/secrets?per_page=100`;
+
+export const secretNamesOf = (body) => (body?.secrets ?? []).map((secret) => secret.name);
 
 async function checkCoolifyToken({ github }) {
   const environmentPath = `/repos/${repository}/environments/${productionEnvironment}`;
@@ -82,7 +84,7 @@ async function checkCoolifyToken({ github }) {
   ]);
 }
 
-const installationIsOnlyThisRepository = (installation) =>
+export const installationIsOnlyThisRepository = (installation) =>
   installation?.repositorySelection === "selected" &&
   installation.repositories?.length === 1 &&
   installation.repositories[0] === repository;
@@ -109,7 +111,7 @@ async function checkMergeApp({ github, state }) {
       }
     }
   }
-  const secrets = await read(github, `/repos/${repository}/dependabot/secrets?per_page=100`);
+  const secrets = await read(github, dependabotSecretsPath);
   const names = secretNamesOf(secrets.body);
   const absent = [secretNames.mergeAppClientId, secretNames.mergeAppPrivateKey].filter(
     (name) => !names.includes(name),
