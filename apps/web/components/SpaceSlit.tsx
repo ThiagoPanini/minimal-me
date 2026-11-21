@@ -9,6 +9,7 @@ import {
 } from "@/design-system/illustrations";
 import type { Space, SpaceId } from "@/spaces/catalog";
 import { FocusableSlit, SpaceFocusProvider } from "@/spaces/focus";
+import { LivingPicture } from "@/spaces/living-picture";
 
 // A fresta de um space (docs/design/system/components/SpaceSlit): uma abertura na fileira dos
 // quatro, com a ilustração inteira em repouso e tudo o que nomeia o space escrito dentro dela.
@@ -117,6 +118,7 @@ export function SpaceSlit({ space }: SpaceSlitProps) {
                 decoding="async"
                 className="slit-crop block"
               />
+              <LivingPicture id={space.id} illustration={space.illustration} />
             </div>
           </div>
           <div className="pointer-events-none absolute inset-0" style={grainStyle} />
