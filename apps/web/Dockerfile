@@ -12,8 +12,9 @@ ENV NEXT_TELEMETRY_DISABLED=1
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/
 RUN npm install --global "$(node -p "require('./package.json').packageManager")"
+# Sem scripts de instalação: o único liberado é o do lefthook, que instala os ganchos do git.
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
-    pnpm install --frozen-lockfile --filter web --store-dir /pnpm-store
+    pnpm install --frozen-lockfile --filter web --store-dir /pnpm-store --ignore-scripts
 
 COPY docs/design/system docs/design/system
 COPY apps/web apps/web
