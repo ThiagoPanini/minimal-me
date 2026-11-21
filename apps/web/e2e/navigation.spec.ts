@@ -12,17 +12,10 @@ async function outlineWidth(page: Page, width: number): Promise<string> {
   return `${Math.floor(width * ratio) / ratio}px`;
 }
 
-// Numa tela de 600px de altura, a Home passa da altura da tela em qualquer largura.
-async function openOnShortScreen(page: Page): Promise<void> {
-  const { width } = page.viewportSize() ?? { width: 1440 };
-  await page.setViewportSize({ width, height: 600 });
-  await page.goto("/");
-}
-
 test("a página rola no documento, pelo teclado, e o voltar do navegador devolve a rolagem @webkit", async ({
   page,
 }) => {
-  await openOnShortScreen(page);
+  await page.goto("/");
   const backToTop = page.getByRole("contentinfo").getByRole("link", { name: "voltar ao início ↑" });
   const bottom = await page.evaluate(
     () => (document.scrollingElement?.scrollHeight ?? 0) - window.innerHeight,
@@ -43,13 +36,13 @@ test("a página rola no documento, pelo teclado, e o voltar do navegador devolve
 test("pela tabulação, voltar ao início e a marca recebem foco visível e levam ao topo", async ({
   page,
 }) => {
-  await openOnShortScreen(page);
+  await page.goto("/");
   const mark = page.getByRole("banner").getByRole("link", { name: "Minimal Me, início" });
   const backToTop = page.getByRole("contentinfo").getByRole("link", { name: "voltar ao início ↑" });
 
-  // O link do rodapé: 1,5px na cor do texto (`body`, #C9C9C4), afastado 3px.
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
+  // O link do rodapé, depois da marca e dos quatro "Acessar": 1,5px na cor do texto (`body`,
+  // #C9C9C4), afastado 3px.
+  for (let link = 0; link < 6; link++) await page.keyboard.press("Tab");
   await expect(backToTop).toBeFocused();
   await expect(backToTop).toHaveCSS("outline-style", "solid");
   await expect(backToTop).toHaveCSS("outline-width", await outlineWidth(page, 1.5));

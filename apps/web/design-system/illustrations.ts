@@ -50,6 +50,81 @@ export const openingLayers: OpeningLayer[] = illustrationsData.opening.layers.ma
   ({ id, alt, position }) => ({ id, alt, position, image: responsiveImage(id) }),
 );
 
+// As ilustrações dos spaces, pela chave em `illustrations.json`: `frames`, `music`, `tech`, `ai`.
+export type SpaceIllustrationKey = keyof typeof illustrationsData.illustrations;
+
+// Onde a imagem fica presa no quadro, de 0 a 1 (`y: 1` a prende pelo pé), e o zoom, a partir de 1.
+export type Crop = { x: number; y: number; zoom: number };
+
+// Um ponto do arquivo, de 0 a 1 sobre a largura (`u`) e a altura (`v`).
+type FilePoint = { u: number; v: number };
+
+// A luz atrás da figura, que respira com a foto acordada: o raio em fração da largura, a
+// opacidade no pico e o ritmo em radianos por segundo.
+export type Glow = FilePoint & { radius: number; alpha: number; rate: number };
+
+// O movimento feito do que está pintado em cada ilustração. `x`, `y`, `w`, `h` e `r` são px
+// do arquivo; `from` e `to`, ângulos em múltiplos de π; `period`, segundos.
+export type SpaceMotion =
+  | { kind: "shutter"; period: number; shots: (FilePoint & { width: number })[] }
+  | { kind: "waves"; source: FilePoint; arcs: number; period: number; from: number; to: number }
+  | { kind: "leds"; lights: (FilePoint & { r: number; rack: number })[] }
+  | {
+      kind: "sheets";
+      atlas: string;
+      atlasSize: [number, number];
+      sheets: {
+        x: number;
+        y: number;
+        w: number;
+        h: number;
+        patch: [number, number];
+        sheet: [number, number];
+      }[];
+    };
+
+export type SpaceIllustration = {
+  key: SpaceIllustrationKey;
+  alt: string;
+  // O recorte na fresta: na fileira larga e na empilhada, até 900px.
+  crop: { wide: Crop; stacked: Crop };
+  glow: Glow;
+  motion: SpaceMotion;
+  image: ResponsiveImage;
+};
+
+const motionKinds: readonly string[] = [
+  "shutter",
+  "waves",
+  "leds",
+  "sheets",
+] satisfies SpaceMotion["kind"][];
+
+// A ilustração de um space, com o texto alternativo, o recorte por largura, a luz, o
+// movimento e as larguras responsivas.
+export function spaceIllustration(key: SpaceIllustrationKey): SpaceIllustration {
+  const { alt, crop, glow, motion } = illustrationsData.illustrations[key];
+  if (!motionKinds.includes(motion.kind)) {
+    throw new Error(`illustrations.json: movimento "${motion.kind}" desconhecido em "${key}"`);
+  }
+  return {
+    key,
+    alt,
+    crop: crop.slit,
+    glow,
+    motion: motion as SpaceMotion,
+    image: responsiveImage(key),
+  };
+}
+
+// A chave de luz das fotos dos spaces: o filtro em repouso e com foco.
+export const grade: { rest: string; focus: string } = illustrationsData.grade;
+
+// Quanto a foto acorda com o foco (escala e ritmos de entrada e saída) e a profundidade com a
+// rolagem e com o ponteiro, em px.
+export const wake: { scale: number; rateIn: number; rateOut: number } = illustrationsData.wake;
+export const depth: { scroll: number; pointer: number } = illustrationsData.depth;
+
 // O grão que cobre toda imagem: o ladrilho de `assets/Texture`, com o tamanho, a opacidade
 // e a mistura de `illustrations.json`.
 export const grainStyle: CSSProperties = {

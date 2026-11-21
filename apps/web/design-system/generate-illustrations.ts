@@ -28,9 +28,11 @@ const data: IllustrationsData = JSON.parse(
   readFileSync(path.join(systemDir, "illustrations.json"), "utf8"),
 );
 
-// As ilustrações que a Home mostra. As dos spaces entram com
-// `...Object.entries(data.illustrations).map(([id, it]) => ({ id, ...it }))`.
-const shown: Illustration[] = [...data.opening.layers];
+// As ilustrações que a Home mostra: as camadas da abertura e as dos spaces.
+const shown: Illustration[] = [
+  ...data.opening.layers,
+  ...Object.entries(data.illustrations).map(([id, illustration]) => ({ id, ...illustration })),
+];
 
 const missing = shown.filter(({ file }) => !existsSync(path.join(systemDir, file)));
 if (missing.length > 0) {
