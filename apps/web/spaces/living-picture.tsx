@@ -69,6 +69,7 @@ export function LivingPicture({ id, illustration }: LivingPictureProps) {
   const reducedMotion = useReducedMotion();
   const visible = useVisible(canvas);
 
+  // Cada mudança chega ao laço depois do mesmo começo, na ordem em que aconteceu.
   useEffect(() => {
     if (reducedMotion) {
       engine.current?.then((started) => started.still());
