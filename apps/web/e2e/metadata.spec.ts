@@ -118,3 +118,50 @@ test("a imagem de compartilhamento é a abertura recortada, com o céu no alto e
   expect(decoded.top.darkest, "o ponto mais escuro do alto").toBeLessThan(0.7);
   expect(decoded.bottom.mean, "luminância média do pé").toBeLessThan(0.3);
 });
+
+// Uma imagem quadrada decodificada: o lado, a cor do canto e a linha do meio, da borda esquerda
+// ao centro, em trechos escuros (`ground`) e claros (o desenho por cima).
+function middleRowRuns(page: Page, url: string) {
+  return page.evaluate(async (src) => {
+    const image = new Image();
+    image.src = src;
+    await image.decode();
+    const { naturalWidth: width, naturalHeight: height } = image;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    if (!context) throw new Error("sem contexto 2d");
+    context.drawImage(image, 0, 0);
+    const { data } = context.getImageData(0, Math.floor(height / 2), Math.ceil(width / 2), 1);
+    const runs: string[] = [];
+    for (let index = 0; index < data.length; index += 4) {
+      const value =
+        (0.2126 * data[index] + 0.7152 * data[index + 1] + 0.0722 * data[index + 2]) / 255;
+      const kind = value > 0.25 ? "claro" : "escuro";
+      if (runs.at(-1) !== kind) runs.push(kind);
+    }
+    return { width, height, corner: [...context.getImageData(0, 0, 1, 1).data], runs };
+  }, url);
+}
+
+test("a aba mostra o ícone da marca: o anel e o ponto sobre ground @webkit", async ({
+  page,
+  baseURL,
+}) => {
+  await page.goto("/");
+  const icon = page.locator('link[rel="icon"]');
+  await expect(icon).toHaveCount(1);
+  await expect(icon).toHaveAttribute("type", "image/png");
+  const url = new URL((await icon.getAttribute("href")) ?? "", baseURL).href;
+
+  const response = await page.request.get(url);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toBe("image/png");
+
+  const decoded = await middleRowRuns(page, url);
+  expect(decoded.width).toBe(decoded.height);
+  // O fundo em `ground` (#161616); da borda ao centro, o anel e, no centro, o ponto.
+  expect(decoded.corner).toEqual([22, 22, 22, 255]);
+  expect(decoded.runs).toEqual(["escuro", "claro", "escuro", "claro"]);
+});
