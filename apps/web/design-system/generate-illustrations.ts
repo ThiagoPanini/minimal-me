@@ -3,7 +3,8 @@
 // `design-system/generated/` (fora do git) e escreve `generated/illustrations.ts`,
 // que importa cada largura. O Next dá hash ao nome de cada arquivo importado e o
 // serve em `/_next/static/media/`; a maior largura é o próprio arquivo do sistema.
-// Faltar uma ilustração que a Home usa quebra o build aqui.
+// Escreve também `generated/atlases.ts`, com os atlas da foto viva, só para o código dela.
+// Faltar uma ilustração ou um atlas que a Home usa quebra o build aqui.
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import sharp from "sharp";
@@ -21,7 +22,10 @@ const variantWidths = [480, 768];
 type Illustration = { id: string; file: string; size: [number, number] };
 type IllustrationsData = {
   opening: { layers: Illustration[] };
-  illustrations: Record<string, Omit<Illustration, "id">>;
+  illustrations: Record<
+    string,
+    Omit<Illustration, "id"> & { motion: { atlas?: string; atlasSize?: [number, number] } }
+  >;
 };
 
 const data: IllustrationsData = JSON.parse(
@@ -34,7 +38,17 @@ const shown: Illustration[] = [
   ...Object.entries(data.illustrations).map(([id, illustration]) => ({ id, ...illustration })),
 ];
 
-const missing = shown.filter(({ file }) => !existsSync(path.join(systemDir, file)));
+// Os atlas da foto viva (as folhas de Write & Learn): entram como estão, sem outras larguras,
+// num módulo à parte, que só o código da foto viva importa.
+const atlases: Illustration[] = Object.entries(data.illustrations).flatMap(([id, { motion }]) =>
+  motion.atlas && motion.atlasSize
+    ? [{ id: `${id} (atlas)`, file: motion.atlas, size: motion.atlasSize }]
+    : [],
+);
+
+const missing = [...shown, ...atlases].filter(
+  ({ file }) => !existsSync(path.join(systemDir, file)),
+);
 if (missing.length > 0) {
   console.error(
     "Ilustrações que a Home usa e que faltam em docs/design/system/assets/Illustrations:",
@@ -50,15 +64,22 @@ const identifier = (id: string, width: number) => `${id.replace(/\W/g, "_")}${wi
 const imports: string[] = [];
 const entries: string[] = [];
 
-for (const { id, file, size } of shown) {
-  const source = path.join(systemDir, file);
-  const { width = 0, height = 0 } = await sharp(source).metadata();
+// Confere que o arquivo tem o tamanho que `illustrations.json` diz e devolve a largura.
+async function checkedWidth({ file, size }: Illustration): Promise<number> {
+  const { width = 0, height = 0 } = await sharp(path.join(systemDir, file)).metadata();
   if (width !== size[0] || height !== size[1]) {
     console.error(
       `${file} tem ${width}×${height}, mas illustrations.json diz ${size[0]}×${size[1]}.`,
     );
     process.exit(1);
   }
+  return width;
+}
+
+for (const illustration of shown) {
+  const { id, file } = illustration;
+  const source = path.join(systemDir, file);
+  const width = await checkedWidth(illustration);
   const names: string[] = [];
   for (const variantWidth of variantWidths.filter((w) => w < width)) {
     const variant = `${id}-${variantWidth}.webp`;
@@ -89,4 +110,29 @@ writeFileSync(
     "",
   ].join("\n"),
 );
-console.log(`Ilustrações geradas: ${shown.map(({ id }) => id).join(", ")}.`);
+
+const atlasImports: string[] = [];
+const atlasEntries: string[] = [];
+for (const [index, atlas] of atlases.entries()) {
+  await checkedWidth(atlas);
+  atlasImports.push(
+    `import atlas${index} from "@design-system/assets/Illustrations/${atlas.file}";`,
+  );
+  atlasEntries.push(`  ${JSON.stringify(atlas.file)}: atlas${index},`);
+}
+writeFileSync(
+  path.join(generatedDir, "atlases.ts"),
+  [
+    "// Gerado por design-system/generate-illustrations.ts no build. Não edite.",
+    ...atlasImports,
+    "",
+    "// Os atlas da foto viva, pelo nome do arquivo em `illustrations.json`.",
+    "export const atlasSources: Record<string, { src: string }> = {",
+    ...atlasEntries,
+    "};",
+    "",
+  ].join("\n"),
+);
+console.log(
+  `Ilustrações geradas: ${shown.map(({ id }) => id).join(", ")}; atlas: ${atlases.map(({ file }) => file).join(", ")}.`,
+);
