@@ -1,7 +1,7 @@
-import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import path from "node:path";
 import type { Locator, Page } from "@playwright/test";
+import sharp from "sharp";
 import { expect, test } from "./fixtures";
 
 const illustrationsDir = path.resolve(
@@ -9,8 +9,35 @@ const illustrationsDir = path.resolve(
   "../../../docs/design/system/assets/Illustrations",
 );
 
-function sha256(bytes: Buffer): string {
-  return createHash("sha256").update(bytes).digest("hex");
+type Pixels = { data: Buffer; width: number; height: number };
+
+// Os pixels de uma imagem, com a transparência composta sobre preto.
+async function pixelsOf(image: Buffer | string): Promise<Pixels> {
+  const { data, info } = await sharp(image)
+    .flatten({ background: "#000" })
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  return { data, width: info.width, height: info.height };
+}
+
+// A diferença entre duas imagens do mesmo tamanho, em dB de PSNR: quanto maior, mais iguais.
+function psnr(a: Pixels, b: Pixels): number {
+  let squared = 0;
+  for (let i = 0; i < a.data.length; i += 1) squared += (a.data[i] - b.data[i]) ** 2;
+  return 10 * Math.log10(255 ** 2 / (squared / a.data.length));
+}
+
+// O arquivo do sistema de design que uma ilustração servida mostra: o do mesmo tamanho com a
+// imagem mais parecida, acima de 35 dB de PSNR (a recodificação do build fica acima de 40 dB).
+async function systemFileOf(bytes: Buffer, systemFiles: Map<string, Pixels>): Promise<string> {
+  const served = await pixelsOf(bytes);
+  let found = { file: "fora do sistema", psnr: 35 };
+  for (const [file, pixels] of systemFiles) {
+    if (pixels.width !== served.width || pixels.height !== served.height) continue;
+    const difference = psnr(served, pixels);
+    if (difference > found.psnr) found = { file, psnr: difference };
+  }
+  return found.file;
 }
 
 // Um arquivo servido com hash no nome, como `/_next/static/media/sky-480.25k3w4etqjn7r.webp`.
@@ -20,11 +47,10 @@ const hashedWebp = /^\/_next\/static\/media\/[\w-]+\.[\w-]{8,}\.webp$/;
 // mostra na maior largura, o texto alternativo e a carga. Confere que cada largura do `srcset`
 // tem hash no nome e é a largura do arquivo servido.
 async function servedIllustrations(page: Page, baseURL: string | undefined, scope: Locator) {
-  const systemFiles = new Map(
-    readdirSync(illustrationsDir)
-      .filter((file) => file.endsWith(".webp"))
-      .map((file) => [sha256(readFileSync(path.join(illustrationsDir, file))), file]),
-  );
+  const systemFiles = new Map<string, Pixels>();
+  for (const file of readdirSync(illustrationsDir).filter((name) => name.endsWith(".webp"))) {
+    systemFiles.set(file, await pixelsOf(path.join(illustrationsDir, file)));
+  }
   const images = await scope.locator("img[srcset]").evaluateAll((elements) =>
     elements.map((image) => ({
       alt: image.getAttribute("alt"),
@@ -50,11 +76,11 @@ async function servedIllustrations(page: Page, baseURL: string | undefined, scop
       }, url);
       expect(decoded, url).toBe(width);
     }
-    // A maior largura é o próprio arquivo do sistema de design, sem cópia.
+    // A maior largura é o arquivo do sistema de design no tamanho dele, recodificado pelo
+    // passo das ilustrações.
     const widest = candidates.reduce((a, b) => (b.width > a.width ? b : a));
     const bytes = await (await page.request.get(new URL(widest.url, baseURL).href)).body();
-    const file = systemFiles.get(sha256(bytes)) ?? `fora do sistema: ${widest.url}`;
-    found.push({ file, alt, loading });
+    found.push({ file: await systemFileOf(bytes, systemFiles), alt, loading });
   }
   return found;
 }

@@ -1,8 +1,10 @@
 // Passo do build: as ilustrações que a Home mostra ganham tamanhos responsivos.
-// Lê `docs/design/system/assets/Illustrations/`, grava as larguras menores em
+// Lê `docs/design/system/assets/Illustrations/`, grava cada largura em
 // `design-system/generated/` (fora do git) e escreve `generated/illustrations.ts`,
 // que importa cada largura. O Next dá hash ao nome de cada arquivo importado e o
-// serve em `/_next/static/media/`; a maior largura é o próprio arquivo do sistema.
+// serve em `/_next/static/media/`. Toda largura, a do arquivo original inclusive, sai
+// recodificada em WebP com a mesma qualidade: os arquivos do sistema guardam a ilustração
+// com mais detalhe do que a tela mostra, e com fator de escala 3 o navegador pede a maior.
 // As camadas da abertura ganham também uma cópia em PNG, no tamanho original, em
 // `generated/opening/`: o `next/og` da imagem de compartilhamento não desenha WebP.
 // Escreve também `generated/atlases.ts`, com os atlas da foto viva, só para o código dela.
@@ -21,6 +23,9 @@ const openingDir = path.join(generatedDir, "opening");
 
 // As larguras menores que o arquivo original; a original entra sempre.
 const variantWidths = [480, 768];
+// A qualidade do WebP de toda largura: no arquivo inteiro, a diferença para o original fica
+// acima de 40 dB de PSNR, e as quatro ilustrações dos spaces caem de 441 KB para 178 KB.
+const webpQuality = 80;
 
 type Illustration = { id: string; file: string; size: [number, number] };
 type IllustrationsData = {
@@ -85,19 +90,14 @@ for (const illustration of shown) {
   const source = path.join(systemDir, file);
   const width = await checkedWidth(illustration);
   const names: string[] = [];
-  for (const variantWidth of variantWidths.filter((w) => w < width)) {
+  for (const variantWidth of [...variantWidths.filter((w) => w < width), width]) {
     const variant = `${id}-${variantWidth}.webp`;
-    await sharp(source)
-      .resize({ width: variantWidth })
-      .webp({ quality: 80 })
-      .toFile(path.join(variantsDir, variant));
+    const image = sharp(source);
+    if (variantWidth < width) image.resize({ width: variantWidth });
+    await image.webp({ quality: webpQuality }).toFile(path.join(variantsDir, variant));
     imports.push(`import ${identifier(id, variantWidth)} from "./illustrations/${variant}";`);
     names.push(identifier(id, variantWidth));
   }
-  imports.push(
-    `import ${identifier(id, width)} from "@design-system/assets/Illustrations/${file}";`,
-  );
-  names.push(identifier(id, width));
   entries.push(`  ${JSON.stringify(id)}: [${names.join(", ")}],`);
 }
 
