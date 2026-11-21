@@ -14,6 +14,7 @@ O que o produto é está em `docs/brief.md`; o vocabulário, em `GLOSSARY.md`; a
 | `apps/web/e2e/` | Os testes Playwright, que rodam contra essa imagem. |
 | `.github/workflows/` | A esteira: o `ci`, que vira o check `gate` e publica a imagem na `main`, o `pr-title` e o `actions.lock`, que fixa as actions de todos os workflows. |
 | `lefthook.yml`, `compose.tools.yaml` e `scripts/` | Os ganchos do git e as ferramentas que rodam de imagem Docker (gitleaks, actionlint e zizmor), iguais na máquina e na CI. |
+| `scripts/author-setup/` | O roteiro da preparação única do Autor (ver "Preparação única do Autor"). |
 | `CODING_STANDARDS.md` | Os padrões que a revisão confere: idioma, web, branches, commits, ganchos e workflows. |
 | `docs/` | Brief, ADRs, sistema de design e o protótipo do MVP. |
 
@@ -32,11 +33,11 @@ O servidor de desenvolvimento abre em `http://localhost:3000`. Em produção nã
 
 | Comando | O que faz |
 |---|---|
-| `pnpm check` | Biome em modo CI; actionlint, zizmor e a fixação das actions pelo `actions.lock`; e a checagem de tipos (`next typegen && tsc --noEmit`). |
+| `pnpm check` | Biome em modo CI; actionlint, zizmor e a fixação das actions pelo `actions.lock`; os testes dos scripts da raiz (`pnpm test:scripts`); e a checagem de tipos (`next typegen && tsc --noEmit`). |
 | `pnpm test:e2e` | Constrói a imagem da Home, sobe-a no Docker Compose com o contêiner oficial do Playwright e roda os testes contra ela. Precisa do Docker de pé. |
 | `pnpm verify` | Os dois acima, nessa ordem. Rode antes de abrir ou atualizar um PR. |
 
-No `pnpm test:e2e`, o Playwright roda em Chromium a 390 e a 1440 de largura e, num subconjunto, em WebKit com o iPhone 13. Cada worktree sobe o próprio projeto do Compose, sem porta no host, então vários worktrees testam ao mesmo tempo. Argumentos extras vão para o `playwright test`, como em `pnpm test:e2e --grep 404`.
+No `pnpm test:e2e`, o Playwright roda em Chromium a 390 e a 1440 de largura e, num subconjunto, em WebKit com o iPhone 13. No mesmo contêiner, o Lighthouse mede a primeira visita a 390px, com fator de escala 3 e Slow 4G simulado: o peso trava em 1.000.000 bytes transferidos, e a mediana do LCP em cinco rodadas só aparece na saída. Cada worktree sobe o próprio projeto do Compose, sem porta no host, então vários worktrees testam ao mesmo tempo. Argumentos extras vão para o `playwright test`, como em `pnpm test:e2e --grep 404`.
 
 ## Como a CI valida
 
@@ -50,6 +51,20 @@ Todo PR roda a validação inteira, sem filtro de caminho, e o resultado vira do
 No PR, o `image` constrói a imagem e ela é testada sem ir ao registro, sem nenhuma permissão de escrita. Na `main`, o `publish` a constrói uma vez e a publica no GHCR como `ghcr.io/thiagopanini/minimal-me/web:sha-<commit>`, com proveniência, SBOM e atestado, e o e2e roda contra esse digest. Uma rodada nova do mesmo PR cancela a anterior; na `main`, nenhuma rodada é cancelada.
 
 Para testar uma imagem pronta em vez de construir uma, como faz a CI, passe a imagem em `WEB_IMAGE`, como em `WEB_IMAGE=ghcr.io/thiagopanini/minimal-me/web:sha-$(git rev-parse HEAD) pnpm test:e2e`. A imagem precisa ser do commit em que você está, porque um teste confere o commit no `version.json`.
+
+## Preparação única do Autor
+
+Os passos que só o Autor faz, porque exigem a conta dele, estão num roteiro guiado em `scripts/author-setup/`. Ele roda numa sessão só, depois do merge do Marco 1 na `main` e da operação que liga a esteira (#74):
+
+```sh
+pnpm author-setup           # guia os passos que faltam, um por tela, e confere cada um
+pnpm author-setup --check   # só confere: lista exatamente o que falta e não muda nada
+pnpm author-setup --plan    # o duplo cheque: por que cada passo é do Autor e o que o agente faz
+```
+
+São sete passos: o token do Coolify no environment `production`; o GitHub App do merge automático, criado por um formulário já preenchido e instalado só neste repositório; o pacote do GHCR público; os alertas de malware do Dependabot; a atualização automática semanal do Coolify; o Origin Certificate na configuração dinâmica do Traefik; e o login OAuth dos MCPs remotos. Rodar de novo mostra só o que falta.
+
+O roteiro precisa do `gh` logado e, para conferir o login dos MCPs, do comando `claude`. Nenhum segredo passa pelo repositório, pelas issues nem pela saída do roteiro: o que é segredo se digita sem eco e vai direto para o segredo de destino pelo `gh secret set`, a chave do App vai do GitHub para os segredos do Dependabot sem aparecer, e a chave do Origin Certificate nasce e fica na VPS. As confirmações do que nenhuma API lê ficam em `~/.local/state/minimal-me/author-setup.json`, fora do repositório e sem segredo.
 
 ## Licença
 

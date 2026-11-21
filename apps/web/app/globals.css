@@ -31,6 +31,212 @@
   --radius-circle: var(--circle);
 
   --ease-*: initial;
+
+  --animate-*: initial;
+  /* O pulso do ponto de "Em desenvolvimento" (StatusLine): 2,6s, `ease-io`, em laço. */
+  --animate-status-pulse: status-pulse 2.6s var(--ease-io) infinite;
+  @keyframes status-pulse {
+    0%,
+    100% {
+      opacity: 0.28;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+}
+
+/*
+ * As quebras da Home valem "até N px", com N incluído, como no protótipo (`max-width`). Os
+ * utilitários `max-[900px]:` e `min-[901px]:` do Tailwind não servem: o primeiro é
+ * `width < 900px` e o segundo `width >= 901px`, e a 900px exatos nenhum dos dois vale.
+ * Até 900px a página empilha (`stacked:`; acima, `not-stacked:`); até 760px, as camadas
+ * da abertura usam a posição estreita e a frase do Masthead fica em 14px (`narrow:`).
+ */
+@custom-variant stacked (@media (max-width: 900px));
+@custom-variant narrow (@media (max-width: 760px));
+
+/*
+ * O estado de cada fresta da fileira de spaces (SpaceSlit), no atributo `data-focus` do item:
+ * `active` é a fresta com foco; `kept` é a que fica aberta até 900px enquanto nenhuma outra
+ * tem foco (no começo, a primeira, já no HTML exportado). No máximo uma fresta leva o atributo.
+ * Aberta: com foco em qualquer largura e, até 900px, também a guardada. Fechada: até 900px,
+ * toda fresta sem o atributo. Recuada: a que não está aberta numa fileira em que outra está.
+ * `slit-open:` vale na própria fresta; `in-slit-*:`, dentro dela.
+ */
+@custom-variant slit-open {
+  &:where([data-focus="active"]) {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    &:where([data-focus="kept"]) {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-open {
+  :where([data-space][data-focus="active"]) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space][data-focus="kept"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-closed {
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant in-slit-receded {
+  :where([data-spaces]:has([data-focus="active"]) > [data-space]:not([data-focus="active"])) & {
+    @slot;
+  }
+  @media (max-width: 900px) {
+    :where([data-space]:not([data-focus])) & {
+      @slot;
+    }
+  }
+}
+
+/*
+ * O movimento da página (`motion/entrance.ts`): a entrada da abertura e a revelação ao rolar.
+ * Tudo vale só com movimento e depois que o script da entrada marcou o `html` com
+ * `data-motion`; sem script ou com movimento reduzido, nenhuma regra daqui vale, e a página
+ * fica no estado final. `entering:` vale enquanto há movimento; `opening-waiting:` enquanto a
+ * abertura espera as duas camadas, e `opening-arrived:` depois. `unrevealed:` vale num bloco
+ * (`data-reveal`) que ainda não entrou na tela, ou dentro dele; `revealed:`, depois que entrou.
+ * Declaradas depois das `slit-*`, ganham delas numa disputa da mesma propriedade.
+ */
+@custom-variant entering {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant opening-waiting {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion="waiting"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant opening-arrived {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(html[data-motion="arrived"]) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant unrevealed {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(html[data-motion] [data-reveal]:not([data-revealed])),
+    :where(html[data-motion] [data-reveal]:not([data-revealed])) & {
+      @slot;
+    }
+  }
+}
+
+@custom-variant revealed {
+  @media (prefers-reduced-motion: no-preference) {
+    &:where(html[data-motion] [data-revealed]),
+    :where(html[data-motion] [data-revealed]) & {
+      @slot;
+    }
+  }
+}
+
+/* As entradas partem de um quadro e terminam no estado que o elemento já tem (`backwards`):
+   o pé de uma fresta fechada, por exemplo, sobe e continua invisível. */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    translate: 0 12px;
+  }
+}
+
+/* Cada palavra do nome sobe de baixo da própria linha, por trás de uma máscara. */
+@keyframes line-up {
+  from {
+    translate: 0 105%;
+  }
+}
+
+/* O fio de uma seção cresce da esquerda. */
+@keyframes grow-x {
+  from {
+    scale: 0 1;
+  }
+}
+
+/* As camadas da abertura: o céu se aproxima, e as dunas sobem. */
+@keyframes sky-in {
+  from {
+    opacity: 0;
+    scale: 1.045;
+  }
+}
+
+@keyframes dunes-in {
+  from {
+    opacity: 0;
+    translate: 0 4%;
+  }
+}
+
+/* A foto de um space se revela como uma cópia no banho: de lavada e clara até a luz dela. */
+@keyframes develop {
+  from {
+    opacity: 0;
+    filter: contrast(0.35) brightness(1.6);
+  }
+}
+
+/*
+ * As transições de vista (`<ViewTransition>` do React). Só entra numa transição quem a pede:
+ * a página inteira não é capturada, e continua à vista e respondendo ao cursor e ao toque. O
+ * aviso (Toast) aparece e some por opacidade em 0,5s: o quadro velho dele se funde no novo,
+ * sem crescer nem se mover. Com movimento reduzido, a transição em curso termina na hora.
+ */
+:root {
+  view-transition-name: none;
+}
+
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(.toast-fade) {
+  animation-name: none;
+}
+
+::view-transition-old(.toast-fade),
+::view-transition-new(.toast-fade) {
+  animation-duration: 0.5s;
+  animation-timing-function: var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(.toast-fade),
+  ::view-transition-new(.toast-fade) {
+    animation: none;
+  }
 }
 
 /* As famílias têm no sistema o mesmo nome que teriam no tema do Tailwind
@@ -65,6 +271,66 @@
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
   column-gap: var(--grid-gap);
+}
+
+/* A foto de uma fresta com as quatro bordas esfumadas em 2%. */
+@utility slit-feather {
+  mask-image:
+    linear-gradient(to right, transparent, black 2%, black 98%, transparent),
+    linear-gradient(to bottom, transparent, black 2%, black 98%, transparent);
+  mask-composite: intersect;
+}
+
+/* O recorte da foto numa fresta (`illustrations.json`): presa no ponto (x, y) e com o zoom,
+   pelos valores da fileira larga e, até 900px, da empilhada. Quem usa declara as seis
+   variáveis `--crop-wide-*` e `--crop-stacked-*`. */
+@utility slit-crop {
+  --crop-x: var(--crop-wide-x);
+  --crop-y: var(--crop-wide-y);
+  --crop-zoom: var(--crop-wide-zoom);
+  @media (max-width: 900px) {
+    --crop-x: var(--crop-stacked-x);
+    --crop-y: var(--crop-stacked-y);
+    --crop-zoom: var(--crop-stacked-zoom);
+  }
+  position: absolute;
+  left: calc((1 - var(--crop-zoom)) * var(--crop-x) * 100%);
+  top: calc((1 - var(--crop-zoom)) * var(--crop-y) * 100%);
+  width: calc(var(--crop-zoom) * 100%);
+  height: calc(var(--crop-zoom) * 100%);
+  max-width: none;
+  object-fit: cover;
+  object-position: calc(var(--crop-x) * 100%) calc(var(--crop-y) * 100%);
+}
+
+/* Os véus de uma fresta, em `ground`. O do topo fica sempre sob o número, o Status e o nome. */
+@utility slit-veil-top {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--ground) 62%, transparent) 0,
+    color-mix(in srgb, var(--ground) 30%, transparent) 18%,
+    transparent 38%
+  );
+}
+
+/* O véu do foco escurece a duna, sob a descrição, e reforça o topo, onde a foto clareia ao
+   perder a chave de repouso. */
+@utility slit-veil-focus {
+  background:
+    linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--ground) 49%, transparent) 0,
+      color-mix(in srgb, var(--ground) 80%, transparent) 8.5%,
+      color-mix(in srgb, var(--ground) 52%, transparent) 21.5%,
+      transparent 30.5%
+    ),
+    linear-gradient(
+      to top,
+      color-mix(in srgb, var(--ground) 90%, transparent) 0,
+      color-mix(in srgb, var(--ground) 76%, transparent) 23%,
+      color-mix(in srgb, var(--ground) 67%, transparent) 39%,
+      transparent 60%
+    );
 }
 
 @layer base {

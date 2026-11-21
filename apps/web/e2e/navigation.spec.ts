@@ -5,6 +5,20 @@ function scrollY(page: Page): () => Promise<number> {
   return () => page.evaluate(() => window.scrollY);
 }
 
+// Espera a rolagem parar fora do topo. Com movimento, a rolagem que o foco faz é suave, e um
+// Enter no meio dela deixa o Chromium no fim da página em vez de levar ao topo.
+async function scrollSettled(page: Page): Promise<void> {
+  let previous = -1;
+  await expect
+    .poll(async () => {
+      const current = await scrollY(page)();
+      const settled = current > 0 && current === previous;
+      previous = current;
+      return settled;
+    })
+    .toBe(true);
+}
+
 // A espessura de um contorno como o navegador a desenha: arredondada para baixo em pixels
 // do dispositivo (1,5px vira 1px numa tela de densidade 1).
 async function outlineWidth(page: Page, width: number): Promise<string> {
@@ -12,17 +26,10 @@ async function outlineWidth(page: Page, width: number): Promise<string> {
   return `${Math.floor(width * ratio) / ratio}px`;
 }
 
-// Numa tela de 600px de altura, a Home passa da altura da tela em qualquer largura.
-async function openOnShortScreen(page: Page): Promise<void> {
-  const { width } = page.viewportSize() ?? { width: 1440 };
-  await page.setViewportSize({ width, height: 600 });
-  await page.goto("/");
-}
-
 test("a página rola no documento, pelo teclado, e o voltar do navegador devolve a rolagem @webkit", async ({
   page,
 }) => {
-  await openOnShortScreen(page);
+  await page.goto("/");
   const backToTop = page.getByRole("contentinfo").getByRole("link", { name: "voltar ao início ↑" });
   const bottom = await page.evaluate(
     () => (document.scrollingElement?.scrollHeight ?? 0) - window.innerHeight,
@@ -43,19 +50,19 @@ test("a página rola no documento, pelo teclado, e o voltar do navegador devolve
 test("pela tabulação, voltar ao início e a marca recebem foco visível e levam ao topo", async ({
   page,
 }) => {
-  await openOnShortScreen(page);
+  await page.goto("/");
   const mark = page.getByRole("banner").getByRole("link", { name: "Minimal Me, início" });
   const backToTop = page.getByRole("contentinfo").getByRole("link", { name: "voltar ao início ↑" });
 
-  // O link do rodapé: 1,5px na cor do texto (`body`, #C9C9C4), afastado 3px.
-  await page.keyboard.press("Tab");
-  await page.keyboard.press("Tab");
+  // O link do rodapé, depois da marca e dos quatro "Acessar": 1,5px na cor do texto (`body`,
+  // #C9C9C4), afastado 3px.
+  for (let link = 0; link < 6; link++) await page.keyboard.press("Tab");
   await expect(backToTop).toBeFocused();
   await expect(backToTop).toHaveCSS("outline-style", "solid");
   await expect(backToTop).toHaveCSS("outline-width", await outlineWidth(page, 1.5));
   await expect(backToTop).toHaveCSS("outline-color", "rgb(201, 201, 196)");
   await expect(backToTop).toHaveCSS("outline-offset", "3px");
-  await expect.poll(scrollY(page)).toBeGreaterThan(0);
+  await scrollSettled(page);
   await page.keyboard.press("Enter");
   await expect.poll(scrollY(page)).toBe(0);
 

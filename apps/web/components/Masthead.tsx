@@ -1,3 +1,5 @@
+import { Fragment } from "react";
+
 // O nome em `wordmark`, com o sobretítulo e a frase ao lado (docs/design/system/components/Masthead),
 // logo abaixo da ilustração da abertura.
 // O nome ocupa as colunas 1 a 8 e nunca quebra; o bloco de texto, as colunas 9 a 12. As
@@ -11,6 +13,20 @@
 // de .76em mais a folga de .06em). Com Jost (ascendente 1,07, descendente .375 e altura das
 // maiúsculas de .7), a linha de base fica a .06 + (.76 - 1,445) / 2 + 1,07 = .7875em do topo da
 // caixa: as maiúsculas começam a .0875em, e a caixa termina .0325em abaixo da linha de base.
+//
+// Com movimento, a página entra como no protótipo (motion/entrance.ts): cada palavra do nome
+// sobe 105% da própria altura em 1,25s, por trás de uma máscara no pé da linha, a segunda 150ms
+// depois da primeira; o sobretítulo aparece e a frase sobe 12px por último. A máscara só
+// recorta abaixo da linha, onde as maiúsculas nunca chegam, então em repouso nada muda.
+
+// As palavras do nome, cada uma com a própria entrada.
+const nameWords = [
+  {
+    word: "Minimal",
+    entrance: "entering:[animation:line-up_1.25s_var(--ease-out)_.45s_backwards]",
+  },
+  { word: "Me", entrance: "entering:[animation:line-up_1.25s_var(--ease-out)_.6s_backwards]" },
+];
 
 type MastheadProps = {
   kicker: string;
@@ -19,16 +35,23 @@ type MastheadProps = {
 
 export function Masthead({ kicker, tagline }: MastheadProps) {
   return (
-    <div className="relative z-4 pt-[clamp(6px,1vw,16px)] pb-[clamp(30px,3.4vw,54px)] max-[900px]:-mt-[clamp(40px,7vw,64px)] max-[900px]:pb-[clamp(36px,6vw,52px)]">
-      <div className="@container page-inner page-grid items-start [--base-gap:.0325] [--cap-gap:.0875] [--name-size:calc(100cqw/6.099)] min-[901px]:[--name-size:calc((200cqw_-_var(--grid-gap))/18.297)]">
-        <h1 className="col-span-12 -mr-[.06em] -ml-[.04em] self-end whitespace-nowrap pt-[.06em] font-light font-sans text-(length:--name-size) text-light uppercase leading-[.76] tracking-[.06em] min-[901px]:col-span-8 min-[901px]:pt-[calc(var(--cap-gap)*1em)] min-[901px]:pb-[calc(var(--base-gap)*1em)] min-[901px]:[text-box:trim-both_cap_alphabetic]">
-          Minimal Me
+    <div className="relative z-4 pt-[clamp(6px,1vw,16px)] pb-[clamp(30px,3.4vw,54px)] stacked:-mt-[clamp(40px,7vw,64px)] stacked:pb-[clamp(36px,6vw,52px)]">
+      <div className="@container page-inner page-grid items-start [--base-gap:.0325] [--cap-gap:.0875] [--name-size:calc(100cqw/6.099)] not-stacked:[--name-size:calc((200cqw_-_var(--grid-gap))/18.297)]">
+        <h1 className="col-span-12 -mr-[.06em] -ml-[.04em] self-end whitespace-nowrap pt-[.06em] font-light font-sans text-(length:--name-size) text-light uppercase leading-[.76] tracking-[.06em] not-stacked:col-span-8 not-stacked:pt-[calc(var(--cap-gap)*1em)] not-stacked:pb-[calc(var(--base-gap)*1em)] not-stacked:[text-box:trim-both_cap_alphabetic]">
+          {nameWords.map(({ word, entrance }, index) => (
+            <Fragment key={word}>
+              {index > 0 && " "}
+              <span className="inline-block entering:[clip-path:inset(-1em_-1em_0_-1em)]">
+                <span className={`inline-block ${entrance}`}>{word}</span>
+              </span>
+            </Fragment>
+          ))}
         </h1>
-        <div className="col-span-12 flex min-w-0 flex-col items-start justify-start gap-3 pt-[clamp(18px,3vw,26px)] min-[901px]:col-span-4 min-[901px]:mt-[calc(var(--cap-gap)*var(--name-size))] min-[901px]:mb-[calc(var(--base-gap)*var(--name-size))] min-[901px]:self-stretch min-[901px]:justify-between min-[901px]:pt-0">
-          <p className="font-normal font-sans text-[11px] text-mist uppercase leading-[1.4] tracking-[.3em] min-[901px]:[text-box:trim-start_cap_alphabetic]">
+        <div className="col-span-12 flex min-w-0 flex-col items-start justify-start gap-3 pt-[clamp(18px,3vw,26px)] not-stacked:col-span-4 not-stacked:mt-[calc(var(--cap-gap)*var(--name-size))] not-stacked:mb-[calc(var(--base-gap)*var(--name-size))] not-stacked:self-stretch not-stacked:justify-between not-stacked:pt-0">
+          <p className="font-normal font-sans text-[11px] text-mist uppercase leading-[1.4] tracking-[.3em] not-stacked:[text-box:trim-start_cap_alphabetic] entering:[animation:fade-in_1s_var(--ease)_.95s_backwards]">
             {kicker}
           </p>
-          <p className="max-w-[34ch] text-pretty font-light font-mono text-[length:clamp(14px,1.1vw,16px)] text-body leading-[1.62] max-[760px]:text-[14px] min-[901px]:[text-box:trim-end_cap_alphabetic]">
+          <p className="max-w-[34ch] text-pretty font-light font-mono text-[length:clamp(14px,1.1vw,16px)] text-body leading-[1.62] narrow:text-[14px] not-stacked:[text-box:trim-end_cap_alphabetic] entering:[animation:fade-up_1s_var(--ease-out)_1.05s_backwards]">
             {tagline}
           </p>
         </div>

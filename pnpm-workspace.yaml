@@ -6,3 +6,11 @@ trustPolicy: no-downgrade
 # Só o lefthook roda script de instalação: o postinstall dele instala os ganchos do git.
 allowBuilds:
   lefthook: true
+
+overrides:
+  # O Lighthouse do teste de peso e LCP. O puppeteer-core 25.13 em diante pede o chromium-bidi
+  # 157.0.8090-0, publicado sem a proveniência das versões anteriores, e o trustPolicy o recusa.
+  # O 25.12.0 cabe na faixa que o Lighthouse 13.5 declara (daí o `~13.5.0` da web) e pede o
+  # chromium-bidi 17.0.2, com proveniência. Sai quando um puppeteer-core novo voltar a pedir
+  # um chromium-bidi com proveniência.
+  "lighthouse>puppeteer-core": 25.12.0

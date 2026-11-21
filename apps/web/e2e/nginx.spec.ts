@@ -43,8 +43,12 @@ test("o que tem hash no nome leva cache longo e imutável", async ({ request }) 
   }
 });
 
-test("HTML e version.json ficam sem cache longo e sem no-transform", async ({ request }) => {
-  for (const route of ["/", "/version.json"]) {
+// O que não tem hash no nome: o HTML, o version.json, os arquivos de rota e as imagens que o
+// Next gera para os metadados (o ícone e a de compartilhamento), que saem sem extensão.
+const unhashed = ["/", "/version.json", "/robots.txt", "/sitemap.xml", "/icon", "/opengraph-image"];
+
+test("o que não tem hash no nome fica sem cache longo e sem no-transform", async ({ request }) => {
+  for (const route of unhashed) {
     const response = await request.get(route);
     expect(response.status(), route).toBe(200);
     const cacheControl = response.headers()["cache-control"] ?? "";
@@ -72,7 +76,7 @@ test("o cabeçalho Server não diz a versão do nginx", async ({ request }) => {
 test("toda resposta leva os quatro cabeçalhos de segurança", async ({ request }) => {
   const { css, font } = await hashedAssets(request);
 
-  for (const route of ["/", css, font, "/version.json", "/esta-rota-nao-existe"]) {
+  for (const route of [css, font, ...unhashed, "/esta-rota-nao-existe"]) {
     const headers = (await request.get(route)).headers();
     for (const [name, value] of Object.entries(securityHeaders)) {
       expect(headers[name], `${name} em ${route}`).toBe(value);

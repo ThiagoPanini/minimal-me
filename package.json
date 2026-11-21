@@ -6,8 +6,10 @@
     "node": "24.x"
   },
   "scripts": {
-    "check": "biome ci && pnpm check:workflows && pnpm --filter web check:types",
+    "author-setup": "node scripts/author-setup/main.mjs",
+    "check": "biome ci && pnpm check:workflows && pnpm test:scripts && pnpm --filter web check:types",
     "check:workflows": "node scripts/tool.mjs actionlint && node scripts/tool.mjs zizmor --offline --no-progress --quiet . && node scripts/check-action-pins.mjs",
+    "test:scripts": "node --test \"scripts/**/*.test.mjs\"",
     "test:e2e": "pnpm --filter web test:e2e",
     "verify": "pnpm check && pnpm test:e2e"
   },
