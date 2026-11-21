@@ -239,10 +239,12 @@ jobs:
   # `production` para ele, chama o /deploy do Coolify e roda o smoke contra a URL pública; se algo
   # falha depois de a tag mudar, devolve `production` ao digest anterior, chama o /deploy de novo e
   # termina vermelho. Este job não instala dependências: é o único que vê o token. O rollback
-  # manual é o workflow `rollback`, que passa pelo mesmo script.
+  # manual é o workflow `rollback`, que passa pelo mesmo script. O `if:` confere o resultado de
+  # cada `needs`: sem função de status, o `success()` implícito olha a cadeia inteira, e o
+  # `image`, pulado no push, pulava a entrega junto.
   deploy:
     needs: [publish, gate]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: ${{ !cancelled() && needs.publish.result == 'success' && needs.gate.result == 'success' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     environment:
