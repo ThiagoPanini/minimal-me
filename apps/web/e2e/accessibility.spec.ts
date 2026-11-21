@@ -5,6 +5,7 @@ import { expect, test } from "./fixtures";
 // WCAG A e AA até a 2.2. Os resultados incompletos só informam, como anotação do teste.
 const wcagTags = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22a", "wcag22aa"];
 
+// O axe numa página aberta: as violações falham o teste.
 async function expectNoAxeViolations(page: Page, testInfo: TestInfo): Promise<void> {
   const results = await new AxeBuilder({ page }).withTags(wcagTags).analyze();
 
@@ -23,11 +24,18 @@ async function expectNoAxeViolations(page: Page, testInfo: TestInfo): Promise<vo
   ).toEqual([]);
 }
 
-test("a Home passa no axe, com WCAG A e AA até 2.2", async ({ page }, testInfo) => {
-  await page.goto("/");
+// As páginas da Home: ela mesma e a 404, que o nginx serve a qualquer rota que não existe.
+const pages = [
+  { name: "a Home", route: "/" },
+  { name: "a 404", route: "/esta-rota-nao-existe" },
+];
 
-  await expectNoAxeViolations(page, testInfo);
-});
+for (const { name, route } of pages) {
+  test(`${name} passa no axe, com WCAG A e AA até 2.2`, async ({ page }, testInfo) => {
+    await page.goto(route);
+    await expectNoAxeViolations(page, testInfo);
+  });
+}
 
 test("com uma fresta aberta pelo teclado e o aviso à vista, a Home passa no axe", async ({
   page,
@@ -106,6 +114,28 @@ test("a árvore ARIA da Home @webkit", async ({ page }) => {
         - link "voltar ao início ↑":
           - /url: "#top"
     - status
+    - alert
+  `);
+});
+
+// A árvore de acessibilidade da 404, inteira: a marca no céu, o texto com o caminho de volta e
+// o rodapé só com o ano.
+test("a árvore ARIA da 404 @webkit", async ({ page }) => {
+  await page.goto("/esta-rota-nao-existe");
+
+  await expect(page.locator("body")).toMatchAriaSnapshot(`
+    - /children: deep-equal
+    - banner:
+      - link "Minimal Me, início":
+        - /url: /
+    - main:
+      - heading "página não encontrada" [level=1]
+      - paragraph: Este endereço não leva a nenhum lugar do Minimal Me.
+      - link "voltar ao início":
+        - /url: /
+    - contentinfo:
+      - paragraph: Minimal Me
+      - paragraph: © 2026
     - alert
   `);
 });
