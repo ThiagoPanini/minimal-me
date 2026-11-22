@@ -24,7 +24,7 @@ Coding standards (language, web, branches, commits, hooks and workflows) live in
 
 ### Infrastructure facts
 
-Before stating a Cloudflare or Coolify fact in a resolution or an ADR, check it in the docs through the MCP (`docs` for Cloudflare, `search_docs` for Coolify). Both are deferred tools: load them with ToolSearch first.
+Before stating a Cloudflare or Coolify fact in a resolution or an ADR, check it in the docs through the MCP (`docs` for Cloudflare, `search_docs` for Coolify). Both are deferred tools: load them with ToolSearch first. The `Operação: ...` tickets, the MCP quirks and the public-URL checks are in `docs/agents/operations.md`.
 
 ## Session start
 
