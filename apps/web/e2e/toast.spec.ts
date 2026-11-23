@@ -75,9 +75,8 @@ type Fade = { snapshot: string; duration: number; easing: string; opacity: strin
 
 // A próxima transição de vista da página (`<ViewTransition>` do React), assim que ela começa:
 // quem entra nela, pelo nome de cada quadro, e como cada quadro muda de opacidade, o velho e o
-// novo, com a duração e a curva. O nome sai do pseudo-elemento, e não do estilo do aviso: o
-// React tira o `view-transition-name` do elemento no meio da transição, e a leitura dele
-// corria contra essa limpeza.
+// novo, com a duração e a curva. O nome sai do pseudo-elemento, nunca do estilo do aviso: o
+// React tira o `view-transition-name` do elemento no meio da transição.
 function nextViewTransition(page: Page): Promise<{ names: string[]; fades: Fade[] }> {
   return page.evaluate(
     () =>
