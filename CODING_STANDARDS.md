@@ -49,4 +49,5 @@ Quando o gitleaks acusa um segredo, tire-o do commit e troque a credencial se el
 - **Actions** fixadas pelo `.github/workflows/actions.lock`, que guarda o commit de cada uma e atende à política de fixação por SHA do GitHub. O `uses:` cita a etiqueta semver completa (`actions/checkout@v7.0.1`), nunca uma etiqueta parcial (`@v7`) nem o SHA. Quem edita um workflow roda `gh actions-lock` (extensão `github/gh-actions-lock`) na raiz, confere o diff do lockfile como o de qualquer dependência e o inclui no mesmo commit. O `pnpm check` falha com uma action fora dessa forma ou com um workflow ou uma action fora do lockfile (`scripts/check-action-pins.mjs`).
 - **Expressões** `${{ }}` entram por `env:` ou `with:`, nunca dentro de `run:`.
 - **Ferramentas por imagem** (gitleaks, actionlint e zizmor) ficam no `compose.tools.yaml`, fixadas por etiqueta e digest, e rodam por `node scripts/tool.mjs <ferramenta>`, igual na máquina, nos ganchos e na CI. O digest de uma versão sai de `docker buildx imagetools inspect <imagem>:<versão>`.
-- O zizmor roda com as regras padrão. Uma exceção é um `# zizmor: ignore[<regra>]` na linha, com o motivo num comentário logo acima.
+- O zizmor roda com as regras padrão.
+- **Exceções** (um override do pnpm, um `ignore` do Dependabot, um `# zizmor: ignore[<regra>]` na linha) levam, num comentário logo acima, o motivo e quando saem.

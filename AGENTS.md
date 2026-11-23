@@ -31,7 +31,7 @@ Before stating a Cloudflare or Coolify fact in a resolution or an ADR, check it 
 Open every session with a sweep of the pipeline, and fix what it finds before the task at hand:
 
 1. Robot PRs with a red check: `gh pr list --author app/dependabot`, then `gh pr checks <number>`.
-2. Failures in the latest runs on `main`: `gh run list --branch main --limit 5`.
+2. Failures in the latest runs on `main`: `gh run list --branch main --limit 5`, and in Dependabot's own update jobs, which leave that list within a day: `gh run list --workflow 'Dependabot Updates' --limit 4`.
 3. Open alerts: `gh api 'repos/{owner}/{repo}/<kind>/alerts?state=open'` for `dependabot`, `code-scanning` and `secret-scanning`.
 
 The daily `retry` workflow reruns each failure up to three times, so what is still red needs its cause fixed. Fix a robot PR with a commit on its branch: its auto-merge stays on.

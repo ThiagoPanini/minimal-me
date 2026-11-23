@@ -1,6 +1,6 @@
-# Operações: Coolify e Cloudflare
+# Operações: Coolify, Cloudflare e GitHub
 
-Referência dos tickets `Operação: ...` (fora do `/implement-spec`). O agente os executa pelos MCPs do Coolify e da Cloudflare e lê o resultado de volta. O que está aqui é o que nenhuma configuração confessa.
+Referência dos tickets `Operação: ...` (fora do `/implement-spec`). O agente os executa pelos MCPs do Coolify e da Cloudflare e pelo `gh`, e lê o resultado de volta. O que está aqui é o que nenhuma configuração confessa.
 
 ## Receita
 
@@ -57,6 +57,12 @@ Vistas na 4.7.6. A VPS atualiza o Coolify sozinha, então confira o que mudou an
     } }
   }
   ```
+
+## GitHub e Dependabot
+
+- **Disparar o Dependabot na hora**: um merge que muda o `.github/dependabot.yml` faz todos os ecossistemas rodarem logo depois, sem esperar a rodada de segunda. É o jeito de ver os robôs ao vivo: o merge do #90 abriu o #91 em um minuto.
+- **Rodadas do Dependabot**: cada ecossistema roda como uma rodada do workflow "Dependabot Updates" (evento `dynamic`), listada por `gh run list --workflow 'Dependabot Updates'`. O erro de uma atualização fica no log, por `gh run view <id> --log`. O `retry` não roda essas rodadas de novo.
+- **Cooldown e ghcr.io**: o Dependabot não acha a data de publicação das imagens do ghcr.io (gitleaks e zizmor) e pula o cooldown delas, então uma versão nova chega no mesmo dia.
 
 ## Conferir a URL pública daqui
 
