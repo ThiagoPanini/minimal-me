@@ -74,8 +74,10 @@ const ease = "cubic-bezier(0.22, 0.61, 0.36, 1)";
 type Fade = { snapshot: string; duration: number; easing: string; opacity: string[] };
 
 // A próxima transição de vista da página (`<ViewTransition>` do React), assim que ela começa:
-// quem entra nela (o aviso, pelo nome que ele leva) e como cada quadro dele muda de opacidade,
-// o velho e o novo, com a duração e a curva.
+// quem entra nela, pelo nome de cada quadro, e como cada quadro muda de opacidade, o velho e o
+// novo, com a duração e a curva. O nome sai do pseudo-elemento, e não do estilo do aviso: o
+// React tira o `view-transition-name` do elemento no meio da transição, e a leitura dele
+// corria contra essa limpeza.
 function nextViewTransition(page: Page): Promise<{ names: string[]; fades: Fade[] }> {
   return page.evaluate(
     () =>
@@ -93,15 +95,13 @@ function nextViewTransition(page: Page): Promise<{ names: string[]; fades: Fade[
             requestAnimationFrame(look);
             return;
           }
-          const toast = document.querySelector('[role="status"]');
-          const toastName = toast ? getComputedStyle(toast).viewTransitionName : "";
           const names = new Set<string>();
           const fades: Fade[] = [];
           for (const animation of running) {
             const effect = animation.effect as KeyframeEffect;
             const [, snapshot, name] =
               /^(::view-transition-[a-z-]+)\((.*)\)$/.exec(String(effect.pseudoElement)) ?? [];
-            if (name) names.add(name === toastName ? "aviso" : name);
+            if (name) names.add(name);
             const keyframes = effect.getKeyframes();
             if (keyframes[0]?.opacity === undefined) continue;
             fades.push({
@@ -144,10 +144,10 @@ test("the toast appears and fades out by opacity in 0.5s, in a view transition o
   await page.goto("/");
   const toast = page.getByRole("status");
 
-  // Só o aviso entra na transição: o quadro velho some e o novo aparece, em 0,5s, com `ease`;
-  // o resto da página não é capturado.
+  // Só o aviso entra na transição, pelo nome `toast`: o quadro velho some e o novo aparece, em
+  // 0,5s, com `ease`; o resto da página não é capturado.
   const fade = {
-    names: ["aviso"],
+    names: ["toast"],
     fades: [
       { snapshot: "::view-transition-new", duration: 500, easing: ease, opacity: ["0", "1"] },
       { snapshot: "::view-transition-old", duration: 500, easing: ease, opacity: ["1", "0"] },
