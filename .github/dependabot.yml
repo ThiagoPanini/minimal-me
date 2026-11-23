@@ -39,7 +39,7 @@ updates:
       # O lefthook 2.2.2 saiu sem a proveniência do 2.2.1, e o `trustPolicy: no-downgrade` do pnpm
       # o recusa como "trust downgrade": sem esta linha, a rodada semanal do npm termina em erro.
       # Fica no 2.2.1, como manda o CODING_STANDARDS. Uma versão nova recusada do mesmo jeito
-      # entra aqui; uma com proveniência sobe sozinha.
+      # entra aqui; uma com proveniência sobe sozinha. Sai quando o lefthook passar do 2.2.2.
       - dependency-name: lefthook
         versions: ["2.2.2"]
 
