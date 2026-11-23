@@ -20,9 +20,9 @@ import { matchesMedia } from "@/app/use-media";
 // estilo.
 //
 // O aparecer e o sumir são uma transição de vista do React (`<ViewTransition>`): com movimento,
-// cada mudança do aviso entra numa transição, e o navegador funde o quadro velho do aviso no
-// novo em 0,5s (`toast-fade` em `app/globals.css`), sem capturar o resto da página. Com
-// movimento reduzido, a mudança vale na hora, sem transição.
+// cada mudança do aviso entra numa transição, com o nome fixo `toast`, e o navegador funde o
+// quadro velho do aviso no novo em 0,5s (`toast-fade` em `app/globals.css`), sem capturar o
+// resto da página. Com movimento reduzido, a mudança vale na hora, sem transição.
 //
 // A região `role="status"` já vem vazia no HTML exportado, para o leitor de tela anunciar o
 // que entrar nela; sem script, ela continua vazia. Cada aviso entra num nó novo, para ser
@@ -89,7 +89,7 @@ export function useToast(): (message: string) => void {
 export function Toast() {
   const { notice } = useToastContext();
   return (
-    <ViewTransition update="toast-fade" default="none">
+    <ViewTransition name="toast" update="toast-fade" default="none">
       <div
         role="status"
         data-shown={notice?.shown || undefined}
